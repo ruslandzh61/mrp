@@ -31,7 +31,7 @@ public class PSO {
     public PSO(Problem aProblem, Evaluator.Evaluation aEvaluation) {
         problem = aProblem;
         evaluation = aEvaluation;
-        PROBLEM_DIMENSION = problem.getNumDimensions();
+        PROBLEM_DIMENSION = problem.getD();
     }
 
     public void execute() {
@@ -53,7 +53,7 @@ public class PSO {
 
         System.out.println("\nSolution found at iteration " + (t - 1) + ", the solutions is:");
         for (int dimIdx = 0; dimIdx < PROBLEM_DIMENSION; ++dimIdx) {
-            System.out.println("     Best " + dimIdx + ": " + gBestSolution.get(dimIdx));
+            System.out.println("     Best " + dimIdx + ": " + gBestSolution.getxSolutionAt(dimIdx));
         }
     }
 
@@ -111,8 +111,8 @@ public class PSO {
             double[] newVel = new double[PROBLEM_DIMENSION];
             for (int dimIdx = 0; dimIdx < PROBLEM_DIMENSION; ++dimIdx) {
                 newVel[dimIdx] = (w * p.getVelocity()[dimIdx]) +
-                        (r1 * C1) * (pBestSolution.get(i).get(dimIdx) - p.getSolution().get(dimIdx)) +
-                        (r2 * C2) * (gBestSolution.get(dimIdx) - p.getSolution().get(dimIdx));
+                        (r1 * C1) * (pBestSolution.get(i).getxSolutionAt(dimIdx) - p.getSolution().getxSolutionAt(dimIdx)) +
+                        (r2 * C2) * (gBestSolution.getxSolutionAt(dimIdx) - p.getSolution().getxSolutionAt(dimIdx));
             }
 
             p.setVelocity(newVel);
@@ -120,7 +120,7 @@ public class PSO {
             // step 4 - update location
             double[] newSol = new double[PROBLEM_DIMENSION];
             for (int dimIdx = 0; dimIdx < PROBLEM_DIMENSION; ++dimIdx) {
-                newSol[dimIdx] = p.getSolution().get(dimIdx) + newVel[dimIdx];
+                newSol[dimIdx] = p.getSolution().getxSolutionAt(dimIdx) + newVel[dimIdx];
             }
 
             Solution solution = new Solution(newSol);
@@ -130,7 +130,7 @@ public class PSO {
         //err = ProblemSet.evaluate(gBestSolution) - 0; // minimizing the functions means it's getting closer to 0
 
         for (int dimIdx = 0; dimIdx < PROBLEM_DIMENSION; ++dimIdx) {
-            System.out.println("     Best " + dimIdx + ": " + gBestSolution.get(dimIdx));
+            System.out.println("     Best " + dimIdx + ": " + gBestSolution.getxSolutionAt(dimIdx));
         }
         System.out.println("     Value: " + problem.evaluate(gBestSolution, evaluation));
 

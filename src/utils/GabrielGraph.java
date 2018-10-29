@@ -1,9 +1,7 @@
-package ncconstruct;
+package utils;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 
 /**
  * Created by rusland on 09.10.18.
@@ -35,15 +33,6 @@ public class GabrielGraph {
         return this.V;
     }
 
-
-    public double dist(double[] v,double[] w) {
-        double sum = 0.0;
-        for(int i=0;i<v.length;i++) {
-            sum = sum + Math.pow((v[i]-w[i]),2.0);
-        }
-        return Math.sqrt(sum);
-    }
-
     private void build(double[][] data) {
         int D = data[0].length; // # of dimensions
         for (int i = 0; i < V-1; ++i) {
@@ -52,7 +41,7 @@ public class GabrielGraph {
                 for (int d = 0; d < D; ++d) {
                     center[d] = 0.5*(data[i][d] + data[j][d]);
                 }
-                double r = dist(center,data[i]); // radius of ball (half-distance between i and j)
+                double r = Utils.dist(center,data[i]); // radius of ball (half-distance between i and j)
 
                 // check for each vertex that it's not in inside of i-j ball
                 int p = 0;
@@ -62,7 +51,7 @@ public class GabrielGraph {
                         ++p;
                         continue;
                     }
-                    double dist = dist(data[p], center);
+                    double dist = Utils.dist(data[p], center);
                     // if inside or on the edge
                     if ( dist <= r)
                         ++denIJ;

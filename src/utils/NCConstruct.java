@@ -1,4 +1,4 @@
-package ncconstruct;
+package utils;
 
 import java.util.*;
 
@@ -42,22 +42,24 @@ public class NCConstruct {
         }
     }
 
-    // edge between i and j in graph gg means there exists no point inside the disk with diameter ij
-    // no edge between i and j in graph gg means there exists at least one point inside the disk with diameter ij
+    /**edge between i and j in graph gg means there exists no point inside the disk with diameter ij
+     * no edge between i and j in graph gg means there exists at least one point inside the disk with diameter ij */
     private GabrielGraph gg;
     private double[][] data;
     private PointDistance[][] orderedByDist; // indices ordered according to distance to a point
-    // CC contains indices of orderedByDist indicating closest indirect point,
-    // all points before this point form core neighborhood
+    /**CC contains indices of orderedByDist indicating closest indirect point,
+     * all points before this point form core neighborhood */
     private int[] CC;
-    // BC store break point at which density decreases
+    /** BC store break point at which density decreases*/
     private int[] BC;
     private List<ArrayList<Integer>> extNeighbors, finalNeighbors;
     private int potentialNeighborsNum;
-    /** constructor takes data (2 dim array), build Gabriel Graph
+
+    /**
+     * constructor takes data (2 dim array), build Gabriel Graph
     */
     public NCConstruct(double[][] aData) {
-        this.data = deepCopy(aData);
+        this.data = Utils.deepCopy(aData);
         this.gg = new GabrielGraph(data);
         this.potentialNeighborsNum = gg.getV()-1;
         gg.printDensityMatrix();
@@ -65,8 +67,14 @@ public class NCConstruct {
         construct();
     }
 
+    /**
+     * id of cluster
+     * returns a copied list of neighbors, big O(n) runtime */
+    public ArrayList<Integer> neighbors(int id) {
+        return new ArrayList<>(finalNeighbors.get(id));
+    }
 
-    public void construct() {
+    private void construct() {
         extractCoreNeighbors();
         extractDensityConnectedNeighbors();
         extractExtendedNeighbors();
@@ -236,43 +244,6 @@ public class NCConstruct {
         return res;
     }
 
-    /*private int nextBreakPoint(int point, int prevBreak) {
-        int prevDen = gg.density(point, orderedByDist[point][prevBreak].getPoint());
-        int j = prevBreak+1;
-        while (j < potentialNeighborsNum) {
-            int curDen = gg.density(point, orderedByDist[point][j].getPoint());
-            // if it's break point at which density decreases
-            if (curDen < prevDen) {
-                break;
-            } else {
-                extNeighbors.get(point).add(orderedByDist[point][j].getPoint());
-                prevDen = curDen;
-                ++j;
-            }
-        }
-        return j;
-    }*/
-
-    private boolean arrContains(PointDistance[] pdArr, int p) {
-        for (PointDistance pd: pdArr) {
-            if (pd.getPoint() == p) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-// 2.5 5.2 3.1 2.2
-    private double[][] deepCopy(double[][] a) {
-        if (a == null) return null;
-        if (a.length == 0) return new double[0][0];
-
-        double[][] resArr = new double[a.length][a[0].length];
-        for (int i = 0; i < a.length; ++i) {
-            resArr[i] = a[i].clone();
-        }
-        return resArr;
-    }
 
     /**
      * Given a point i as the base point,first,we list all remaining points in D in non-decreasing order of their
@@ -288,7 +259,7 @@ public class NCConstruct {
                     p++;
                     continue;
                 }
-                orderedByDist[i][j] = new PointDistance(p, gg.dist(data[i], data[p]));
+                orderedByDist[i][j] = new PointDistance(p, Utils.dist(data[i], data[p]));
                 ++p;
                 ++j;
             }

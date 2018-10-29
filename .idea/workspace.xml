@@ -1,7 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="31ac2908-1b01-48a7-8033-ec2e78d94e2f" name="Default" comment="" />
+    <list default="true" id="31ac2908-1b01-48a7-8033-ec2e78d94e2f" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/Project/ncconstruct/GabrielGraph.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/Project/ncconstruct/NCConstruct$Neighbor.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/Project/ncconstruct/NCConstruct$PointDistance.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/Project/ncconstruct/NCConstruct.class" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ncconstruct/GabrielGraph.java" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/ncconstruct/NCConstruct.java" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/PSO/Evaluator$Evaluation.class" afterPath="$PROJECT_DIR$/out/production/Project/PSO/Evaluator$Evaluation.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/PSO/Evaluator.class" afterPath="$PROJECT_DIR$/out/production/Project/PSO/Evaluator.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/PSO/PSO.class" afterPath="$PROJECT_DIR$/out/production/Project/PSO/PSO.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/PSO/Problem.class" afterPath="$PROJECT_DIR$/out/production/Project/PSO/Problem.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/PSO/Solution.class" afterPath="$PROJECT_DIR$/out/production/Project/PSO/Solution.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/PSO/Evaluator.java" afterPath="$PROJECT_DIR$/src/PSO/Evaluator.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/PSO/PSO.java" afterPath="$PROJECT_DIR$/src/PSO/PSO.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/PSO/Particle.java" afterPath="$PROJECT_DIR$/src/PSO/Particle.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/PSO/Problem.java" afterPath="$PROJECT_DIR$/src/PSO/Problem.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/PSO/Solution.java" afterPath="$PROJECT_DIR$/src/PSO/Solution.java" />
+    </list>
     <ignored path="GA-PSO-Clustering.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path="$PROJECT_DIR$/out/" />
@@ -25,22 +44,13 @@
       <file leaf-file-name="Particle.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/PSO/Particle.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
-              <caret line="11" column="30" selection-start-line="11" selection-start-column="30" selection-end-line="11" selection-end-column="30" />
+            <state relative-caret-position="435">
+              <caret line="42" column="25" selection-start-line="42" selection-start-column="25" selection-end-line="42" selection-end-column="25" />
               <folding>
-                <element signature="imports" expanded="false" />
-                <element signature="e#258#259#0" expanded="false" />
-                <element signature="e#289#290#0" expanded="false" />
-                <element signature="e#339#340#0" expanded="false" />
-                <element signature="e#379#380#0" expanded="false" />
-                <element signature="e#416#417#0" expanded="false" />
-                <element signature="e#447#448#0" expanded="false" />
-                <element signature="e#497#498#0" expanded="false" />
-                <element signature="e#537#538#0" expanded="false" />
-                <element signature="e#583#584#0" expanded="false" />
-                <element signature="e#621#622#0" expanded="false" />
-                <element signature="e#655#656#0" expanded="false" />
-                <element signature="e#685#686#0" expanded="false" />
+                <element signature="e#747#748#0" expanded="true" />
+                <element signature="e#775#776#0" expanded="true" />
+                <element signature="e#819#820#0" expanded="true" />
+                <element signature="e#853#854#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -49,11 +59,9 @@
       <file leaf-file-name="PSO.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/PSO/PSO.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="10" column="4" selection-start-line="10" selection-start-column="4" selection-end-line="10" selection-end-column="4" />
-              <folding>
-                <element signature="imports" expanded="false" />
-              </folding>
+            <state relative-caret-position="1005">
+              <caret line="69" column="13" selection-start-line="69" selection-start-column="13" selection-end-line="69" selection-end-column="13" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -72,13 +80,8 @@
         <entry file="file://$PROJECT_DIR$/src/PSO/Problem.java">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="270">
-              <caret line="18" column="46" selection-start-line="18" selection-start-column="46" selection-end-line="18" selection-end-column="46" />
-              <folding>
-                <element signature="e#1060#1061#0" expanded="false" />
-                <element signature="e#1089#1090#0" expanded="false" />
-                <element signature="e#1123#1124#0" expanded="false" />
-                <element signature="e#1153#1154#0" expanded="false" />
-              </folding>
+              <caret line="18" column="14" selection-start-line="18" selection-start-column="14" selection-end-line="18" selection-end-column="14" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -86,53 +89,75 @@
       <file leaf-file-name="Evaluator.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/PSO/Evaluator.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="90">
-              <caret line="6" column="4" selection-start-line="6" selection-start-column="4" selection-end-line="8" selection-end-column="5" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Solution.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/PSO/Solution.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="90">
-              <caret line="6" column="46" selection-start-line="6" selection-start-column="46" selection-end-line="6" selection-end-column="46" />
+            <state relative-caret-position="1725">
+              <caret line="115" column="30" selection-start-line="115" selection-start-column="30" selection-end-line="115" selection-end-column="30" />
               <folding>
-                <element signature="e#269#270#0" expanded="false" />
-                <element signature="e#309#310#0" expanded="false" />
-                <element signature="e#343#344#0" expanded="false" />
-                <element signature="e#379#380#0" expanded="false" />
-                <element signature="e#429#430#0" expanded="false" />
-                <element signature="e#469#470#0" expanded="false" />
+                <element signature="imports" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file leaf-file-name="GabrielGraph.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/ncconstruct/GabrielGraph.java">
+        <entry file="file://$PROJECT_DIR$/src/utils/GabrielGraph.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="148">
-              <caret line="93" column="0" selection-start-line="93" selection-start-column="0" selection-end-line="93" selection-end-column="0" />
+            <state relative-caret-position="765">
+              <caret line="53" column="39" selection-start-line="53" selection-start-column="39" selection-end-line="53" selection-end-column="39" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#2688#2689#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="NCConstruct.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/ncconstruct/NCConstruct.java">
+      <file leaf-file-name="Solution.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/PSO/Solution.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="259">
-              <caret line="194" column="28" selection-start-line="194" selection-start-column="28" selection-end-line="194" selection-end-column="28" />
+            <state relative-caret-position="210">
+              <caret line="14" column="22" selection-start-line="14" selection-start-column="22" selection-end-line="14" selection-end-column="22" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="PSODriver.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/PSO/PSODriver.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="300">
+              <caret line="20" column="0" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Graph.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/utils/Graph.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="195">
+              <caret line="13" column="19" selection-start-line="13" selection-start-column="19" selection-end-line="13" selection-end-column="19" />
               <folding>
-                <element signature="e#536#537#0" expanded="true" />
-                <element signature="e#572#573#0" expanded="true" />
-                <element signature="e#7815#7824#0" expanded="true" />
-                <element signature="e#8496#8505#0" expanded="true" />
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="NCConstruct.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/utils/NCConstruct.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1620">
+              <caret line="261" column="64" selection-start-line="261" selection-start-column="64" selection-end-line="261" selection-end-column="64" />
+              <folding>
+                <element signature="e#2197#2198#0" expanded="true" />
+                <element signature="e#2259#2260#0" expanded="true" />
+                <element signature="method#extractCoreNeighbors#0;class#NCConstruct#0" expanded="false" />
+                <element signature="method#extractDensityConnectedNeighbors#0;class#NCConstruct#0" expanded="false" />
+                <element signature="method#extractExtendedNeighbors#0;class#NCConstruct#0" expanded="false" />
+                <element signature="method#extractFinalNeighbors#0;class#NCConstruct#0" expanded="false" />
+                <element signature="e#8037#8046#0" expanded="true" />
+                <element signature="e#8718#8727#0" expanded="true" />
+                <element signature="method#toString#0;class#NCConstruct#0" expanded="false" />
+                <element signature="method#printNeighbors#0;class#NCConstruct#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -147,6 +172,9 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="GradleLocalSettings">
     <option name="externalProjectsViewState">
       <projects_view />
@@ -157,14 +185,24 @@
       <list>
         <option value="$PROJECT_DIR$/src/PSO/VelocityCalculator.java" />
         <option value="$PROJECT_DIR$/src/Evaluator.java" />
-        <option value="$PROJECT_DIR$/src/PSO/Evaluator.java" />
-        <option value="$PROJECT_DIR$/src/PSO/Particle.java" />
-        <option value="$PROJECT_DIR$/src/PSO/PSO.java" />
-        <option value="$PROJECT_DIR$/src/PSO/Problem.java" />
-        <option value="$PROJECT_DIR$/src/PSO/Solution.java" />
         <option value="$PROJECT_DIR$/src/PSO/Swarm.java" />
         <option value="$PROJECT_DIR$/src/ncconstruct/GabrielGraph.java" />
         <option value="$PROJECT_DIR$/src/ncconstruct/NCConstruct.java" />
+        <option value="$PROJECT_DIR$/src/ncconstruct/Graph.java" />
+        <option value="$PROJECT_DIR$/src/graphs/Graph.java" />
+        <option value="$PROJECT_DIR$/src/graphs/CC.java" />
+        <option value="$PROJECT_DIR$/src/graphs/NCConstruct.java" />
+        <option value="$PROJECT_DIR$/src/PSO/Problem.java" />
+        <option value="$PROJECT_DIR$/src/PSO/PSODriver.java" />
+        <option value="$PROJECT_DIR$/src/utils/Graph.java" />
+        <option value="$PROJECT_DIR$/src/utils/CC.java" />
+        <option value="$PROJECT_DIR$/src/utils/Utils.java" />
+        <option value="$PROJECT_DIR$/src/utils/GabrielGraph.java" />
+        <option value="$PROJECT_DIR$/src/utils/NCConstruct.java" />
+        <option value="$PROJECT_DIR$/src/PSO/Evaluator.java" />
+        <option value="$PROJECT_DIR$/src/PSO/Solution.java" />
+        <option value="$PROJECT_DIR$/src/PSO/Particle.java" />
+        <option value="$PROJECT_DIR$/src/PSO/PSO.java" />
       </list>
     </option>
   </component>
@@ -203,6 +241,9 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -235,7 +276,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="PSO" />
+              <option name="myItemId" value="utils" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -253,15 +294,12 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="ncconstruct" />
+              <option name="myItemId" value="PSO" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -269,15 +307,15 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="FullScreen" value="true" />
   </component>
-  <component name="RunManager" selected="Application.NCConstruct">
+  <component name="RunManager" selected="Application.Evaluator">
     <configuration default="false" name="GabrielGraph" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
-          <option name="PATTERN" value="ncconstruct.*" />
+          <option name="PATTERN" value="utils.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="MAIN_CLASS_NAME" value="ncconstruct.GabrielGraph" />
+      <option name="MAIN_CLASS_NAME" value="utils.GabrielGraph" />
       <option name="VM_PARAMETERS" />
       <option name="PROGRAM_PARAMETERS" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
@@ -293,11 +331,71 @@
     <configuration default="false" name="NCConstruct" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
-          <option name="PATTERN" value="ncconstruct.*" />
+          <option name="PATTERN" value="utils.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
-      <option name="MAIN_CLASS_NAME" value="ncconstruct.NCConstruct" />
+      <option name="MAIN_CLASS_NAME" value="utils.NCConstruct" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="Project" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="false" name="Evaluator" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
+        <pattern>
+          <option name="PATTERN" value="PSO.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="MAIN_CLASS_NAME" value="PSO.Evaluator" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="Project" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="false" name="Solution" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
+        <pattern>
+          <option name="PATTERN" value="PSO.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="MAIN_CLASS_NAME" value="PSO.Solution" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="Project" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="false" name="Utils" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
+        <pattern>
+          <option name="PATTERN" value="utils.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="MAIN_CLASS_NAME" value="utils.Utils" />
       <option name="VM_PARAMETERS" />
       <option name="PROGRAM_PARAMETERS" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
@@ -724,14 +822,20 @@
     <configuration default="true" type="osgi.bnd.run" factoryName="Test Launcher (JUnit)">
       <method />
     </configuration>
-    <list size="2">
+    <list size="5">
       <item index="0" class="java.lang.String" itemvalue="Application.GabrielGraph" />
       <item index="1" class="java.lang.String" itemvalue="Application.NCConstruct" />
+      <item index="2" class="java.lang.String" itemvalue="Application.Evaluator" />
+      <item index="3" class="java.lang.String" itemvalue="Application.Solution" />
+      <item index="4" class="java.lang.String" itemvalue="Application.Utils" />
     </list>
     <recent_temporary>
-      <list size="2">
-        <item index="0" class="java.lang.String" itemvalue="Application.NCConstruct" />
-        <item index="1" class="java.lang.String" itemvalue="Application.GabrielGraph" />
+      <list size="5">
+        <item index="0" class="java.lang.String" itemvalue="Application.Evaluator" />
+        <item index="1" class="java.lang.String" itemvalue="Application.Solution" />
+        <item index="2" class="java.lang.String" itemvalue="Application.Utils" />
+        <item index="3" class="java.lang.String" itemvalue="Application.NCConstruct" />
+        <item index="4" class="java.lang.String" itemvalue="Application.GabrielGraph" />
       </list>
     </recent_temporary>
   </component>
@@ -769,12 +873,13 @@
       <workItem from="1539467895309" duration="14433000" />
       <workItem from="1539493714407" duration="1123000" />
       <workItem from="1539694977858" duration="12730000" />
-      <workItem from="1540667720319" duration="18989000" />
+      <workItem from="1540667720319" duration="42851000" />
+      <workItem from="1540772181878" duration="144000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="74474000" />
+    <option name="totallyTimeSpent" value="98480000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1440" height="900" extended-state="0" />
@@ -782,19 +887,17 @@
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32891566" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32650602" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32650602" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18526466" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32891566" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -804,7 +907,9 @@
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32891566" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32891566" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
     <layout-to-restore>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -847,7 +952,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="37" />
+      <option name="time" value="58" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -856,88 +961,11 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/PSO/Problem.java">
+    <entry file="file://$PROJECT_DIR$/src/PSO/PSO.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="18" column="46" selection-start-line="18" selection-start-column="46" selection-end-line="18" selection-end-column="46" />
-          <folding>
-            <element signature="e#1060#1061#0" expanded="false" />
-            <element signature="e#1089#1090#0" expanded="false" />
-            <element signature="e#1123#1124#0" expanded="false" />
-            <element signature="e#1153#1154#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/PSO/Evaluator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" column="13" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
+        <state relative-caret-position="2355">
+          <caret line="159" column="5" selection-start-line="159" selection-start-column="5" selection-end-line="159" selection-end-column="5" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/PSO/Particle.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#258#259#0" expanded="false" />
-            <element signature="e#289#290#0" expanded="false" />
-            <element signature="e#339#340#0" expanded="false" />
-            <element signature="e#379#380#0" expanded="false" />
-            <element signature="e#416#417#0" expanded="false" />
-            <element signature="e#447#448#0" expanded="false" />
-            <element signature="e#497#498#0" expanded="false" />
-            <element signature="e#537#538#0" expanded="false" />
-            <element signature="e#583#584#0" expanded="false" />
-            <element signature="e#621#622#0" expanded="false" />
-            <element signature="e#655#656#0" expanded="false" />
-            <element signature="e#685#686#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/PSO/PSO.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2355">
-          <caret line="159" column="5" selection-start-line="159" selection-start-column="5" selection-end-line="159" selection-end-column="5" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/PSO/Particle.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#258#259#0" expanded="false" />
-            <element signature="e#289#290#0" expanded="false" />
-            <element signature="e#339#340#0" expanded="false" />
-            <element signature="e#379#380#0" expanded="false" />
-            <element signature="e#416#417#0" expanded="false" />
-            <element signature="e#447#448#0" expanded="false" />
-            <element signature="e#497#498#0" expanded="false" />
-            <element signature="e#537#538#0" expanded="false" />
-            <element signature="e#583#584#0" expanded="false" />
-            <element signature="e#621#622#0" expanded="false" />
-            <element signature="e#655#656#0" expanded="false" />
-            <element signature="e#685#686#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/PSO/PSO.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2355">
-          <caret line="159" column="5" selection-start-line="159" selection-start-column="5" selection-end-line="159" selection-end-column="5" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -946,19 +974,10 @@
         <state relative-caret-position="195">
           <caret line="14" column="23" selection-start-line="14" selection-start-column="23" selection-end-line="14" selection-end-column="23" />
           <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#258#259#0" expanded="false" />
-            <element signature="e#289#290#0" expanded="false" />
-            <element signature="e#339#340#0" expanded="false" />
-            <element signature="e#379#380#0" expanded="false" />
-            <element signature="e#416#417#0" expanded="false" />
-            <element signature="e#447#448#0" expanded="false" />
-            <element signature="e#497#498#0" expanded="false" />
-            <element signature="e#537#538#0" expanded="false" />
-            <element signature="e#583#584#0" expanded="false" />
-            <element signature="e#621#622#0" expanded="false" />
-            <element signature="e#655#656#0" expanded="false" />
-            <element signature="e#685#686#0" expanded="false" />
+            <element signature="e#747#748#0" expanded="true" />
+            <element signature="e#775#776#0" expanded="true" />
+            <element signature="e#819#820#0" expanded="true" />
+            <element signature="e#853#854#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -967,9 +986,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="150">
           <caret line="10" column="24" selection-start-line="10" selection-start-column="24" selection-end-line="10" selection-end-column="24" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -985,12 +1002,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#1060#1061#0" expanded="false" />
-            <element signature="e#1089#1090#0" expanded="false" />
-            <element signature="e#1123#1124#0" expanded="false" />
-            <element signature="e#1153#1154#0" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -998,14 +1010,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
           <caret line="9" column="25" selection-start-line="9" selection-start-column="25" selection-end-line="9" selection-end-column="25" />
-          <folding>
-            <element signature="e#269#270#0" expanded="false" />
-            <element signature="e#309#310#0" expanded="false" />
-            <element signature="e#343#344#0" expanded="false" />
-            <element signature="e#379#380#0" expanded="false" />
-            <element signature="e#429#430#0" expanded="false" />
-            <element signature="e#469#470#0" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1015,19 +1020,10 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#258#259#0" expanded="false" />
-            <element signature="e#289#290#0" expanded="false" />
-            <element signature="e#339#340#0" expanded="false" />
-            <element signature="e#379#380#0" expanded="false" />
-            <element signature="e#416#417#0" expanded="false" />
-            <element signature="e#447#448#0" expanded="false" />
-            <element signature="e#497#498#0" expanded="false" />
-            <element signature="e#537#538#0" expanded="false" />
-            <element signature="e#583#584#0" expanded="false" />
-            <element signature="e#621#622#0" expanded="false" />
-            <element signature="e#655#656#0" expanded="false" />
-            <element signature="e#685#686#0" expanded="false" />
+            <element signature="e#747#748#0" expanded="true" />
+            <element signature="e#775#776#0" expanded="true" />
+            <element signature="e#819#820#0" expanded="true" />
+            <element signature="e#853#854#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1036,9 +1032,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="150">
           <caret line="10" column="24" selection-start-line="10" selection-start-column="24" selection-end-line="10" selection-end-column="24" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1055,19 +1049,10 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#258#259#0" expanded="false" />
-            <element signature="e#289#290#0" expanded="false" />
-            <element signature="e#339#340#0" expanded="false" />
-            <element signature="e#379#380#0" expanded="false" />
-            <element signature="e#416#417#0" expanded="false" />
-            <element signature="e#447#448#0" expanded="false" />
-            <element signature="e#497#498#0" expanded="false" />
-            <element signature="e#537#538#0" expanded="false" />
-            <element signature="e#583#584#0" expanded="false" />
-            <element signature="e#621#622#0" expanded="false" />
-            <element signature="e#655#656#0" expanded="false" />
-            <element signature="e#685#686#0" expanded="false" />
+            <element signature="e#747#748#0" expanded="true" />
+            <element signature="e#775#776#0" expanded="true" />
+            <element signature="e#819#820#0" expanded="true" />
+            <element signature="e#853#854#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1076,9 +1061,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="150">
           <caret line="10" column="24" selection-start-line="10" selection-start-column="24" selection-end-line="10" selection-end-column="24" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1094,12 +1077,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="150">
           <caret line="10" column="6" selection-start-line="10" selection-start-column="6" selection-end-line="10" selection-end-column="6" />
-          <folding>
-            <element signature="e#1060#1061#0" expanded="false" />
-            <element signature="e#1089#1090#0" expanded="false" />
-            <element signature="e#1123#1124#0" expanded="false" />
-            <element signature="e#1153#1154#0" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1107,14 +1085,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
           <caret line="9" column="25" selection-start-line="9" selection-start-column="25" selection-end-line="9" selection-end-column="25" />
-          <folding>
-            <element signature="e#269#270#0" expanded="false" />
-            <element signature="e#309#310#0" expanded="false" />
-            <element signature="e#343#344#0" expanded="false" />
-            <element signature="e#379#380#0" expanded="false" />
-            <element signature="e#429#430#0" expanded="false" />
-            <element signature="e#469#470#0" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1124,19 +1095,10 @@
         <state relative-caret-position="195">
           <caret line="14" column="25" selection-start-line="14" selection-start-column="25" selection-end-line="14" selection-end-column="25" />
           <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#258#259#0" expanded="false" />
-            <element signature="e#289#290#0" expanded="false" />
-            <element signature="e#339#340#0" expanded="false" />
-            <element signature="e#379#380#0" expanded="false" />
-            <element signature="e#416#417#0" expanded="false" />
-            <element signature="e#447#448#0" expanded="false" />
-            <element signature="e#497#498#0" expanded="false" />
-            <element signature="e#537#538#0" expanded="false" />
-            <element signature="e#583#584#0" expanded="false" />
-            <element signature="e#621#622#0" expanded="false" />
-            <element signature="e#655#656#0" expanded="false" />
-            <element signature="e#685#686#0" expanded="false" />
+            <element signature="e#747#748#0" expanded="true" />
+            <element signature="e#775#776#0" expanded="true" />
+            <element signature="e#819#820#0" expanded="true" />
+            <element signature="e#853#854#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1145,9 +1107,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1163,12 +1123,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="150">
           <caret line="10" column="6" selection-start-line="10" selection-start-column="6" selection-end-line="10" selection-end-column="6" />
-          <folding>
-            <element signature="e#1060#1061#0" expanded="false" />
-            <element signature="e#1089#1090#0" expanded="false" />
-            <element signature="e#1123#1124#0" expanded="false" />
-            <element signature="e#1153#1154#0" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1176,14 +1131,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
           <caret line="9" column="25" selection-start-line="9" selection-start-column="25" selection-end-line="9" selection-end-column="25" />
-          <folding>
-            <element signature="e#269#270#0" expanded="false" />
-            <element signature="e#309#310#0" expanded="false" />
-            <element signature="e#343#344#0" expanded="false" />
-            <element signature="e#379#380#0" expanded="false" />
-            <element signature="e#429#430#0" expanded="false" />
-            <element signature="e#469#470#0" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1193,19 +1141,10 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#258#259#0" expanded="false" />
-            <element signature="e#289#290#0" expanded="false" />
-            <element signature="e#339#340#0" expanded="false" />
-            <element signature="e#379#380#0" expanded="false" />
-            <element signature="e#416#417#0" expanded="false" />
-            <element signature="e#447#448#0" expanded="false" />
-            <element signature="e#497#498#0" expanded="false" />
-            <element signature="e#537#538#0" expanded="false" />
-            <element signature="e#583#584#0" expanded="false" />
-            <element signature="e#621#622#0" expanded="false" />
-            <element signature="e#655#656#0" expanded="false" />
-            <element signature="e#685#686#0" expanded="false" />
+            <element signature="e#747#748#0" expanded="true" />
+            <element signature="e#775#776#0" expanded="true" />
+            <element signature="e#819#820#0" expanded="true" />
+            <element signature="e#853#854#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1215,19 +1154,10 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#258#259#0" expanded="false" />
-            <element signature="e#289#290#0" expanded="false" />
-            <element signature="e#339#340#0" expanded="false" />
-            <element signature="e#379#380#0" expanded="false" />
-            <element signature="e#416#417#0" expanded="false" />
-            <element signature="e#447#448#0" expanded="false" />
-            <element signature="e#497#498#0" expanded="false" />
-            <element signature="e#537#538#0" expanded="false" />
-            <element signature="e#583#584#0" expanded="false" />
-            <element signature="e#621#622#0" expanded="false" />
-            <element signature="e#655#656#0" expanded="false" />
-            <element signature="e#685#686#0" expanded="false" />
+            <element signature="e#747#748#0" expanded="true" />
+            <element signature="e#775#776#0" expanded="true" />
+            <element signature="e#819#820#0" expanded="true" />
+            <element signature="e#853#854#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1236,8 +1166,19 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
           <caret line="10" column="20" selection-start-line="10" selection-start-column="20" selection-end-line="10" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/PSO/Particle.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="false" />
+            <element signature="e#747#748#0" expanded="true" />
+            <element signature="e#775#776#0" expanded="true" />
+            <element signature="e#819#820#0" expanded="true" />
+            <element signature="e#853#854#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1247,41 +1188,10 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#258#259#0" expanded="false" />
-            <element signature="e#289#290#0" expanded="false" />
-            <element signature="e#339#340#0" expanded="false" />
-            <element signature="e#379#380#0" expanded="false" />
-            <element signature="e#416#417#0" expanded="false" />
-            <element signature="e#447#448#0" expanded="false" />
-            <element signature="e#497#498#0" expanded="false" />
-            <element signature="e#537#538#0" expanded="false" />
-            <element signature="e#583#584#0" expanded="false" />
-            <element signature="e#621#622#0" expanded="false" />
-            <element signature="e#655#656#0" expanded="false" />
-            <element signature="e#685#686#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/PSO/Particle.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#258#259#0" expanded="false" />
-            <element signature="e#289#290#0" expanded="false" />
-            <element signature="e#339#340#0" expanded="false" />
-            <element signature="e#379#380#0" expanded="false" />
-            <element signature="e#416#417#0" expanded="false" />
-            <element signature="e#447#448#0" expanded="false" />
-            <element signature="e#497#498#0" expanded="false" />
-            <element signature="e#537#538#0" expanded="false" />
-            <element signature="e#583#584#0" expanded="false" />
-            <element signature="e#621#622#0" expanded="false" />
-            <element signature="e#655#656#0" expanded="false" />
-            <element signature="e#685#686#0" expanded="false" />
+            <element signature="e#747#748#0" expanded="true" />
+            <element signature="e#775#776#0" expanded="true" />
+            <element signature="e#819#820#0" expanded="true" />
+            <element signature="e#853#854#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1290,9 +1200,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
           <caret line="10" column="20" selection-start-line="10" selection-start-column="20" selection-end-line="10" selection-end-column="20" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1301,19 +1209,10 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#258#259#0" expanded="false" />
-            <element signature="e#289#290#0" expanded="false" />
-            <element signature="e#339#340#0" expanded="false" />
-            <element signature="e#379#380#0" expanded="false" />
-            <element signature="e#416#417#0" expanded="false" />
-            <element signature="e#447#448#0" expanded="false" />
-            <element signature="e#497#498#0" expanded="false" />
-            <element signature="e#537#538#0" expanded="false" />
-            <element signature="e#583#584#0" expanded="false" />
-            <element signature="e#621#622#0" expanded="false" />
-            <element signature="e#655#656#0" expanded="false" />
-            <element signature="e#685#686#0" expanded="false" />
+            <element signature="e#747#748#0" expanded="true" />
+            <element signature="e#775#776#0" expanded="true" />
+            <element signature="e#819#820#0" expanded="true" />
+            <element signature="e#853#854#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1322,9 +1221,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
           <caret line="10" column="20" selection-start-line="10" selection-start-column="20" selection-end-line="10" selection-end-column="20" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1333,19 +1230,10 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#258#259#0" expanded="false" />
-            <element signature="e#289#290#0" expanded="false" />
-            <element signature="e#339#340#0" expanded="false" />
-            <element signature="e#379#380#0" expanded="false" />
-            <element signature="e#416#417#0" expanded="false" />
-            <element signature="e#447#448#0" expanded="false" />
-            <element signature="e#497#498#0" expanded="false" />
-            <element signature="e#537#538#0" expanded="false" />
-            <element signature="e#583#584#0" expanded="false" />
-            <element signature="e#621#622#0" expanded="false" />
-            <element signature="e#655#656#0" expanded="false" />
-            <element signature="e#685#686#0" expanded="false" />
+            <element signature="e#747#748#0" expanded="true" />
+            <element signature="e#775#776#0" expanded="true" />
+            <element signature="e#819#820#0" expanded="true" />
+            <element signature="e#853#854#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1354,8 +1242,19 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
           <caret line="10" column="20" selection-start-line="10" selection-start-column="20" selection-end-line="10" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/PSO/Particle.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="false" />
+            <element signature="e#747#748#0" expanded="true" />
+            <element signature="e#775#776#0" expanded="true" />
+            <element signature="e#819#820#0" expanded="true" />
+            <element signature="e#853#854#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1365,41 +1264,10 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#258#259#0" expanded="false" />
-            <element signature="e#289#290#0" expanded="false" />
-            <element signature="e#339#340#0" expanded="false" />
-            <element signature="e#379#380#0" expanded="false" />
-            <element signature="e#416#417#0" expanded="false" />
-            <element signature="e#447#448#0" expanded="false" />
-            <element signature="e#497#498#0" expanded="false" />
-            <element signature="e#537#538#0" expanded="false" />
-            <element signature="e#583#584#0" expanded="false" />
-            <element signature="e#621#622#0" expanded="false" />
-            <element signature="e#655#656#0" expanded="false" />
-            <element signature="e#685#686#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/PSO/Particle.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#258#259#0" expanded="false" />
-            <element signature="e#289#290#0" expanded="false" />
-            <element signature="e#339#340#0" expanded="false" />
-            <element signature="e#379#380#0" expanded="false" />
-            <element signature="e#416#417#0" expanded="false" />
-            <element signature="e#447#448#0" expanded="false" />
-            <element signature="e#497#498#0" expanded="false" />
-            <element signature="e#537#538#0" expanded="false" />
-            <element signature="e#583#584#0" expanded="false" />
-            <element signature="e#621#622#0" expanded="false" />
-            <element signature="e#655#656#0" expanded="false" />
-            <element signature="e#685#686#0" expanded="false" />
+            <element signature="e#747#748#0" expanded="true" />
+            <element signature="e#775#776#0" expanded="true" />
+            <element signature="e#819#820#0" expanded="true" />
+            <element signature="e#853#854#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1419,55 +1287,83 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/PSO/Evaluator.java">
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_112.jdk/Contents/Home/src.zip!/java/util/List.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="6" column="4" selection-start-line="6" selection-start-column="4" selection-end-line="8" selection-end-column="5" />
+        <state relative-caret-position="312">
+          <caret line="707" column="12" selection-start-line="707" selection-start-column="12" selection-end-line="707" selection-end-column="12" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_112.jdk/Contents/Home/src.zip!/java/lang/String.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="82">
+          <caret line="110" column="19" selection-start-line="110" selection-start-column="19" selection-end-line="110" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/utils/CC.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1500">
+          <caret line="104" column="0" selection-start-line="104" selection-start-column="0" selection-end-line="104" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/PSO/Particle.java">
+    <entry file="file://$PROJECT_DIR$/src/utils/Utils.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="11" column="30" selection-start-line="11" selection-start-column="30" selection-end-line="11" selection-end-column="30" />
+        <state relative-caret-position="135">
+          <caret line="9" column="18" selection-start-line="9" selection-start-column="18" selection-end-line="9" selection-end-column="18" />
           <folding>
-            <element signature="imports" expanded="false" />
-            <element signature="e#258#259#0" expanded="false" />
-            <element signature="e#289#290#0" expanded="false" />
-            <element signature="e#339#340#0" expanded="false" />
-            <element signature="e#379#380#0" expanded="false" />
-            <element signature="e#416#417#0" expanded="false" />
-            <element signature="e#447#448#0" expanded="false" />
-            <element signature="e#497#498#0" expanded="false" />
-            <element signature="e#537#538#0" expanded="false" />
-            <element signature="e#583#584#0" expanded="false" />
-            <element signature="e#621#622#0" expanded="false" />
-            <element signature="e#655#656#0" expanded="false" />
-            <element signature="e#685#686#0" expanded="false" />
+            <element signature="method#deepCopy#0;class#Utils#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/PSO/Problem.java">
+    <entry file="file://$PROJECT_DIR$/src/utils/GabrielGraph.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="18" column="46" selection-start-line="18" selection-start-column="46" selection-end-line="18" selection-end-column="46" />
+        <state relative-caret-position="765">
+          <caret line="53" column="39" selection-start-line="53" selection-start-column="39" selection-end-line="53" selection-end-column="39" />
           <folding>
-            <element signature="e#1060#1061#0" expanded="false" />
-            <element signature="e#1089#1090#0" expanded="false" />
-            <element signature="e#1123#1124#0" expanded="false" />
-            <element signature="e#1153#1154#0" expanded="false" />
+            <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/PSO/PSO.java">
+    <entry file="file://$PROJECT_DIR$/src/utils/Graph.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="10" column="4" selection-start-line="10" selection-start-column="4" selection-end-line="10" selection-end-column="4" />
+        <state relative-caret-position="195">
+          <caret line="13" column="19" selection-start-line="13" selection-start-column="19" selection-end-line="13" selection-end-column="19" />
           <folding>
-            <element signature="imports" expanded="false" />
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/utils/NCConstruct.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1620">
+          <caret line="261" column="64" selection-start-line="261" selection-start-column="64" selection-end-line="261" selection-end-column="64" />
+          <folding>
+            <element signature="e#2197#2198#0" expanded="true" />
+            <element signature="e#2259#2260#0" expanded="true" />
+            <element signature="method#extractCoreNeighbors#0;class#NCConstruct#0" expanded="false" />
+            <element signature="method#extractDensityConnectedNeighbors#0;class#NCConstruct#0" expanded="false" />
+            <element signature="method#extractExtendedNeighbors#0;class#NCConstruct#0" expanded="false" />
+            <element signature="method#extractFinalNeighbors#0;class#NCConstruct#0" expanded="false" />
+            <element signature="e#8037#8046#0" expanded="true" />
+            <element signature="e#8718#8727#0" expanded="true" />
+            <element signature="method#toString#0;class#NCConstruct#0" expanded="false" />
+            <element signature="method#printNeighbors#0;class#NCConstruct#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/PSO/Evaluator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1725">
+          <caret line="115" column="30" selection-start-line="115" selection-start-column="30" selection-end-line="115" selection-end-column="30" />
+          <folding>
+            <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1480,50 +1376,48 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/PSO/Solution.java">
+    <entry file="file://$PROJECT_DIR$/src/PSO/PSO.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="6" column="46" selection-start-line="6" selection-start-column="46" selection-end-line="6" selection-end-column="46" />
-          <folding>
-            <element signature="e#269#270#0" expanded="false" />
-            <element signature="e#309#310#0" expanded="false" />
-            <element signature="e#343#344#0" expanded="false" />
-            <element signature="e#379#380#0" expanded="false" />
-            <element signature="e#429#430#0" expanded="false" />
-            <element signature="e#469#470#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_112.jdk/Contents/Home/src.zip!/java/util/List.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="312">
-          <caret line="707" column="12" selection-start-line="707" selection-start-column="12" selection-end-line="707" selection-end-column="12" />
+        <state relative-caret-position="1005">
+          <caret line="69" column="13" selection-start-line="69" selection-start-column="13" selection-end-line="69" selection-end-column="13" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/ncconstruct/GabrielGraph.java">
+    <entry file="file://$PROJECT_DIR$/src/PSO/Particle.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="148">
-          <caret line="93" column="0" selection-start-line="93" selection-start-column="0" selection-end-line="93" selection-end-column="0" />
+        <state relative-caret-position="435">
+          <caret line="42" column="25" selection-start-line="42" selection-start-column="25" selection-end-line="42" selection-end-column="25" />
           <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#2688#2689#0" expanded="true" />
+            <element signature="e#747#748#0" expanded="true" />
+            <element signature="e#775#776#0" expanded="true" />
+            <element signature="e#819#820#0" expanded="true" />
+            <element signature="e#853#854#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/ncconstruct/NCConstruct.java">
+    <entry file="file://$PROJECT_DIR$/src/PSO/PSODriver.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="259">
-          <caret line="194" column="28" selection-start-line="194" selection-start-column="28" selection-end-line="194" selection-end-column="28" />
-          <folding>
-            <element signature="e#536#537#0" expanded="true" />
-            <element signature="e#572#573#0" expanded="true" />
-            <element signature="e#7815#7824#0" expanded="true" />
-            <element signature="e#8496#8505#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="300">
+          <caret line="20" column="0" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/PSO/Problem.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="18" column="14" selection-start-line="18" selection-start-column="14" selection-end-line="18" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/PSO/Solution.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="210">
+          <caret line="14" column="22" selection-start-line="14" selection-start-column="22" selection-end-line="14" selection-end-column="22" />
+          <folding />
         </state>
       </provider>
     </entry>

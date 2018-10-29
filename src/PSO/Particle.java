@@ -10,6 +10,7 @@ public class Particle {
     private double fitness;
     private double[] velocity;
     private Solution solution;
+    private Solution pBest;
 
     public double[] getVelocity() {
         return velocity;
@@ -33,6 +34,14 @@ public class Particle {
 
     public double getFitness() {
         return fitness;
+    }
+
+    public Solution getpBest() {
+        return pBest;
+    }
+
+    public void setpBest(Solution pBest) {
+        this.pBest = pBest;
     }
 
     /*private Solution solution;
