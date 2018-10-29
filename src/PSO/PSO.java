@@ -15,7 +15,7 @@ public class PSO {
     private double C2 = 2.0;
     private double W_UPPERBOUND = 1.0;
     private double W_LOWERBOUND = 0.0;
-    private double w;
+    private double w, alhpa;
 
     private List<Particle> swarm = new ArrayList<>();
     private double[] pBestFitness = new double[SWARM_SIZE];
@@ -60,10 +60,10 @@ public class PSO {
     public void initializeSwarm() {
         Particle p;
         for(int i=0; i<SWARM_SIZE; i++) {
-            p = new Particle();
+            /*p = new Particle();
 
             // randomize location inside a space defined in Problem Set
-            double[] solution = new double[PROBLEM_DIMENSION];
+            int[] solution = new int[PROBLEM_DIMENSION];
             for (int dimIdx = 0; dimIdx < PROBLEM_DIMENSION; ++dimIdx) {
                 solution[dimIdx] = problem.getDimLow(dimIdx) + generator.nextDouble() * (
                         problem.getDimHigh(dimIdx) - problem.getDimLow(dimIdx));
@@ -79,11 +79,12 @@ public class PSO {
 
             p.setSolution(location);
             p.setVelocity(vel);
-            swarm.add(p);
+            swarm.add(p);*/
         }
     }
 
     private void update(int iterNum) {
+        /*
         // step 1 - update pBestFitness
         for(int i=0; i<SWARM_SIZE; i++) {
             if(fitnessValueList[i] < pBestFitness[i]) {
@@ -134,14 +135,27 @@ public class PSO {
         }
         System.out.println("     Value: " + problem.evaluate(gBestSolution, evaluation));
 
-        updateFitnessList();
+        updateFitnessList();*/
+    }
+
+    private void updateVelocity(int idxParticle) {
+        Particle p = swarm.get(idxParticle);
+        double r1 = generator.nextDouble();
+        double r2 = generator.nextDouble();
+        double[] newVel = new double[PROBLEM_DIMENSION];
+        for (int dimIdx = 0; dimIdx < PROBLEM_DIMENSION; ++dimIdx) {
+            newVel[dimIdx] = (w * p.getVelocity()[dimIdx]) + (r1 * C1) *
+                    (-1 - p.getySolution()[dimIdx]) +
+                    (r2 * C2) * (1 - p.getySolution()[dimIdx]);
+        }
+        p.setVelocity(newVel);
     }
 
 
     public void updateFitnessList() {
         for(int i=0; i<SWARM_SIZE; i++) {
-            swarm.get(i).setFitness(problem.evaluate(swarm.get(i).getSolution(), evaluation));
-            fitnessValueList[i] = swarm.get(i).getFitness();
+            swarm.get(i).getSolution().setFitness(problem.evaluate(swarm.get(i).getSolution(), evaluation));
+            fitnessValueList[i] = swarm.get(i).getSolution().getFitness();
         }
     }
 

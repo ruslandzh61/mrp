@@ -113,7 +113,7 @@ public class Evaluator {
         double[][] data = {{2,2}, {3,3}, {3,1}, {4,2}, {1.6,-0.5}, {3.01, -1.5}, {-4, 2}, {-2, 2}, {-3, 3},{7,7}};
 
         Solution s = new Solution();
-        s.setySolution(realS);
+        s.setxSolution(realS);
         Evaluator e = new Evaluator();
         double cost = e.evaluate(s,Evaluation.CONNECTIVITY,data);
         System.out.println(cost);
