@@ -11,13 +11,7 @@ public class PSODriver {
         int numDims = 2;
         double velLow = -1;
         double velHigh = 1;
-        double[] dimLow = new double[numDims];
-        double[] dimHigh = new double[numDims];
-        dimLow[0] = 1;
-        dimHigh[0] = 4;
-        dimLow[1] = -1;
-        dimHigh[1] = 1;
-        Problem problem = new Problem(data, evaluator, dimLow, dimHigh, velLow, velHigh);
+        Problem problem = new Problem(data, evaluator, velLow, velHigh);
 
         PSO pso = new PSO(problem, evaluation);
         pso.execute();

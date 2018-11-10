@@ -13,7 +13,7 @@ public class Particle {
     private Solution pBest;
     private double[] velocity;
 
-    private int[] ySolution; // transformed from connection vector;
+    private int[] ySolution; // dummy intermediate discrete representation
 
     private final Random rnd = new Random();
 
@@ -21,7 +21,10 @@ public class Particle {
         this.solution = aSolution;
     }
 
-
+    public Particle(Solution aSolution, double[] aVelocity) {
+        this.velocity = aVelocity;
+        this.solution = aSolution;
+    }
 
     /**
      * update X through. update Y first and then X for next iteration of PSO
@@ -101,13 +104,8 @@ public class Particle {
         this.ySolution = aySolution;
     }
 
-
-    /*private Solution solution;
-    private List<Double> velocity;
-    private List<Double> continuosPosition; // converted representation, not discrete
-    private Solution pBest;
-
-    public Particle(Problem problem) {
-    }*/
+    public static void main(String[] args) {
+        
+    }
 }
 

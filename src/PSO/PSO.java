@@ -1,5 +1,7 @@
 package PSO;
 
+import utils.NCConstruct;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -8,14 +10,16 @@ import java.util.Random;
  * Created by rusland on 09.09.18.
  */
 public class PSO {
-    private int SWARM_SIZE = 30;
-    private int MAX_ITERATION = 100;
+    private int MAX_ITERATION = 1000;
     private int PROBLEM_DIMENSION;
     private double C1 = 2.0;
     private double C2 = 2.0;
-    private double W_UPPERBOUND = 1.0;
-    private double W_LOWERBOUND = 0.0;
-    private double w, alhpa;
+    private double W_UPPERBOUND = 0.9;
+    private double W_LOWERBOUND = 0.4;
+    private double w;
+    private double alhpa=0.5;
+    private static int MAX_K = 20;
+    private static int SWARM_SIZE = 2 * MAX_K;
 
     private List<Particle> swarm = new ArrayList<>();
     private double[] pBestFitness = new double[SWARM_SIZE];
@@ -25,7 +29,8 @@ public class PSO {
     private double[] fitnessValueList = new double[SWARM_SIZE];
     private Problem problem;
     private Evaluator.Evaluation evaluation;
-
+    private List<Particle> paretoFrontier = new ArrayList<>();
+    private NCConstruct ncc;
     Random generator = new Random();
 
     public PSO(Problem aProblem, Evaluator.Evaluation aEvaluation) {
@@ -58,17 +63,16 @@ public class PSO {
     }
 
     public void initializeSwarm() {
+        ncc = new NCConstruct(problem.getData());
         Particle p;
         for(int i=0; i<SWARM_SIZE; i++) {
-            /*p = new Particle();
+            int clusterNum = generator.nextInt(MAX_K);
 
             // randomize location inside a space defined in Problem Set
-            int[] solution = new int[PROBLEM_DIMENSION];
-            for (int dimIdx = 0; dimIdx < PROBLEM_DIMENSION; ++dimIdx) {
-                solution[dimIdx] = problem.getDimLow(dimIdx) + generator.nextDouble() * (
-                        problem.getDimHigh(dimIdx) - problem.getDimLow(dimIdx));
-            }
-            Solution location = new Solution(solution);
+
+            KMeans kMeans = new KMeans(problem,clusterNum);
+            kMeans.nextIter();
+            Solution solution = new Solution(kMeans.getLabels());
 
             // randomize velocity in the range defined in Problem Set
             double[] vel = new double[PROBLEM_DIMENSION];
@@ -76,10 +80,8 @@ public class PSO {
                 vel[dimIdx] = problem.getVelLow() + generator.nextDouble() * (
                         problem.getVelHigh() - problem.getVelLow());
             }
-
-            p.setSolution(location);
-            p.setVelocity(vel);
-            swarm.add(p);*/
+            p = new Particle(solution, vel);
+            swarm.add(p);
         }
     }
 
