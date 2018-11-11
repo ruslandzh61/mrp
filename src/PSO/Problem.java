@@ -38,8 +38,13 @@ public class Problem {
 
     public double getDimHigh(int dimIdx) { return dimHigh[dimIdx];}
 
-    public double evaluate(Solution solution, Evaluator.Evaluation evaluation) {
-        return evaluator.evaluate(solution, evaluation, data);
+    public double[] evaluate(Solution solution, Evaluator.Evaluation[] evaluation) {
+        assert (evaluation.length>0);
+        double[] result = new double[evaluation.length];
+        for (int iE = 0; iE < evaluation.length; ++iE) {
+            result[iE] = evaluator.evaluate(solution, evaluation[iE], data);
+        }
+        return result;
     }
 
     public double getVelLow() {
@@ -70,7 +75,6 @@ public class Problem {
     }
 
     public static void main(String[] args) {
-        Evaluator.Evaluation evaluation = Evaluator.Evaluation.CONNECTIVITY;
         double[][] data = {{2, 2}, {3, 3}, {3, 1}, {4, 2}, {1.6, -0.5}, {3.01, -1.5}, {-4, 2}, {-2, 2}, {-3, 3}, {7, 7}};
         Evaluator evaluator = new Evaluator();
         int numDims = 2;

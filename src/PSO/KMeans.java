@@ -4,6 +4,7 @@ import java.util.Random;
 
 /**
  * Created by rusland on 10.11.18.
+ * code is taken from http://cecs.wright.edu/~keke.chen/cloud/labs/mapreduce/KMeans.java
  */
 public class KMeans {
     private int[] label;
@@ -31,6 +32,28 @@ public class KMeans {
         }
     }
 
+    public void clustering(int numClusters, int niter) {
+        double [][] c1 = centroids;
+        double threshold = 0.001;
+        int round=0;
+
+        while (true) {
+            // update _centroids with the last round results
+            centroids = c1;
+
+            //assign record to the closest centroid
+            label = new int[problem.getN()];
+            for (int i = 0; i < problem.getN(); i++) {
+                label[i] = closest(problem.getData()[i]);
+            }
+
+            // recompute centroids based on the assignments
+            c1 = updateCentroids();
+            round++;
+            if ((niter > 0 && round >= niter) || converge(centroids, c1, threshold))
+                break;
+        }
+    }
     public int[] getLabels() {
         return label;
     }
@@ -96,6 +119,24 @@ public class KMeans {
             sum += d*d;
         }
         return Math.sqrt(sum);
+    }
+
+    // check convergence condition
+    // max{dist(c1[i], c2[i]), i=1..numClusters < threshold
+    private boolean converge(double [][] c1, double [][] c2, double threshold){
+        // c1 and c2 are two sets of centroids
+        double maxv = 0;
+        for (int i=0; i< k; i++){
+            double d= dist(c1[i], c2[i]);
+            if (maxv<d)
+                maxv = d;
+        }
+
+        if (maxv <threshold)
+            return true;
+        else
+            return false;
+
     }
 
     public static void main(String[] args) {

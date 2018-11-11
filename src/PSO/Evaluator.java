@@ -53,6 +53,7 @@ public class Evaluator {
         return Utils.sum(con)/clustersHp.size();
     }
 
+    /* returns negative value of cohesion function to enable maximization of this value */
     private double cohesion(Solution solution, double[][] data) {
         // key is id of a cluster; value is set of data points in the cluster
         HashMap<Integer, Set<Integer>> clustersHp = toHashMap(solution);
@@ -66,7 +67,7 @@ public class Evaluator {
             }
             coh[i++] = cohI/entry.getValue().size();
         }
-        return Utils.sum(coh)/clustersHp.size();
+        return Utils.sum(coh)/clustersHp.size() * (-1);
     }
 
     private double cohesionDistance(double[][] data, int p, Set<Integer> neighbors) {
