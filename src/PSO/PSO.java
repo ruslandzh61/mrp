@@ -17,13 +17,16 @@ public class PSO {
     private double MIN_W = 0.4;
     private double w;
     static double ALPHA=0.5;
-    private static int MAX_K = 20;
-    private static int SWARM_SIZE = 2 * MAX_K;
+    private int maxK;
+    private int swarmSize = 2 * maxK;
     private static int NUM_OBJ = 2;
-    private int t;
+    private static int NUM_ITER_IMRPOV = 100;
+    private int t, numIterWithoutImprov;
 
-    private List<Particle> swarm = new ArrayList<>();
-    private double[][] pBestObjective = new double[SWARM_SIZE][NUM_OBJ];
+    private List<Particle> swarm;
+    /* record of objectives of personal best solution are stored
+        for the purpose of not calculating them every time pBest is updated */
+    private double[][] pBestObjective;
     private Problem problem;
     private Evaluator.Evaluation[] evaluation;
     private Solution gBestSolution;
@@ -33,50 +36,84 @@ public class PSO {
     private Pareto pareto = new Pareto();
     private double[] idealObjectives;
 
-    public PSO(Problem aProblem, Evaluator.Evaluation[] aEvaluation) {
+    public PSO(Problem aProblem, Evaluator.Evaluation[] aEvaluation, int maxK) {
         problem = aProblem;
         evaluation = aEvaluation;
+        this.maxK = maxK;
+        this.swarmSize = 2 * maxK;
+
+        swarm = new ArrayList<>();
+        pBestObjective = new double[swarmSize][NUM_OBJ];
+        for (int iP = 0; iP < swarmSize; ++iP) {
+            for (int iO = 0; iO < NUM_OBJ; ++iO) {
+                pBestObjective[iP][iO] = Double.NEGATIVE_INFINITY;
+            }
+        }
+
         int[] gBest = new int[problem.getD()];
         for (int i = 0; i < problem.getD(); ++i) {
             gBest[i] = Integer.MIN_VALUE;
         }
-        gBestSolution = new Solution(gBest);
+        gBestSolution = new Solution(gBest,-1);
+
         idealObjectives = new double[evaluation.length];
+        for (int iO = 0; iO < NUM_OBJ; ++iO) {
+            idealObjectives[iO] = Double.NEGATIVE_INFINITY;
+        }
+        ncc = new NCConstruct(problem.getData());
     }
 
-    public void execute() {
+    public int[] execute() {
         initializeSwarm();
 
         t = 0;
+        numIterWithoutImprov = 0;
         //double err = 9999;
 
-        while(t < MAX_ITERATION) { // && err > ProblemSet.ERR_TOLERANCE) {
+        while(t < MAX_ITERATION && numIterWithoutImprov < NUM_ITER_IMRPOV) { // && err > ProblemSet.ERR_TOLERANCE) {
             System.out.println("ITERATION " + t + ": ");
             update();
             t++;
+            System.out.println("without improv: " + numIterWithoutImprov);
         }
 
         System.out.println("\nSolution found at iteration " + (t - 1) + ", the solutions is:");
-        for (int dimIdx = 0; dimIdx < problem.getD(); ++dimIdx) {
-            System.out.println("     Best " + dimIdx + ": " + gBestSolution.getxSolutionAt(dimIdx));
+        System.out.print("     Best ");
+        for (int dimIdx = 0; dimIdx < problem.getN(); ++dimIdx) {
+            System.out.print(gBestSolution.getxSolutionAt(dimIdx) + " ");
         }
+        System.out.println();
+
+        System.out.print("     objectives: ");
+        double[] objs = problem.evaluate(gBestSolution, evaluation, ncc);
+        for (double obj: objs) {
+            System.out.print(obj + " ");
+        }
+        System.out.println();
+
+        System.out.print("     ideal: ");
+        for (int dimIdx = 0; dimIdx < NUM_OBJ; ++dimIdx) {
+            System.out.print(idealObjectives[dimIdx] + " ");
+        }
+        System.out.println();
+
+        return gBestSolution.getxSolution();
     }
 
     public void initializeSwarm() {
-        ncc = new NCConstruct(problem.getData());
         Particle p;
-        for(int i=0; i<SWARM_SIZE; i++) {
-            int clusterNum = generator.nextInt(MAX_K);
+        for(int i = 0; i< swarmSize; i++) {
+            int clusterNum = generator.nextInt(maxK -1)+1;
 
             // randomize location inside a space defined in Problem Set
 
             KMeans kMeans = new KMeans(problem,clusterNum);
             kMeans.nextIter();
-            Solution solution = new Solution(kMeans.getLabels());
+            Solution solution = new Solution(kMeans.getLabels(), clusterNum);
 
             // randomize velocity in the range defined in Problem Set
-            double[] vel = new double[problem.getD()];
-            for (int dimIdx = 0; dimIdx < problem.getD(); ++dimIdx) {
+            double[] vel = new double[problem.getN()];
+            for (int dimIdx = 0; dimIdx < problem.getN(); ++dimIdx) {
                 vel[dimIdx] = problem.getVelLow() + generator.nextDouble() * (
                         problem.getVelHigh() - problem.getVelLow());
             }
@@ -86,22 +123,25 @@ public class PSO {
     }
 
     private void update() {
+
         // step 1 - Evaluate objective functions for each particle
-        for(int iP = 0; iP < SWARM_SIZE; iP++) {
-            swarm.get(iP).setObjectives(problem.evaluate(swarm.get(iP).getSolution(), evaluation));
+        for(int iP = 0; iP < swarmSize; iP++) {
+            Particle p = swarm.get(iP);
+            p.setObjectives(problem.evaluate(swarm.get(iP).getSolution(), evaluation, ncc));
         }
 
         // step 2 - store non-dominated particles in paretoFrontier
         Map<Integer, double[]> mapIdxToObjectives = new HashMap<>();
-        for (int iP = 0; iP < SWARM_SIZE; ++iP) {
+        for (int iP = 0; iP < swarmSize; ++iP) {
             mapIdxToObjectives.put(iP, swarm.get(iP).getObjectives());
         }
         paretoFrontier = pareto.extractParetoNondominated(mapIdxToObjectives);
 
         // step 3 - Update Personal Bests
-        for(int i=0; i<SWARM_SIZE; i++) {
+        for(int i = 0; i< swarmSize; i++) {
             if(pareto.testDominance(swarm.get(i).getObjectives(), pBestObjective[i])) {
                 pBestObjective[i] = swarm.get(i).getObjectives();
+                swarm.get(i).setpBest(swarm.get(i).getSolution());
             }
         }
 
@@ -113,15 +153,21 @@ public class PSO {
         updateGBest();
 
         // step 5 - Update velocity and particles
-        for(int i=0; i<SWARM_SIZE; i++) {
+        for(int i = 0; i< swarmSize; i++) {
             updateVelocity(i);
             swarm.get(i).update(gBestSolution);
         }
-        for (int dimIdx = 0; dimIdx < problem.getD(); ++dimIdx) {
-            System.out.println("     Best " + dimIdx + ": " + gBestSolution.getxSolutionAt(dimIdx));
+
+        // step - print best in iteration t
+        System.out.print("     Best: ");
+        for (int dimIdx = 0; dimIdx < problem.getN(); ++dimIdx) {
+            System.out.print(gBestSolution.getxSolutionAt(dimIdx) + " ");
         }
+        System.out.println();
+
         System.out.print("     Value: ");
-        for (double obj: problem.evaluate(gBestSolution, evaluation)) {
+        double[] objs = problem.evaluate(gBestSolution, evaluation, ncc);
+        for (double obj: objs) {
             System.out.print(obj + " ");
         }
         System.out.println();
@@ -131,9 +177,9 @@ public class PSO {
         Particle p = swarm.get(idxParticle);
         double r1 = generator.nextDouble();
         double r2 = generator.nextDouble();
-        double[] newVel = new double[problem.getD()];
+        double[] newVel = new double[problem.getN()];
         w = (MAX_W - MIN_W) * (MAX_ITERATION-t) / MAX_ITERATION + MIN_W;
-        for (int dimIdx = 0; dimIdx < problem.getD(); ++dimIdx) {
+        for (int dimIdx = 0; dimIdx < problem.getN(); ++dimIdx) {
             newVel[dimIdx] = (w * p.getVelocity()[dimIdx]) + (r1 * C1) *
                     (-1 - p.getySolution()[dimIdx]) +
                     (r2 * C2) * (1 - p.getySolution()[dimIdx]);
@@ -143,7 +189,7 @@ public class PSO {
 
     private void updateGBest() {
         // update utopia point
-        for (int i = 0; i < SWARM_SIZE; ++i) {
+        for (int i = 0; i < swarmSize; ++i) {
             for (int iO = 0; iO < evaluation.length; ++iO) {
                 double obj = swarm.get(i).getObjectives()[iO];
                 if (obj > idealObjectives[iO]) {
@@ -162,7 +208,22 @@ public class PSO {
                 minDist = distToUtopia;
             }
         }
-        gBestSolution = swarm.get(iLeader).getSolution();
+        double[] gBestObjs;
+        if (t != 0) {
+            gBestObjs = problem.evaluate(gBestSolution, evaluation, ncc);
+        } else {
+            gBestObjs = new double[NUM_OBJ];
+            for (int i = 0; i < gBestObjs.length; ++i) {
+                gBestObjs[i] = Double.NEGATIVE_INFINITY;
+            }
+        }
+        if (pareto.testDominance(swarm.get(iLeader).getObjectives(), gBestObjs)) {
+            Solution sTemp = swarm.get(iLeader).getSolution();
+            gBestSolution = new Solution(sTemp.getxSolution(), sTemp.getK());
+            numIterWithoutImprov = 0;
+        } else {
+            numIterWithoutImprov++;
+        }
     }
 
 

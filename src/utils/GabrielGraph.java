@@ -20,7 +20,6 @@ public class GabrielGraph {
      */
     public GabrielGraph(double[][] data) {
         this.V = data.length;
-        System.out.println(V);
         adj = (LinkedList<Integer>[]) new LinkedList[V];
         for (int v = 0; v < V; v++) {
             adj[v] = new LinkedList<Integer>();
@@ -83,7 +82,7 @@ public class GabrielGraph {
         return density[v][w];
     }
 
-    public String toString() {
+    /*public String toString() {
         StringBuilder s = new StringBuilder();
         s.append(V + " vertices, " + NEWLINE);
         for (int v = 0; v < V; v++) {
@@ -94,7 +93,7 @@ public class GabrielGraph {
             s.append(NEWLINE);
         }
         return s.toString();
-    }
+    }*/
 
     public List<Integer> adj(int v) {
         validateVertex(v);

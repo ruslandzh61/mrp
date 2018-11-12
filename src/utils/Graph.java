@@ -12,7 +12,7 @@ public class Graph {
 
     public Graph(int aV) {
         this.V = aV;
-        System.out.println(V);
+        //System.out.println(V);
         adj = (LinkedList<Integer>[]) new LinkedList[V];
         for (int v = 0; v < V; v++) {
             adj[v] = new LinkedList<Integer>();

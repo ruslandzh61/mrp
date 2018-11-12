@@ -1,5 +1,6 @@
 package PSO;
 
+import utils.NCConstruct;
 import utils.Utils;
 
 /**
@@ -38,11 +39,11 @@ public class Problem {
 
     public double getDimHigh(int dimIdx) { return dimHigh[dimIdx];}
 
-    public double[] evaluate(Solution solution, Evaluator.Evaluation[] evaluation) {
+    public double[] evaluate(Solution solution, Evaluator.Evaluation[] evaluation, NCConstruct ncc) {
         assert (evaluation.length>0);
         double[] result = new double[evaluation.length];
         for (int iE = 0; iE < evaluation.length; ++iE) {
-            result[iE] = evaluator.evaluate(solution, evaluation[iE], data);
+            result[iE] = evaluator.evaluate(solution, evaluation[iE], data, ncc);
         }
         return result;
     }

@@ -16,9 +16,9 @@ public class Evaluator {
 
     /**
      * data parameter is needed for the evaluation of a connectivity */
-    public Double evaluate(Solution solution, Evaluation evaluation, double[][] data) {
+    public Double evaluate(Solution solution, Evaluation evaluation, double[][] data, NCConstruct ncc) {
         if (evaluation == Evaluation.CONNECTIVITY) {
-            return connectivity(solution, data);
+            return connectivity(solution, data, ncc);
         } else if (evaluation == Evaluation.COHESION) {
             return cohesion(solution, data);
         }
@@ -26,10 +26,9 @@ public class Evaluator {
         return null;
     }
 
-    private double connectivity(Solution solution, double[][] data) {
+    private double connectivity(Solution solution, double[][] data, NCConstruct ncc) {
         HashMap<Integer, Set<Integer>> clustersHp = toHashMap(solution);
         /*NC construction and obtaining sub-clusters*/
-        NCConstruct ncc = new NCConstruct(data);
 
         int N = data.length;
         double[] con = new double[clustersHp.size()];
@@ -90,6 +89,24 @@ public class Evaluator {
 
     private HashMap<Integer, Set<Integer>> toHashMap(Solution solution) {
         // convert solution to efficient data structure
+        HashMap<Integer, Set<Integer>> clustersHp = new HashMap<>(); // key is cluster id, value is set of data points
+        for (int i = 0; i < solution.size(); ++i) {
+            int id = solution.getxSolutionAt(i);
+            if (clustersHp.containsKey(id)) {
+                clustersHp.get(id).add(i);
+            } else {
+                Set<Integer> cluster = new HashSet<>();
+                cluster.add(i);
+                clustersHp.put(id,cluster);
+            }
+        }
+        return clustersHp;
+    }
+
+    /*
+    // only use if solution is locus-based representation, which should be transformed to normal representation
+    private HashMap<Integer, Set<Integer>> toHashMap(Solution solution) {
+        // convert solution to efficient data structure
         CC connectedComps = solution.toClusters();
         HashMap<Integer, Set<Integer>> clustersHp = new HashMap<>(); // key is cluster id, value is set of data points
         for (int i = 0; i < connectedComps.N(); ++i) {
@@ -103,7 +120,7 @@ public class Evaluator {
             }
         }
         return clustersHp;
-    }
+    }*/
 
     public static void main(String[] args) {
 
@@ -113,10 +130,10 @@ public class Evaluator {
         //int[] realS = {1,2,3,5,0,4,7,8,0,0}; // 1 cluster
         double[][] data = {{2,2}, {3,3}, {3,1}, {4,2}, {1.6,-0.5}, {3.01, -1.5}, {-4, 2}, {-2, 2}, {-3, 3},{7,7}};
 
-        Solution s = new Solution();
-        s.setxSolution(realS);
+        Solution s = new Solution(realS, Utils.distinctNumberOfItems(realS));
         Evaluator e = new Evaluator();
-        double cost = e.evaluate(s,Evaluation.CONNECTIVITY,data);
+        NCConstruct ncc = new NCConstruct(data);
+        double cost = e.evaluate(s,Evaluation.CONNECTIVITY,data, ncc);
         System.out.println(cost);
 
     }

@@ -62,7 +62,6 @@ public class NCConstruct {
         this.data = Utils.deepCopy(aData);
         this.gg = new GabrielGraph(data);
         this.potentialNeighborsNum = gg.getV()-1;
-        gg.printDensityMatrix();
         sortByDist();
         construct();
     }

@@ -1,10 +1,13 @@
 package PSO;
 
+import utils.Utils;
+
 import java.util.Random;
 
 /**
  * Created by rusland on 10.11.18.
  * code is taken from http://cecs.wright.edu/~keke.chen/cloud/labs/mapreduce/KMeans.java
+ * https://github.com/JasonAltschuler/KMeansPlusPlus/blob/master/src/KMeans.java
  */
 public class KMeans {
     private int[] label;
@@ -21,13 +24,24 @@ public class KMeans {
     KMeans(Problem aProblem, int aK) {
         label = new int[aProblem.getN()];
         problem = aProblem;
-        this.k=aK;
-        centroids = new double[k][];
-        for (int iR = 0; iR < k; ++iR) {
-            centroids[iR] = new double[problem.getD()];
-            for (int iD = 0; iD < problem.getD(); ++iD) {
-                centroids[iR][iD] = problem.getDimLow(iD) + rnd.nextDouble() * (
-                        problem.getDimHigh(iD) - problem.getDimLow(iD));
+        if (aK > problem.getN()) {
+            this.k = problem.getN();
+        } else {
+            this.k = aK;
+        }
+
+        // choose existing data points as initial data points
+        centroids = new double[k][problem.getD()];
+        double[][] copy = Utils.deepCopy(problem.getData());
+        int m = problem.getN();
+        int n = problem.getD();
+
+        int rand;
+        for (int i = 0; i < k; i++) {
+            rand = rnd.nextInt(m - i);
+            for (int j = 0; j < n; j++) {
+                centroids[i][j] = copy[rand][j];       // store chosen centroid
+                copy[rand][j] = copy[m - 1 - i][j];    // ensure sampling without replacement
             }
         }
     }
