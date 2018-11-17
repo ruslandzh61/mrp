@@ -4,89 +4,99 @@ import java.util.*;
 
 /**
  * Created by rusland on 10.11.18.
- * code is taken from
+ * Pareto implements simple procedure for finding set of pareto-optimal front;
+ * should be substituted with MaxiMin algorithm (Li, 2007):
+ *      'Better Spread and Convergence: Particle Swarm Multiobjective Optimization Using the Maximin Fitness Function'
+ *
+ * some code is taken from
  * https://github.com/jcaucb/ParetoNondominated/blob/master/src/org/ucb/c5/pareto/Pareto.java
  */
 public class Pareto {
     public static int PRECISION = 8;
-    public static double THRESHOLD = 0.0000001;
+    public static double THRESHOLD = Math.pow(0.1, PRECISION);
 
-    public Set<Integer> extractParetoNondominated(Map<Integer, double[]> nameToDatum) {
+    public Set<Integer> extractParetoNondominated(Map<Integer, double[]> data) {
         //Create an array of the names in arbitrary order
-        List<Integer> ranked = new ArrayList<>(nameToDatum.keySet());
+        List<Integer> ranked = new ArrayList<>(data.keySet());
 
-        //Rank on a single arbitrarily chosen field
+        //Rank on a first objective, if equal rank on the next one and so on,
+        // return either more or less to prevent identical members in pareto set
         Collections.sort(ranked, (o1, o2) -> {
-            double[] datum1 = nameToDatum.get(o1);
-            double[] datum2 = nameToDatum.get(o2);
+            double[] p1 = data.get(o1);
+            double[] p2 = data.get(o2);
+            int objNum = 0;
+            double diff;
+            do {
+                diff = Utils.roundAvoid(p2[objNum], PRECISION) - Utils.roundAvoid(p1[objNum], PRECISION);
+                if (diff > THRESHOLD) {
+                    return 1;
+                } else if (-diff > THRESHOLD) { // diff is negative
+                    //System.out.println(o1 + " > " + o2 + " on " + objNum + ": " + diff);
+                    return -1;
+                }
+                objNum++;
+                //System.out.println(o1 + " <> " + o2);
+            } while (p1.length>objNum); // Math.abs(diff) < THRESHOLD is already true at this point
 
-            //See which score is higher
-            double diff = Utils.roundAvoid(datum2[0], PRECISION) - Utils.roundAvoid(datum1[0], PRECISION);
-            if(diff > 0) {
-                return 1;
-            } else if (Math.abs(diff) <= THRESHOLD) {
-                return 0;
-            }
             return -1;
         });
 
         /*Determine the non-dominated set:
-
-        Starting with the highest-rank end of the List we just sorted,
-        consider putting that datum in the non-dominated set.  If any
-        preexisting members of the non-dominated set dominate the proposed
-        datum, then it does not belong in the set, and the algorithm should
-        continue to the next value.
+            Starting with the highest-rank end of the List we just sorted,
+            consider putting a member in the non-dominated set.  If any
+            preexisting members of the non-dominated set dominate current member,
+            then it does not belong in the set, and the algorithm should
+            continue to the next member after current one.
         */
-        Set<Integer> out = new HashSet<>();
-        Outer: for(int name : ranked) {
-            double[] datum1 = nameToDatum.get(name);
-            for(Integer domName : out) {
-                double[] domDatum = nameToDatum.get(domName);
-                if(testDominance(domDatum, datum1)) {
+        Set<Integer> pareto = new HashSet<>();
+        Outer: for(int id : ranked) {
+            double[] p = data.get(id);
+            for(Integer idOut : pareto) {
+                double[] pTmp = data.get(idOut);
+                if(testDominance(pTmp, p)) {
                     continue Outer;
                 }
             }
-            out.add(name);
+            pareto.add(id);
         }
 
         //Return the Pareto Non-dominated set
-        return out;
+        return pareto;
     }
 
-    public boolean testDominance(double[] domDatum, double[] datum1) {
-        assert (domDatum.length==datum1.length);
+    public boolean testDominance(double[] p1, double[] p2) {
+        assert (p1.length==p2.length);
+        int equalObjNum = 0;
         //If any of the individual scores of datum1 are higher than those of the domDatum, it is not dominated
-        int equalCounter = 0;
-        for(int i=0; i<datum1.length; i++) {
-            double score1 = Utils.roundAvoid(datum1[i], PRECISION);
-            double domScore = Utils.roundAvoid(domDatum[i], PRECISION);
-            if(score1 > domScore) {
+        for(int i=0; i<p2.length; i++) {
+            double p1Score = Utils.roundAvoid(p1[i], PRECISION);
+            double p2Score = Utils.roundAvoid(p2[i], PRECISION);
+            if(p2Score > p1Score) {
                 return false;
-            } else if (score1 == domScore) {
-                equalCounter++;
+            } else if (Math.abs(p2Score-p1Score) < THRESHOLD) {
+                equalObjNum++;
             }
         }
-        if (equalCounter == datum1.length) {
+
+        if (equalObjNum==p1.length) {
             return false;
         }
         return true;
     }
 
     public static void main(String[] args) {
-        /*double[][] values = new double[4][];
-        values[0] = new double[]{3,-3};
-        values[1] = new double[]{2,-2};
-        values[2] = new double[]{1,-1};
-        values[3] = new double[]{4,-4};
+        double[][] values = new double[6][];
+        values[0] = new double[]{0.2, 0.17590848575069545};
+        values[1] = new double[]{0.2, 0.22910852642658405};
+        values[2] = new double[]{0.2, 0.19483310610576984};
+        values[3] = new double[]{0.14285714285714285, 0.23748606942878325};
+        values[4] = new double[]{0.14285714285714288, 0.24109386296189347};
+        values[5] = new double[]{0.125, 0.28223727678569877};
         Map<Integer,double[]> map = new HashMap<>();
         for (int i = 0; i < values.length; ++i) {
             map.put(i, values[i]);
         }
         Set<Integer> set = new Pareto().extractParetoNondominated(map);
-        System.out.println(set);*/
-        double[] d1 = {0.5, 4.7446201124355864};
-        double[] d2 = {0.5, 4.7446201123358864};
-        System.out.println(new Pareto().testDominance(d1,d2));
+        System.out.println(set);
     }
 }

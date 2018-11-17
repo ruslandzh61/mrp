@@ -9,8 +9,7 @@ import utils.Utils;
 public class Problem {
     private int N, D;
     // space constraints
-    private double[] dimLow, dimHigh;
-    private double velLow, velHigh;
+    //private double[] dimLow, dimHigh;
 
     public double[][] getData() {
         return data;
@@ -19,14 +18,12 @@ public class Problem {
     private double[][] data;
     private Evaluator evaluator;
 
-    public Problem(double[][] aData, Evaluator aEvaluator, double aVelLow, double aVelHigh) {
+    public Problem(double[][] aData, Evaluator aEvaluator) {
         this.data = Utils.deepCopy(aData);
         this.N = data.length;
         this.D = data[0].length;
         evaluator = aEvaluator;
-        velLow = aVelLow;
-        velHigh = aVelHigh;
-        retrieveDimBound();
+        //retrieveDimBound();
     }
 
     public int getN() {
@@ -35,9 +32,9 @@ public class Problem {
 
     public int getD() { return D;}
 
-    public double getDimLow(int dimIdx) { return dimLow[dimIdx];}
+    /*public double getDimLow(int dimIdx) { return dimLow[dimIdx];}
 
-    public double getDimHigh(int dimIdx) { return dimHigh[dimIdx];}
+    public double getDimHigh(int dimIdx) { return dimHigh[dimIdx];}*/
 
     public double[] evaluate(Solution solution, Evaluator.Evaluation[] evaluation, NCConstruct ncc) {
         assert (evaluation.length>0);
@@ -48,15 +45,7 @@ public class Problem {
         return result;
     }
 
-    public double getVelLow() {
-        return velLow;
-    }
-
-    public double getVelHigh() {
-        return velHigh;
-    }
-
-    private void retrieveDimBound() {
+    /*private void retrieveDimBound() {
         dimLow = new double[D];
         dimHigh = new double[D];
         for (int iD = 0; iD < D; ++iD) {
@@ -73,17 +62,5 @@ public class Problem {
                 }
             }
         }
-    }
-
-    public static void main(String[] args) {
-        double[][] data = {{2, 2}, {3, 3}, {3, 1}, {4, 2}, {1.6, -0.5}, {3.01, -1.5}, {-4, 2}, {-2, 2}, {-3, 3}, {7, 7}};
-        Evaluator evaluator = new Evaluator();
-        int numDims = 2;
-        double velLow = -1;
-        double velHigh = 1;
-        Problem problem = new Problem(data, evaluator, velLow, velHigh);
-        for (int iD = 0; iD < numDims; ++iD) {
-            System.out.println(problem.getDimLow(iD) + " " + problem.getDimHigh(iD));
-        }
-    }
+    }*/
 }

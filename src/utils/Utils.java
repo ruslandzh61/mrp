@@ -12,7 +12,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
-
 /**
  * Created by rusland on 28.10.18.
  */
@@ -119,14 +118,18 @@ public class Utils {
         return set.size();
     }
 
-    public static void main(String[] args) {
-        /*
-        Integer[] a = {0,1,2,3};
-        Integer[] m = {0,1,2,3,4,5};
-        Set<Integer> ci = new HashSet<>(Arrays.asList(a));
-        System.out.println(intersection(ci, Arrays.asList(m)));
-        */
-        System.out.println(roundAvoid(-2.23454545545,5));
+
+    public static double[][] extractAttributes(List<String[]> data, int[] excludedColumns) {
+        double[][] result = new double[data.size()][data.get(0).length-excludedColumns.length];
+        for (int i = 0; i < result.length; ++i) {
+            int ak = 0;
+            for (int j = 0; j < result[0].length; ++j) {
+                if (Arrays.binarySearch(excludedColumns,j) < 0) {
+                    result[i][ak++] = Double.parseDouble(data.get(i)[j]);
+                }
+            }
+        }
+        return result;
     }
 
     public static void whenWriteStringUsingBufferedWritter_thenCorrect(String str, String fileName)
@@ -135,5 +138,20 @@ public class Utils {
         writer.write(str);
 
         writer.close();
+    }
+
+    public static int[] extractLabels(List<String[]> dataStr, int col) {
+        int[] labels = new int[dataStr.size()];
+        for (int i = 0; i < dataStr.size(); ++i) {
+            labels[i] = Integer.parseInt(dataStr.get(i)[col]);
+        }
+        System.out.println(Arrays.toString(labels));
+        return labels;
+    }
+
+    public static void checkClusterLabels(int[] sol, int k) {
+        for (int i = 0; i < sol.length; ++i) {
+            assert (sol[i] < k);
+        }
     }
 }

@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="com.github.haifengl:smile-core:1.5.2" type="repository">
+    <properties maven-id="com.github.haifengl:smile-core:1.5.2" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/haifengl/smile-core/1.5.2/smile-core-1.5.2.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/haifengl/smile-data/1.5.2/smile-data-1.5.2.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/haifengl/smile-math/1.5.2/smile-math-1.5.2.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.25/slf4j-api-1.7.25.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/github/haifengl/smile-graph/1.5.2/smile-graph-1.5.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

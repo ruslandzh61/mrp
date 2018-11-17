@@ -1,96 +1,91 @@
 package PSO;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import utils.Utils;
+
 import java.util.Random;
 
 /**
  * Created by rusland on 09.09.18.
+ * represents extended version of particle, defined in (Jarboui, 2007):
+ *      'Combinatorial particle swarm optimization (CPSO) for partitional clustering problem'
+ * Extended particle stores real solution 'solution' and intermediate dummy solution vector
+ * This version is able to deal with a combinatorial representation of PSO
  */
 public class Particle {
+    public static double ALPHA = 0.5;
+    /* solution stores real reprsentation */
     private Solution solution;
     private Solution pBest;
     private double[] velocity;
-
-
     private double[] objectives; // objective function values: connectivity on first and cohesion on second
 
-    private int[] ySolution; // dummy intermediate discrete representation
-
+    private int[] dummySol; // dummy intermediate discrete representation
     private final Random rnd = new Random();
 
     public Particle(Solution aSolution, double[] aVelocity) {
         this.velocity = aVelocity;
         this.solution = aSolution;
-        this.ySolution = new int[solution.getxSolution().length];
+        this.dummySol = new int[solution.getSolution().length];
     }
 
     /**
-     * update X through Y. update Y first and then X for next iteration of PSO
+     * update real solution vector X through intermediate solution vector Y. update Y first and then X for step t
      * gBest is global best solution at step t-1, pBest is personal best at step t-1 before calling update method
      * */
     public void update(Solution gBest) {
-        // step 1 - obtain currect vector value Y at step t-1
-        computeYFromX(gBest);
-        //System.out.println("yk-1: " + Arrays.toString(ySolution));
+        assert (gBest != null);
+
+        int[] sol = solution.getSolution();
+        // step 1 - obtain currect dummy intermediate solution vector at step t-1
+        calcIntermediateSol(gBest);
+        //System.out.println("yk-1: " + Arrays.toString(dummySol));
 
         // step 2 - update velocity at step t, code can be found in PSO; called just before update
-
         // step 3 - new value of lambla is computed using updated value of velocity
-        double[] lambda = new double[solution.getxSolution().length];
-        int N = solution.getxSolution().length;
+        double[] lambda = new double[sol.length];
+        int N = solution.getSolution().length;
         for (int j = 0; j < N; ++j) {
-            lambda[j] = ySolution[j] + velocity[j];
+            lambda[j] = dummySol[j] + velocity[j];
         }
+
         //System.out.println("lam: " + Arrays.toString(lambda));
 
         // step 4 - vector value Y at step is computed
         for (int j = 0; j < N; ++j) {
-            if (lambda[j] > PSO.ALPHA) {
-                ySolution[j] = 1;
-            } else if (lambda[j] < PSO.ALPHA * (-1)) {
-                ySolution[j] = -1;
+            if (lambda[j] > ALPHA) {
+                dummySol[j] = 1;
+            } else if (lambda[j] < -ALPHA) {
+                dummySol[j] = -1;
             } else {
-                ySolution[j] = 0;
+                dummySol[j] = 0;
             }
         }
-        //System.out.println("yk: " + Arrays.toString(ySolution));
+        //System.out.println("yk: " + Arrays.toString(dummySol));
+        // step 5 - obtain new real solution vector from intermediate solution vector
 
-        // step 5 - obtain new solution vector X from vector Y at step t
         int[] newSol = new int[N];
         for (int j = 0; j < N; ++j) {
-            if (ySolution[j] == 1) {
-                newSol[j] = gBest.getxSolutionAt(j);
-            } else if (ySolution[j] == -1) {
-                newSol[j] = pBest.getxSolutionAt(j);
+            if (dummySol[j] == 1) {
+                newSol[j] = gBest.getSolutionAt(j);
+            } else if (dummySol[j] == -1) {
+                newSol[j] = pBest.getSolutionAt(j);
             } else {
                 // randomly select cluster
                 //use only if solution is in locus-based representation
                 //newSol[j] = rnd.nextInt(solution.toClusters().count());
-
-                newSol[j] = rnd.nextInt(solution.getK());
+                int randomCluster = rnd.nextInt(solution.getK(false));
+                newSol[j] = randomCluster;
             }
         }
-        solution = new Solution(newSol, solution.getK());
-        //System.out.println("x: " + Arrays.toString(solution.getxSolution()));
-    }
 
-    private void computeYFromX(Solution gBest) {
-        int N = solution.getxSolution().length;
-        for (int j = 0; j < N; ++j) {
-            if (solution.getxSolutionAt(j) == pBest.getxSolutionAt(j) &&
-                    pBest.getxSolutionAt(j) == gBest.getxSolutionAt(j)){
-                ySolution[j] = (rnd.nextDouble() >= 0.5) ? 1: -1;
-            } else if (solution.getxSolutionAt(j) == pBest.getxSolutionAt(j)) {
-                ySolution[j] = 1;
-            } else if (solution.getxSolutionAt(j) == gBest.getxSolutionAt(j)) {
-                ySolution[j] = -1;
-            } else {
-                ySolution[j] = 0;
+        // get highest cluster id
+        int maxK = 0;
+        for (int i = 0; i < N; ++i) {
+            if (maxK < newSol[i]) {
+                maxK = newSol[i];
             }
         }
+        solution = new Solution(newSol, maxK+1);
     }
 
     public double[] getVelocity() {
@@ -105,17 +100,21 @@ public class Particle {
         return solution;
     }
 
+    public void setSolution(int[] sol) {
+        this.solution = new Solution(sol.clone(), solution.getK(false));
+    }
+
+    public int getDummySolAt(int dimIdx) {
+        return dummySol[dimIdx];
+    }
+
     // pBest is not used in client PSO code, since gBest is calculated using records of particle's objectives
     public Solution getpBest() {
         return pBest;
     }
 
     public void setpBest(Solution pBest) {
-        this.pBest = new Solution(pBest.getxSolution(),pBest.getK());
-    }
-
-    public int[] getySolution() {
-        return this.ySolution.clone();
+        this.pBest = new Solution(pBest.getSolution(),pBest.getK(false));
     }
 
     public double getObjective(int i) {
@@ -123,12 +122,29 @@ public class Particle {
     }
 
     public double[] getObjectives() {
-        return objectives.clone();
+        return objectives;
     }
 
     public void setObjectives(double[] aObjectives) {
         objectives = aObjectives.clone();
     }
+
+    private void calcIntermediateSol(Solution gBest) {
+        int N = solution.getSolution().length;
+        for (int j = 0; j < N; ++j) {
+            if (solution.getSolutionAt(j) == pBest.getSolutionAt(j) &&
+                    pBest.getSolutionAt(j) == gBest.getSolutionAt(j)){
+                dummySol[j] = (rnd.nextDouble() >= 0.5) ? 1: -1;
+            } else if (solution.getSolutionAt(j) == pBest.getSolutionAt(j)) {
+                dummySol[j] = 1;
+            } else if (solution.getSolutionAt(j) == gBest.getSolutionAt(j)) {
+                dummySol[j] = -1;
+            } else {
+                dummySol[j] = 0;
+            }
+        }
+    }
+
 
     public static void main(String[] args) {
         int[] s = {0,0,0,1,2,1};
@@ -140,8 +156,11 @@ public class Particle {
         Solution gbestSol = new Solution(gbest,3);
 
         Particle p = new Particle(sol,vel);
+        // pretend velocity is updated
+        p.setVelocity(vel);
         p.setpBest(pbestSol);
         p.update(gbestSol);
     }
+
 }
 

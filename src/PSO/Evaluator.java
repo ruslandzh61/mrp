@@ -1,6 +1,5 @@
 package PSO;
 
-import utils.CC;
 import utils.NCConstruct;
 import utils.Utils;
 
@@ -11,21 +10,29 @@ import java.util.*;
  */
 public class Evaluator {
     public enum Evaluation {
-        DUMMY, CONNECTIVITY, COHESION
+        CONNECTIVITY, COHESION
     }
 
+
     /**
-     * data parameter is needed for the evaluation of a connectivity */
+     * 'data' and 'ncc' parameters are needed for the evaluation of connectivity function
+     * */
     public Double evaluate(Solution solution, Evaluation evaluation, double[][] data, NCConstruct ncc) {
         if (evaluation == Evaluation.CONNECTIVITY) {
             return connectivity(solution, data, ncc);
         } else if (evaluation == Evaluation.COHESION) {
-            return cohesion(solution, data);
+            /* returns 1 / (value of cohesion objective) to enable maximization of this objective */
+            return 1.0 / cohesion(solution, data);
         }
 
         return null;
     }
 
+    /**
+     * value of connectivity objective.
+     * value would fall in the interval [0, 1].
+     * Should be maximized.
+     * */
     private double connectivity(Solution solution, double[][] data, NCConstruct ncc) {
         HashMap<Integer, Set<Integer>> clustersHp = toHashMap(solution);
         /*NC construction and obtaining sub-clusters*/
@@ -52,7 +59,11 @@ public class Evaluator {
         return Utils.sum(con)/clustersHp.size();
     }
 
-    /* returns negative value of cohesion function to enable maximization of this value */
+    /**
+     *  value of cohesion objective.
+     *  value would fall in the interval [0, Infinity].
+     *  Should be minimized.
+     *  */
     private double cohesion(Solution solution, double[][] data) {
         // key is id of a cluster; value is set of data points in the cluster
         HashMap<Integer, Set<Integer>> clustersHp = toHashMap(solution);
@@ -66,7 +77,7 @@ public class Evaluator {
             }
             coh[i++] = cohI/entry.getValue().size();
         }
-        return Utils.sum(coh)/clustersHp.size() * (-1);
+        return Utils.sum(coh)/clustersHp.size();
     }
 
     private double cohesionDistance(double[][] data, int p, Set<Integer> neighbors) {
@@ -78,20 +89,11 @@ public class Evaluator {
         return max;
     }
 
-    private double dummy(Solution solution) {
-        double x = solution.getxSolutionAt(0); // the "x" part of the location
-        double y = solution.getxSolutionAt(1); // the "y" part of the location
-
-        return Math.pow(2.8125 - x + x * Math.pow(y, 4), 2) +
-                Math.pow(2.25 - x + x * Math.pow(y, 2), 2) +
-                Math.pow(1.5 - x + x * y, 2);
-    }
-
     private HashMap<Integer, Set<Integer>> toHashMap(Solution solution) {
         // convert solution to efficient data structure
         HashMap<Integer, Set<Integer>> clustersHp = new HashMap<>(); // key is cluster id, value is set of data points
         for (int i = 0; i < solution.size(); ++i) {
-            int id = solution.getxSolutionAt(i);
+            int id = solution.getSolutionAt(i);
             if (clustersHp.containsKey(id)) {
                 clustersHp.get(id).add(i);
             } else {
