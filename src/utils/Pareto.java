@@ -1,5 +1,7 @@
 package utils;
 
+import PSO.Solution;
+
 import java.util.*;
 
 /**
@@ -17,10 +19,35 @@ public class Pareto {
 
     public Set<Integer> extractParetoNondominated(Map<Integer, double[]> data) {
         //Create an array of the names in arbitrary order
-        List<Integer> ranked = new ArrayList<>(data.keySet());
-
+        List<Integer> ranked = sort(data);
         //Rank on a first objective, if equal rank on the next one and so on,
         // return either more or less to prevent identical members in pareto set
+
+        /*Determine the non-dominated set:
+            Starting with the highest-rank end of the List we just sorted,
+            consider putting a member in the non-dominated set.  If any
+            preexisting members of the non-dominated set dominate current member,
+            then it does not belong in the set, and the algorithm should
+            continue to the next member after current one.
+        */
+        Set<Integer> pareto = new HashSet<>();
+        Outer: for(int id : ranked) {
+            double[] p = data.get(id);
+            for(Integer idOut : pareto) {
+                double[] pTmp = data.get(idOut);
+                if(testDominance(pTmp, p,false)) {
+                    continue Outer;
+                }
+            }
+            pareto.add(id);
+        }
+
+        //Return the Pareto Non-dominated set
+        return pareto;
+    }
+
+    public List<Integer> sort(Map<Integer, double[]> data) {
+        List<Integer> ranked = new ArrayList<>(data.keySet());
         Collections.sort(ranked, (o1, o2) -> {
             double[] p1 = data.get(o1);
             double[] p2 = data.get(o2);
@@ -40,31 +67,14 @@ public class Pareto {
 
             return -1;
         });
-
-        /*Determine the non-dominated set:
-            Starting with the highest-rank end of the List we just sorted,
-            consider putting a member in the non-dominated set.  If any
-            preexisting members of the non-dominated set dominate current member,
-            then it does not belong in the set, and the algorithm should
-            continue to the next member after current one.
-        */
-        Set<Integer> pareto = new HashSet<>();
-        Outer: for(int id : ranked) {
-            double[] p = data.get(id);
-            for(Integer idOut : pareto) {
-                double[] pTmp = data.get(idOut);
-                if(testDominance(pTmp, p)) {
-                    continue Outer;
-                }
-            }
-            pareto.add(id);
-        }
-
-        //Return the Pareto Non-dominated set
-        return pareto;
+        return ranked;
     }
 
-    public boolean testDominance(double[] p1, double[] p2) {
+    /**
+     * if dominatesIfEqual set to true, then p1 dominates p2 in case p1 and p2 are equal
+     * if dominatesIfEqual set to false, then p1 doesn't dominates p2 in case p1 and p2 are equal
+     * */
+    public boolean testDominance(double[] p1, double[] p2, boolean dominatesIfEqual) {
         assert (p1.length==p2.length);
         int equalObjNum = 0;
         //If any of the individual scores of datum1 are higher than those of the domDatum, it is not dominated
@@ -78,7 +88,7 @@ public class Pareto {
             }
         }
 
-        if (equalObjNum==p1.length) {
+        if (!dominatesIfEqual && equalObjNum==p1.length) {
             return false;
         }
         return true;

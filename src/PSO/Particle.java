@@ -17,7 +17,6 @@ public class Particle {
     private Solution solution;
     private Solution pBest;
     private double[] velocity;
-    private double[] objectives; // objective function values: connectivity on first and cohesion on second
 
     private int[] dummySol; // dummy intermediate discrete representation
     private final Random rnd = new Random();
@@ -32,7 +31,7 @@ public class Particle {
      * update real solution vector X through intermediate solution vector Y. update Y first and then X for step t
      * gBest is global best solution at step t-1, pBest is personal best at step t-1 before calling update method
      * */
-    public void update(Solution gBest) {
+    public void update(Solution gBest, int maxK) {
         assert (gBest != null);
 
         int[] sol = solution.getSolution();
@@ -78,14 +77,23 @@ public class Particle {
             }
         }
 
-        // get highest cluster id
-        int maxK = 0;
+        // check for maxK bound constraint
         for (int i = 0; i < N; ++i) {
-            if (maxK < newSol[i]) {
-                maxK = newSol[i];
+            // if violates maxK bound constraint - set to random cluster
+            if (newSol[i] >= maxK) {
+                newSol[i] = rnd.nextInt(maxK);
             }
         }
-        solution = new Solution(newSol, maxK+1);
+
+        // get number of clusters, since number of clusters might increase after updating the particle using global best
+        int maxLabel = -1;
+        for (int i = 0; i < N; ++i) {
+            if (maxLabel < newSol[i]) {
+                maxLabel = newSol[i];
+            }
+        }
+
+        solution = new Solution(newSol, maxLabel+1);
     }
 
     public double[] getVelocity() {
@@ -117,18 +125,6 @@ public class Particle {
         this.pBest = new Solution(pBest.getSolution(),pBest.getK(false));
     }
 
-    public double getObjective(int i) {
-        return objectives[i];
-    }
-
-    public double[] getObjectives() {
-        return objectives;
-    }
-
-    public void setObjectives(double[] aObjectives) {
-        objectives = aObjectives.clone();
-    }
-
     private void calcIntermediateSol(Solution gBest) {
         int N = solution.getSolution().length;
         for (int j = 0; j < N; ++j) {
@@ -148,18 +144,19 @@ public class Particle {
 
     public static void main(String[] args) {
         int[] s = {0,0,0,1,2,1};
+        int k = 3;
         int[] pbest = {1,0,2,1,2,0};
         int[] gbest = {2,1,2,0,1,1};
         double[] vel = {-1.2,-0.9,0.5,0.7,0.9,0.3};
         Solution sol = new Solution(s,3);
         Solution pbestSol = new Solution(pbest,3);
         Solution gbestSol = new Solution(gbest,3);
-
         Particle p = new Particle(sol,vel);
+
         // pretend velocity is updated
         p.setVelocity(vel);
         p.setpBest(pbestSol);
-        p.update(gbestSol);
+        p.update(gbestSol, k);
     }
 
 }

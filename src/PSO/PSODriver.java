@@ -23,7 +23,6 @@ public class PSODriver {
      *      'Adaptive neighbourhood construction algorithm based on density and connectivity'
      * */
     public void runDummy() {
-        int maxK;
         double[][] data;
         int[] labels;
         labels = new int[]{0,0,0,0,0,0,1,1,1,2};
@@ -31,19 +30,24 @@ public class PSODriver {
                 {2,2}, {3,3}, {3,1}, {4,2}, {1.6,-0.5},
                 {3.01, -1.5}, {-4, 2}, {-2, 2}, {-3, 3},{7,7}
         };
-        maxK = 6;
+        int maxK = 6;
+
         Evaluator.Evaluation[] evaluation = {Evaluator.Evaluation.CONNECTIVITY, Evaluator.Evaluation.COHESION};
         Evaluator evaluator = new Evaluator();
         Problem problem = new Problem(data, evaluator);
-        PSO pso = new PSO(problem, evaluation, maxK);
+
+        PSOConfiguration configuration = new PSOConfiguration();
+        configuration.maxK = maxK;
+        PSO pso = new PSO(problem, evaluation, configuration);
         int[] labelsPred = pso.execute();
+
         System.out.println(new AdjustedRandIndex().measure(labels, labelsPred));
     }
 
     /**
      * main method to run PSO-based clustering
      * */
-    public void run(String path) throws IOException {
+    public void run(String path, PSOConfiguration configuration) throws IOException {
         int maxK;
         double[][] data;
         int[] labelsTrue;
@@ -63,7 +67,7 @@ public class PSODriver {
         int[] excludedColumns = {0,dataStr.get(0).length-1};
         data = Utils.extractAttributes(dataStr, excludedColumns);
         // pick maxK 2-10% of total number of data point
-        maxK = data.length/20;
+        maxK = data.length/20; // 5% of total number
 
         // step 2 - pick objectives
         Evaluator.Evaluation[] evaluation = {Evaluator.Evaluation.CONNECTIVITY, Evaluator.Evaluation.COHESION};
@@ -71,7 +75,8 @@ public class PSODriver {
         Problem problem = new Problem(data, evaluator);
 
         // step 3 - run PSO algorithm
-        PSO pso = new PSO(problem, evaluation, maxK);
+        configuration.maxK = maxK;
+        PSO pso = new PSO(problem, evaluation, configuration);
         // constructed clusters
         int[] labelsPred = pso.execute();
 
@@ -104,7 +109,17 @@ public class PSODriver {
             // pick file manually or pass a path string
             boolean pickManually = false;
             String path = pickManually ? Utils.pickAFile(): "data/glass.csv";
-            new PSODriver().run(path);
+            PSOConfiguration configuration = new PSOConfiguration();
+            // default configuration
+            /*configuration.c1 = 1.42;
+            configuration.c2 = 1.63;
+            configuration.maxW = 0.9;
+            configuration.minW = 0.4;
+            configuration.maxIteration = 1000;
+            configuration.maxIterWithoutImprovement = 50;
+            configuration.pMax = 150;
+            configuration.pickLeaderRandomly = false;*/
+            new PSODriver().run(path, configuration);
         } catch (IOException e) {
             e.printStackTrace();
         }

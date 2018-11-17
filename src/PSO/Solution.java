@@ -13,6 +13,7 @@ public class Solution {
     private int[] solution;
     private double fitness;
     private int k;
+    private double[] objectives; // objective function values: connectivity on first and cohesion on second
 
     /** number of clusters stays the same if empty clusters are counted as well
     * */
@@ -71,6 +72,19 @@ public class Solution {
         } else {
             return k;
         }
+    }
+
+
+    public double getObjective(int i) {
+        return objectives[i];
+    }
+
+    public double[] getObjectives() {
+        return objectives;
+    }
+
+    public void setObjectives(double[] aObjectives) {
+        objectives = aObjectives.clone();
     }
 
     private void checkSolution() {
