@@ -18,6 +18,10 @@ import smile.validation.AdjustedRandIndex;
  */
 public class PSODriver {
 
+    /** simple test using artificial two-dimensional data sets
+     *  similar to the one used in (Inkaya, 2014) depicted on Fig. 3:
+     *      'Adaptive neighbourhood construction algorithm based on density and connectivity'
+     * */
     public void runDummy() {
         int maxK;
         double[][] data;
@@ -36,7 +40,9 @@ public class PSODriver {
         System.out.println(new AdjustedRandIndex().measure(labels, labelsPred));
     }
 
-    /* most of data points end up in the same cluster */
+    /**
+     * main method to run PSO-based clustering
+     * */
     public void run(String path) throws IOException {
         int maxK;
         double[][] data;
@@ -94,6 +100,7 @@ public class PSODriver {
     public static void main(String[] args) {
         //new PSODriver().runDummy();
         try {
+            // test using UCI 'glass' public data set - https://archive.ics.uci.edu/ml/datasets/glass+identification
             // pick file manually or pass a path string
             boolean pickManually = false;
             String path = pickManually ? Utils.pickAFile(): "data/glass.csv";
