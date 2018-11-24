@@ -84,11 +84,12 @@ public class PSO {
         }
         System.out.println();
 
-        System.out.print("     ideal: ");
+        System.out.print("     ideal found objectives: ");
         for (int dimIdx = 0; dimIdx < evaluation.length; ++dimIdx) {
             System.out.print(idealObjectives[dimIdx] + " ");
         }
         System.out.println();
+        System.out.println("pareto-optimal set:");
         for (Solution s: paretoOptimal) {
             System.out.println(Arrays.toString(s.getObjectives()));
         }
@@ -230,28 +231,6 @@ public class PSO {
 
         // step 1 -  pick a leader in pareto set closest to utopia point
         return pickALeader();
-
-        /*
-        // step 2 - update global best
-        // I'M NOT SURE WHETHER GLOBAL BEST SHOULD BE UPDATED ONLY WHEN NEW LEADER DOMINATES IT OR REGARDLESS OF THAT
-        paretoLeaderSolution = new Solution(swarm.get(iLeader).getSolution());
-
-        double[] finalBestObjs;
-        if (gBestSolution != null) {
-            finalBestObjs = problem.evaluate(paretoLeaderSolution, evaluation, ncc);
-        } else {
-            finalBestObjs = new double[numOfObj];
-            for (int i = 0; i < numOfObj; ++i) {
-                finalBestObjs[i] = Double.NEGATIVE_INFINITY;
-            }
-        }
-        double[] gBestObjs = problem.evaluate(paretoLeaderSolution,evaluation,ncc);
-        if (pareto.testDominance(gBestObjs, finalBestObjs)) {
-            gBestSolution = new Solution(paretoLeaderSolution);
-            numOfIterWithoutImprov = 0;
-        } else {
-            numOfIterWithoutImprov++;
-        }*/
     }
 
     private Solution pickALeader() {

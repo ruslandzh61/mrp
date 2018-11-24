@@ -187,7 +187,7 @@ public class KMeans {
         labels = {0,0,0,0,0,0,1,1,1,2};*/
 
 
-        List<String[]> dataStr = Utils.readDataFromCustomSeperator("data/glass.csv", skipLines, ',');
+        List<String[]> dataStr = Utils.readDataFromCustomSeperator("data/glass.csv", ',');
         assert (dataStr.size()>0);
 
         labels = Utils.extractLabels(dataStr, dataStr.get(0).length-1);

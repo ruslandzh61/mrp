@@ -55,7 +55,7 @@ public class PSODriver {
 
         /* process data */
         // step 1 - read data from file
-        List<String[]> dataStr = Utils.readDataFromCustomSeperator(path, skipLines, ',');
+        List<String[]> dataStr = Utils.readDataFromCustomSeperator(path, ',');
         assert (dataStr.size()>0);
         assert (dataStr.get(0).length>0);
 
@@ -64,7 +64,7 @@ public class PSODriver {
         //System.out.println(Arrays.toString(labelsTrue));
 
         // exclude columns from csv file
-        int[] excludedColumns = {0,dataStr.get(0).length-1};
+        int[] excludedColumns = {dataStr.get(0).length-1};
         data = Utils.extractAttributes(dataStr, excludedColumns);
         // pick maxK 2-10% of total number of data point
         maxK = data.length/20; // 5% of total number
@@ -120,6 +120,7 @@ public class PSODriver {
             configuration.pMax = 150;
             configuration.pickLeaderRandomly = false;*/
             new PSODriver().run(path, configuration);
+            //Utils.nominalForm("data/glass.csv");
         } catch (IOException e) {
             e.printStackTrace();
         }

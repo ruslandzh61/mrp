@@ -33,7 +33,7 @@ public class Utils {
     /**
     * taken from https://www.geeksforgeeks.org/reading-csv-file-java-using-opencv/
     * */
-    public static List<String[]> readDataFromCustomSeperator(String file, int skipLine,char sep) throws IOException
+    public static List<String[]> readDataFromCustomSeperator(String file, char sep) throws IOException
     {
         // Create object of filereader
         // class with csv file as parameter.
@@ -51,7 +51,6 @@ public class Utils {
 
         // Read all data at once
         List<String[]> allData = csvReader.readAll();
-
         /*
         // print Data
         for (String[] row : allData) {
@@ -138,6 +137,18 @@ public class Utils {
         writer.write(str);
 
         writer.close();
+    }
+
+    public static void nominalForm(String file) throws IOException {
+        List<String[]> data = readDataFromCustomSeperator(file, ',');
+        String res = "";
+        for (String[] record: data) {
+            record[record.length-1] = "class"+record[record.length-1];
+            String s = Arrays.toString(record);
+            res = res.concat(s.substring(1,s.length()-1)+System.getProperty("line.separator"));
+        }
+
+        whenWriteStringUsingBufferedWritter_thenCorrect(res, "data/output.csv");
     }
 
     public static int[] extractLabels(List<String[]> dataStr, int col) {
