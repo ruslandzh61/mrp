@@ -22,7 +22,7 @@ public class Evaluator {
             return connectivity(solution, data, ncc);
         } else if (evaluation == Evaluation.COHESION) {
             /* returns 1 / (value of cohesion objective) to enable maximization of this objective */
-            return 1.0 / cohesion(solution, data);
+            return -cohesion(solution, data); //1.0 / cohesion(solution, data);
         }
 
         return null;

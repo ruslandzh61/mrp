@@ -11,6 +11,11 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 /**
  * Created by rusland on 28.10.18.
@@ -151,12 +156,46 @@ public class Utils {
         whenWriteStringUsingBufferedWritter_thenCorrect(res, "data/output.csv");
     }
 
+    public static void replaceInFile(String p, String repl, String with) throws IOException {
+        Path path = Paths.get(p);
+        Charset charset = StandardCharsets.UTF_8;
+
+        String content = new String(Files.readAllBytes(path));
+        content = content.replaceAll(repl, with);
+        Files.write(path, content.getBytes(charset));
+    }
+
+    public static void nominalFormToNumber(String file, char sep, int attrIdx) throws IOException {
+        HashMap<String, Integer> map = new HashMap<>();
+
+        List<String[]> data = readDataFromCustomSeperator(file, sep);
+        if (attrIdx == -1)
+            attrIdx = data.get(0).length-1;
+        String res = "";
+        int i = 0;
+        for (String[] record: data) {
+            String s;
+            if (!map.containsKey(record[attrIdx])) {
+                map.put(record[attrIdx], i++);
+            }
+            record[attrIdx] = map.get(record[attrIdx]).toString();
+            s = Arrays.toString(record);
+            res = res.concat(s.substring(1,s.length()-1)+System.getProperty("line.separator"));
+        }
+
+        whenWriteStringUsingBufferedWritter_thenCorrect(res, "data/output.csv");
+    }
+
     public static int[] extractLabels(List<String[]> dataStr, int col) {
         int[] labels = new int[dataStr.size()];
         for (int i = 0; i < dataStr.size(); ++i) {
-            labels[i] = Integer.parseInt(dataStr.get(i)[col]);
+            try {
+                labels[i] = Integer.parseInt(dataStr.get(i)[col]);
+            } catch (NumberFormatException e) {
+                System.out.println(dataStr.get(i)[0]);
+            }
         }
-        System.out.println(Arrays.toString(labels));
+        //System.out.println(Arrays.toString(labels));
         return labels;
     }
 
@@ -164,5 +203,12 @@ public class Utils {
         for (int i = 0; i < sol.length; ++i) {
             assert (sol[i] < k);
         }
+    }
+
+    public static void main(String[] args) throws Exception {
+        //replaceInFile("data/p-yeast.csv", " ","");
+        //replaceInFile("data/output.csv", ",,",",");
+        //Utils.nominalFormToNumber("data/ld.csv", ',', -1);
+        //Utils.nominalForm("data/ld.csv");
     }
 }

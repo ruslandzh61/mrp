@@ -10,7 +10,7 @@ public class PSOConfiguration {
     public double minW = 0.4;
     public int maxIteration = 1000;
     public int maxIterWithoutImprovement = 50;
-    public int maxK = 150;
+    public int maxK = 20;
     public int pMax = 150;
     public boolean pickLeaderRandomly = false;
 }

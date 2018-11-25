@@ -47,7 +47,7 @@ public class PSODriver {
     /**
      * main method to run PSO-based clustering
      * */
-    public void run(String path, PSOConfiguration configuration) throws IOException {
+    public void run(String path, PSOConfiguration configuration, char sep) throws IOException {
         int maxK;
         double[][] data;
         int[] labelsTrue;
@@ -55,7 +55,7 @@ public class PSODriver {
 
         /* process data */
         // step 1 - read data from file
-        List<String[]> dataStr = Utils.readDataFromCustomSeperator(path, ',');
+        List<String[]> dataStr = Utils.readDataFromCustomSeperator(path, sep);
         assert (dataStr.size()>0);
         assert (dataStr.get(0).length>0);
 
@@ -64,7 +64,7 @@ public class PSODriver {
         //System.out.println(Arrays.toString(labelsTrue));
 
         // exclude columns from csv file
-        int[] excludedColumns = {dataStr.get(0).length-1};
+        int[] excludedColumns = {0,dataStr.get(0).length-1};
         data = Utils.extractAttributes(dataStr, excludedColumns);
         // pick maxK 2-10% of total number of data point
         maxK = data.length/20; // 5% of total number
@@ -93,8 +93,8 @@ public class PSODriver {
         System.out.println("ARI of k-means baseline algorithm: " + adjustedRandIndex.measure(labelsTrue, kMeans.getLabels()));
 
         // optional step - write true and constructed labels into a file
-        /*Utils.whenWriteStringUsingBufferedWritter_thenCorrect(Arrays.toString(labelsTrue) +
-                System.getProperty("line.separator") + "," + Arrays.toString(labelsPred), "data/output.csv");*/
+        Utils.whenWriteStringUsingBufferedWritter_thenCorrect(Arrays.toString(labelsTrue) +
+                System.getProperty("line.separator") + "," + Arrays.toString(labelsPred), "data/output.txt");
 
         // optional step - objectives of true clusters
         /*System.out.println("objectives of true clusters: " + Arrays.toString(problem.evaluate(
@@ -102,13 +102,16 @@ public class PSODriver {
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         //new PSODriver().runDummy();
         try {
             // test using UCI 'glass' public data set - https://archive.ics.uci.edu/ml/datasets/glass+identification
             // pick file manually or pass a path string
             boolean pickManually = false;
-            String path = pickManually ? Utils.pickAFile(): "data/glass.csv";
+            String filePath;
+            //filePath = "data/glass.csv";
+            filePath = "data/p-yeast.csv";
+            String path = pickManually ? Utils.pickAFile(): filePath;
             PSOConfiguration configuration = new PSOConfiguration();
             // default configuration
             /*configuration.c1 = 1.42;
@@ -119,7 +122,7 @@ public class PSODriver {
             configuration.maxIterWithoutImprovement = 50;
             configuration.pMax = 150;
             configuration.pickLeaderRandomly = false;*/
-            new PSODriver().run(path, configuration);
+            new PSODriver().run(path, configuration,',');
             //Utils.nominalForm("data/glass.csv");
         } catch (IOException e) {
             e.printStackTrace();
