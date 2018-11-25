@@ -19,6 +19,7 @@ import weka.filters.unsupervised.attribute.Remove;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -26,7 +27,7 @@ import java.util.List;
  */
 public class GADriver {
 
-    public GADriver(String filename, String filenameForTrueLabels) throws Exception {
+    public GADriver(String filename, String filenameForTrueLabels, boolean removeFirst, char sep) throws Exception {
         ClusterEvaluation eval;
         Instances data;
         String[] options;
@@ -36,11 +37,13 @@ public class GADriver {
 
         data = ConverterUtils.DataSource.read(filename);
         data.setClassIndex(data.numAttributes() - 1);
-        filter = new Remove();
-        filter.setAttributeIndices("1");
-        filter.setInputFormat(data);
-        data = Filter.useFilter(data, filter);
-        data.setClassIndex(data.numAttributes() - 1);
+        if (removeFirst) {
+            filter = new Remove();
+            filter.setAttributeIndices("1");
+            filter.setInputFormat(data);
+            data = Filter.useFilter(data, filter);
+            data.setClassIndex(data.numAttributes() - 1);
+        }
 
         /*Normalize normFilter = new Normalize();
         normFilter.setInputFormat(data);
@@ -57,9 +60,9 @@ public class GADriver {
         //System.out.println(dataClusterer);
 
         cl = new MyGenClustPlusPlus();
-        cl.setSeed(99);
+        cl.setSeed(10);
         cl.buildClusterer(dataClusterer);
-        System.out.println("DB Index score: " + cl.daviesBouldinScore());
+
         eval = new ClusterEvaluation();
         eval.setClusterer(cl);
         eval.evaluateClusterer(new Instances(data));
@@ -67,17 +70,34 @@ public class GADriver {
 
         int[] labelsTrue = new int[data.size()];
         int[] labelsPred = new int[data.size()];
-        List<String[]> dataStr = Utils.readDataFromCustomSeperator(filenameForTrueLabels, ',');
+        List<String[]> dataStr = Utils.readDataFromCustomSeperator(filenameForTrueLabels, sep);
         assert (dataStr.size() > 0);
         assert (dataStr.get(0).length > 0);
         labelsTrue = Utils.extractLabels(dataStr, dataStr.get(0).length - 1);
+
 
         // extract labels
         for (int i = 0; i < data.size(); ++i) {
             labelsPred[i] = cl.clusterInstance(dataClusterer.get(i));
         }
 
+        // retrieve data in two-dim array format
+        int[] excludedColumns;
+        if (removeFirst) {
+            excludedColumns = new int[]{0, data.numAttributes()-1};
+        } else {
+            excludedColumns = new int[]{data.numAttributes()-1};
+        }
+        double[][] dataArr = Utils.extractAttributes(dataStr, excludedColumns);
+        HashMap<Integer,double[]> centroids = Utils.centroids(dataArr, labelsPred);
+
+
         // step 4 - measure comparing to true labels
+        //System.out.println("DB Index score: " + cl.calcularDavidBouldin().getResultado());
+        //System.out.println("inner DB Index score: " + cl.daviesBouldinScore());
+        // matches with sclearn davies-bouldin function output
+        System.out.println("DB Index score:       " + Utils.dbIndexScore(centroids,labelsPred,dataArr));
+
         AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
         System.out.println("ARI of GA algorithm: " + adjustedRandIndex.measure(labelsTrue, labelsPred));
         System.out.println(Arrays.toString(labelsTrue));
@@ -88,6 +108,7 @@ public class GADriver {
     }
 
     public static void main(String[] args) throws Exception {
-        new GADriver("data/p-ld.csv","data/ld.csv");
+        // weka doesn't work with other separators other than ','
+        new GADriver("data/p-winequality-red.csv","data/winequality-red.csv", false, ',');
     }
 }
