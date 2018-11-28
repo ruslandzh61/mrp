@@ -7,10 +7,7 @@ import weka.clusterers.DensityBasedClusterer;
 import weka.clusterers.EM;
 import weka.clusterers.GenClustPlusPlus;
 //import weka.core.*;
-import weka.core.EuclideanDistance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.ManhattanDistance;
+import weka.core.*;
 import weka.core.converters.ConverterUtils;
 import weka.core.pmml.jaxbbindings.Cluster;
 import weka.filters.Filter;
@@ -27,14 +24,31 @@ import java.util.List;
  */
 public class GADriver {
 
-    public GADriver(String filename, String filenameForTrueLabels, boolean removeFirst, char sep) throws Exception {
+    public GADriver(int runs, String filename, String filenameForTrueLabels, boolean removeFirst, char sep) throws Exception {
         ClusterEvaluation eval;
         Instances data;
-        String[] options;
         MyGenClustPlusPlus cl;
-        double logLikelyhood;
         Remove filter;
 
+        AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
+        double meanMyDBIndex = 0.0;
+        double meanMyDBWithMyCentroids = 0.0;
+        double meanInnerDBIndex = 0.0;
+        double meanARI = 0.0;
+        //double meanInnerDBWithMyCentroids;
+        int[] labelsTrue, labelsPred;
+        StringBuffer output= new StringBuffer();
+        String temp;
+
+        // step 1 - retrieve true labels
+        List<String[]> dataStr = Utils.readDataFromCustomSeperator(filenameForTrueLabels, sep);
+        assert (dataStr.size() > 0);
+        assert (dataStr.get(0).length > 0);
+        labelsTrue = Utils.extractLabels(dataStr, dataStr.get(0).length - 1);
+        temp = Arrays.toString(labelsTrue);
+        output.append(temp.substring(1,temp.length()-1)+System.getProperty("line.separator"));
+
+        // step 2 - preprocess data
         data = ConverterUtils.DataSource.read(filename);
         data.setClassIndex(data.numAttributes() - 1);
         if (removeFirst) {
@@ -59,56 +73,73 @@ public class GADriver {
         //dataClusterer.setClassIndex(dataClusterer.numAttributes() - 1);
         //System.out.println(dataClusterer);
 
-        cl = new MyGenClustPlusPlus();
-        cl.setSeed(10);
-        cl.buildClusterer(dataClusterer);
+        // step 3 - build model
+        for (int seed = 1; seed <= runs; ++seed) {
+            cl = new MyGenClustPlusPlus();
+            cl.setSeed(seed);
+            cl.buildClusterer(dataClusterer);
 
-        eval = new ClusterEvaluation();
-        eval.setClusterer(cl);
-        eval.evaluateClusterer(new Instances(data));
-        System.out.println(eval.clusterResultsToString());
+            eval = new ClusterEvaluation();
+            eval.setClusterer(cl);
+            eval.evaluateClusterer(new Instances(data));
+            //System.out.println(eval.clusterResultsToString());
 
-        int[] labelsTrue = new int[data.size()];
-        int[] labelsPred = new int[data.size()];
-        List<String[]> dataStr = Utils.readDataFromCustomSeperator(filenameForTrueLabels, sep);
-        assert (dataStr.size() > 0);
-        assert (dataStr.get(0).length > 0);
-        labelsTrue = Utils.extractLabels(dataStr, dataStr.get(0).length - 1);
+            labelsPred = cl.getLabels();
+            temp = Arrays.toString(labelsPred);
+            output.append(temp.substring(1, temp.length() - 1)).append(System.getProperty("line.separator"));
 
-
-        // extract labels
-        for (int i = 0; i < data.size(); ++i) {
+            // extract labels
+        /*for (int i = 0; i < data.size(); ++i) {
             labelsPred[i] = cl.clusterInstance(dataClusterer.get(i));
-        }
+        }*/
 
-        // retrieve data in two-dim array format
-        int[] excludedColumns;
-        if (removeFirst) {
-            excludedColumns = new int[]{0, data.numAttributes()-1};
-        } else {
-            excludedColumns = new int[]{data.numAttributes()-1};
+            /*
+            // retrieve data in two-dim array format
+            int[] excludedColumns;
+            if (removeFirst) {
+                excludedColumns = new int[]{0, data.numAttributes() - 1};
+            } else {
+                excludedColumns = new int[]{data.numAttributes() - 1};
+            }
+            double[][] dataArr = Utils.extractAttributes(dataStr, excludedColumns);
+            HashMap<Integer, double[]> centroids = Utils.centroidsFromWekaInstance(cl.getCentroids());
+            HashMap<Integer, double[]> myCentroids = Utils.centroids(dataArr, labelsPred);
+
+            // step 4 - measure
+            double ARI = adjustedRandIndex.measure(labelsTrue, labelsPred);
+            double myDBIndex = Utils.dbIndexScore(centroids,labelsPred,dataArr);
+            double myDBWithMyCentroids = Utils.dbIndexScore(myCentroids,labelsPred,dataArr);
+            double innerDBIndex = cl.daviesBouldinScore();
+
+            meanARI += ARI;
+            meanMyDBIndex += myDBIndex;
+            meanMyDBWithMyCentroids += myDBWithMyCentroids;
+            meanInnerDBIndex += innerDBIndex;
+
+            System.out.println("run " + seed + ": " + Arrays.toString(labelsPred));
+            System.out.println("mean ARI score:               " + ARI);
+            //System.out.println("my DB Index score:            " + myDBIndex);
+            System.out.println("my DB score with my centroid: " + myDBWithMyCentroids);
+            //System.out.println("inner DB Index score:         " + innerDBIndex);
+            */
         }
-        double[][] dataArr = Utils.extractAttributes(dataStr, excludedColumns);
-        HashMap<Integer,double[]> centroids = Utils.centroids(dataArr, labelsPred);
 
 
         // step 4 - measure comparing to true labels
         //System.out.println("DB Index score: " + cl.calcularDavidBouldin().getResultado());
-        //System.out.println("inner DB Index score: " + cl.daviesBouldinScore());
-        // matches with sclearn davies-bouldin function output
-        System.out.println("DB Index score:       " + Utils.dbIndexScore(centroids,labelsPred,dataArr));
+        //System.out.println("mean ARI score:               " + meanARI/runs);
+        //System.out.println("my DB Index score:            " + meanMyDBIndex/runs);
+        //System.out.println("my DB score with my centroid: " + meanMyDBWithMyCentroids/runs);
+        //System.out.println("inner DB Index score:         " + meanInnerDBIndex/runs);
 
-        AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
-        System.out.println("ARI of GA algorithm: " + adjustedRandIndex.measure(labelsTrue, labelsPred));
-        System.out.println(Arrays.toString(labelsTrue));
-        System.out.println(Arrays.toString(labelsPred));
-
-        Utils.whenWriteStringUsingBufferedWritter_thenCorrect(Arrays.toString(labelsTrue) +
-                System.getProperty("line.separator") + "," + Arrays.toString(labelsPred), "data/output.txt");
+        //System.out.println(Arrays.toString(labelsTrue));
+        //System.out.println(Arrays.toString(cl.getLabels()));
+        Utils.whenWriteStringUsingBufferedWritter_thenCorrect(output.toString() +
+                System.getProperty("line.separator"), "../datasets/output.csv");
     }
 
     public static void main(String[] args) throws Exception {
         // weka doesn't work with other separators other than ','
-        new GADriver("data/p-winequality-red.csv","data/winequality-red.csv", false, ',');
+        GADriver gaDriver = new GADriver(30, "data/p-dermatology.csv","data/dermatology.csv", false, ',');
     }
 }

@@ -52,6 +52,10 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
     public static final int SUPPLIED = 4;
     public static final Tag[] TAGS_SELECTION_MK = new Tag[]{new Tag(0, "Random"), new Tag(1, "k-means++"), new Tag(2, "Canopy"), new Tag(3, "Farthest first"), new Tag(4, "Supplied Centroids")};
 
+    Instances getCentroids() {
+        return this.m_builtClusterer.getClusterCentroids();
+    }
+
     public int numberOfClusters() {
         return this.m_numberOfClusters;
     }
@@ -281,6 +285,10 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
 
     public double daviesBouldinScore() {
         return 1.0/fitness(m_builtClusterer);
+    }
+
+    public int[] getLabels() throws Exception {
+        return m_builtClusterer.getAssignments();
     }
 
     private double fitness(MyGenClustPlusPlus.MKMeans chromosome) {

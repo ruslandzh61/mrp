@@ -32,8 +32,9 @@ public class PSO {
     private Random generator = new Random();
     private VelocityCalculator velocityCalculator;
 
-    public PSO(Problem aProblem, Evaluator.Evaluation[] aEvaluation, PSOConfiguration configuration) {
+    public PSO(Problem aProblem, NCConstruct aNCconstruct, Evaluator.Evaluation[] aEvaluation, PSOConfiguration configuration) {
         this.problem = aProblem;
+        this.ncc = aNCconstruct;
         this.evaluation = aEvaluation;
         this.conf = configuration;
 
@@ -53,7 +54,6 @@ public class PSO {
         for (int iO = 0; iO < numOfObj; ++iO) {
             idealObjectives[iO] = Double.NEGATIVE_INFINITY;
         }
-        ncc = new NCConstruct(problem.getData());
     }
 
     public int[] execute() {
@@ -100,13 +100,13 @@ public class PSO {
         Particle p;
         for(int i = 0; i < swarmSize; i++) {
             // step 1 - randomize particle location using k-means
-            int clusterNum = generator.nextInt(conf.maxK-5) + 5;
+            int clusterNum = generator.nextInt(conf.maxK-1) + 2;
             // k-means centroids are initialized and point are assigned to a particular centroid
             KMeans kMeans = new KMeans(problem.getData(),problem.getN(),problem.getD(),clusterNum);
             // perform one iteration of k-mean
             //kMeans.oneIter();
             // perform complete k-means clustering
-            //kMeans.clustering(100);
+            kMeans.clustering(50);
             Solution solution = new Solution(kMeans.getLabels(), clusterNum);
 
             // step 2 -randomize velocity in the defined range

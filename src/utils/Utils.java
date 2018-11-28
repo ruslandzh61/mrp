@@ -5,6 +5,7 @@ import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import weka.core.EuclideanDistance;
+import weka.core.Instances;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -272,20 +273,19 @@ public class Utils {
                     "Impossible to evaluate Davies-Bouldin index over a single cluster");
         } else {
             // counting distances within
-            HashMap<Integer, Double> withinClusterDistance = new HashMap<>();
+            HashMap<Integer, Double> clustersDiameter = new HashMap<>();
 
             for (int clusterID: labelToClusterPoints.keySet()) {
                 HashSet<Integer> cluster = labelToClusterPoints.get(clusterID);
-                withinClusterDistance.put(clusterID, 0.0);
+                clustersDiameter.put(clusterID, 0.0);
                 for (int p: cluster) {
                     double[] punto = data[p];
-                    withinClusterDistance.put(clusterID,
-                            withinClusterDistance.get(clusterID)+Utils.dist(punto, clusters.get(clusterID)));
+                    clustersDiameter.put(clusterID,
+                            clustersDiameter.get(clusterID)+Utils.dist(punto, clusters.get(clusterID)));
                 }
-                withinClusterDistance.put(clusterID,
-                        withinClusterDistance.get(clusterID)/cluster.size());
+                clustersDiameter.put(clusterID,
+                        clustersDiameter.get(clusterID)/cluster.size());
             }
-
 
             double result = 0.0;
             double max = Double.NEGATIVE_INFINITY;
@@ -298,7 +298,7 @@ public class Utils {
                         for (int j = 0; j < numberOfClusters; j++)
                             //if the cluster is null
                             if (i != j && clusters.get(j) != null) {
-                                double val = (withinClusterDistance.get(i) + withinClusterDistance.get(j))
+                                double val = (clustersDiameter.get(i) + clustersDiameter.get(j))
                                         / Utils.dist(clusters.get(i), clusters.get(j));
                                 if (val > max)
                                     max = val;
@@ -316,11 +316,19 @@ public class Utils {
         return david;
     }
 
+    public static HashMap<Integer, double[]> centroidsFromWekaInstance(Instances instances) {
+        HashMap<Integer, double[]> result = new HashMap<>();
+        for (int i = 0; i < instances.numInstances(); ++i) {
+            result.put(i,instances.get(i).toDoubleArray());
+        }
+        return result;
+    }
+
     public static void main(String[] args) throws Exception {
         //replaceInFile("data/winequality-red.csv", ";",",");
         //replaceInFile("data/output.csv", " ","");
-        //Utils.nominalFormToNumber("data/ld.csv", ',', -1);
-        //Utils.nominalForm("data/p-winequality-red.csv");
+        //Utils.nominalFormToNumber("data/output.csv", ',', -1);
+        //Utils.nominalForm("data/dermatology.csv");
 
         //test centroids
         /*double[][] data = {{1,1},{5,5},{10,10},{11,11}};
