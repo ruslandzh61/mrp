@@ -259,10 +259,10 @@ public class Utils {
     public static double dbIndexScore(HashMap<Integer, double[]> clusters, int[] labels, double[][] data) {
         int numberOfClusters = clusters.size();
         double david = 0.0;
-        HashMap<Integer, HashSet<Integer>> labelToClusterPoints = new HashMap<>();
+        HashMap<Integer, List<Integer>> labelToClusterPoints = new HashMap<>();
         Set<Integer> distLabels = Utils.distinctItems(labels);
         for (int label: distLabels) {
-            labelToClusterPoints.put(label, new HashSet<>());
+            labelToClusterPoints.put(label, new ArrayList<>());
         }
         for (int i = 0; i < labels.length; ++i) {
             labelToClusterPoints.get(labels[i]).add(i);
@@ -271,50 +271,65 @@ public class Utils {
         if (numberOfClusters == 1) {
             throw new RuntimeException(
                     "Impossible to evaluate Davies-Bouldin index over a single cluster");
-        } else {
-            // counting distances within
-            HashMap<Integer, Double> clustersDiameter = new HashMap<>();
+        }
+        // counting distances within
+        HashMap<Integer, Double> clustersDiameter = new HashMap<>();
 
-            for (int clusterID: labelToClusterPoints.keySet()) {
-                HashSet<Integer> cluster = labelToClusterPoints.get(clusterID);
-                clustersDiameter.put(clusterID, 0.0);
-                for (int p: cluster) {
-                    double[] punto = data[p];
-                    clustersDiameter.put(clusterID,
-                            clustersDiameter.get(clusterID)+Utils.dist(punto, clusters.get(clusterID)));
-                }
+        for (int clusterID: labelToClusterPoints.keySet()) {
+            List<Integer> cluster = labelToClusterPoints.get(clusterID);
+            clustersDiameter.put(clusterID, 0.0);
+            for (int p: cluster) {
+                double[] punto = data[p];
                 clustersDiameter.put(clusterID,
-                        clustersDiameter.get(clusterID)/cluster.size());
+                        clustersDiameter.get(clusterID)+Utils.dist(punto, clusters.get(clusterID)));
             }
+            clustersDiameter.put(clusterID,
+                    clustersDiameter.get(clusterID)/cluster.size());
+        }
 
-            double result = 0.0;
-            double max = Double.NEGATIVE_INFINITY;
+        double result = 0.0;
 
-            try {
-                for (int i: distLabels) {
+        for (int i: distLabels) {
+            //if the cluster is null
+            if (clusters.get(i) != null) {
+                double max = Double.NEGATIVE_INFINITY;
+                for (int j = 0; j < numberOfClusters; j++) {
                     //if the cluster is null
-                    if (clusters.get(i) != null) {
-
-                        for (int j = 0; j < numberOfClusters; j++)
-                            //if the cluster is null
-                            if (i != j && clusters.get(j) != null) {
-                                double val = (clustersDiameter.get(i) + clustersDiameter.get(j))
-                                        / Utils.dist(clusters.get(i), clusters.get(j));
-                                if (val > max)
-                                    max = val;
-                            }
+                    if (i != j && clusters.get(j) != null) {
+                        double val = (clustersDiameter.get(i) + clustersDiameter.get(j))
+                                / Utils.dist(clusters.get(i), clusters.get(j));
+                        if (val > max)
+                            max = val;
                     }
+                }
+                if (max != Double.NEGATIVE_INFINITY) {
                     result = result + max;
                 }
-            } catch (Exception e) {
-                System.out.println("Excepcion al calcular DAVID BOULDIN");
-                e.printStackTrace();
             }
-            david = result / numberOfClusters;
         }
+        david = result / numberOfClusters;
 
         return david;
     }
+
+    /*public static void measureFromFile(String filePath, char sep, double[][] data,) throws IOException {
+        List<String[]> dataStr = Utils.readDataFromCustomSeperator(filePath, sep);
+        String[] labelsStr = dataStr.get(0);
+        int[] labelsTrue = new int[labelsStr.length];
+        for (int i = 0; i < labelsTrue.length; ++i) {
+            labelsTrue[i] = Integer.parseInt(labelsStr[i]);
+        }
+        int[] labelsPred;
+        double meanDB = 0.0;
+        for (int i = 1; i < dataStr.size(); ++i) {
+            labelsStr = dataStr.get(i);
+            labelsTrue = new int[labelsStr.length];
+            for (int iA = 0; iA < labelsTrue.length; ++iA) {
+                labelsTrue[iA] = Integer.parseInt(labelsStr[iA]);
+            }
+            meanDB += Utils.dbIndexScore()
+        }
+    }*/
 
     public static HashMap<Integer, double[]> centroidsFromWekaInstance(Instances instances) {
         HashMap<Integer, double[]> result = new HashMap<>();

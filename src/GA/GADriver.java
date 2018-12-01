@@ -31,7 +31,7 @@ public class GADriver {
         Remove filter;
 
         AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
-        double meanMyDBIndex = 0.0;
+        double meanMyDBWithInnerC = 0.0;
         double meanMyDBWithMyCentroids = 0.0;
         double meanInnerDBIndex = 0.0;
         double meanARI = 0.0;
@@ -88,12 +88,7 @@ public class GADriver {
             temp = Arrays.toString(labelsPred);
             output.append(temp.substring(1, temp.length() - 1)).append(System.getProperty("line.separator"));
 
-            // extract labels
-        /*for (int i = 0; i < data.size(); ++i) {
-            labelsPred[i] = cl.clusterInstance(dataClusterer.get(i));
-        }*/
 
-            /*
             // retrieve data in two-dim array format
             int[] excludedColumns;
             if (removeFirst) {
@@ -107,30 +102,29 @@ public class GADriver {
 
             // step 4 - measure
             double ARI = adjustedRandIndex.measure(labelsTrue, labelsPred);
-            double myDBIndex = Utils.dbIndexScore(centroids,labelsPred,dataArr);
+            double myDBWithInnerCentroids = Utils.dbIndexScore(centroids,labelsPred,dataArr);
             double myDBWithMyCentroids = Utils.dbIndexScore(myCentroids,labelsPred,dataArr);
             double innerDBIndex = cl.daviesBouldinScore();
 
             meanARI += ARI;
-            meanMyDBIndex += myDBIndex;
+            meanMyDBWithInnerC += myDBWithInnerCentroids;
             meanMyDBWithMyCentroids += myDBWithMyCentroids;
             meanInnerDBIndex += innerDBIndex;
 
             System.out.println("run " + seed + ": " + Arrays.toString(labelsPred));
-            System.out.println("mean ARI score:               " + ARI);
-            //System.out.println("my DB Index score:            " + myDBIndex);
-            System.out.println("my DB score with my centroid: " + myDBWithMyCentroids);
-            //System.out.println("inner DB Index score:         " + innerDBIndex);
-            */
+            System.out.println("mean ARI score:                   " + ARI);
+            System.out.println("my DB Index with inner centroids: " + myDBWithInnerCentroids);
+            System.out.println("my DB score with my centroid:     " + myDBWithMyCentroids);
+            System.out.println("inner DB Index score:             " + innerDBIndex);
         }
 
 
         // step 4 - measure comparing to true labels
         //System.out.println("DB Index score: " + cl.calcularDavidBouldin().getResultado());
-        //System.out.println("mean ARI score:               " + meanARI/runs);
-        //System.out.println("my DB Index score:            " + meanMyDBIndex/runs);
-        //System.out.println("my DB score with my centroid: " + meanMyDBWithMyCentroids/runs);
-        //System.out.println("inner DB Index score:         " + meanInnerDBIndex/runs);
+        System.out.println("mean ARI score:                   " + meanARI/runs);
+        System.out.println("my DB score with inner centroids: " + meanMyDBWithInnerC/runs);
+        System.out.println("my DB score with my centroid:     " + meanMyDBWithMyCentroids/runs);
+        System.out.println("inner DB Index score:             " + meanInnerDBIndex/runs);
 
         //System.out.println(Arrays.toString(labelsTrue));
         //System.out.println(Arrays.toString(cl.getLabels()));
@@ -140,6 +134,6 @@ public class GADriver {
 
     public static void main(String[] args) throws Exception {
         // weka doesn't work with other separators other than ','
-        GADriver gaDriver = new GADriver(30, "data/p-dermatology.csv","data/dermatology.csv", false, ',');
+        GADriver gaDriver = new GADriver(30, "data/p-glass.csv","data/glass.csv", false, ',');
     }
 }

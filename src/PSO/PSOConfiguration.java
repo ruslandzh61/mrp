@@ -13,4 +13,5 @@ public class PSOConfiguration {
     public int maxK = 10;
     public int pMax = 150;
     public boolean pickLeaderRandomly = false;
+    public boolean miniMax = true;
 }

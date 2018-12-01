@@ -106,7 +106,7 @@ public class PSO {
             // perform one iteration of k-mean
             //kMeans.oneIter();
             // perform complete k-means clustering
-            kMeans.clustering(50);
+            //kMeans.clustering(50);
             Solution solution = new Solution(kMeans.getLabels(), clusterNum);
 
             // step 2 -randomize velocity in the defined range
@@ -139,16 +139,21 @@ public class PSO {
         if (paretoOptimal == null) {
             // if paretoOptimal has not been initialized yet
             paretoOptimal = new HashSet<>();
-            Set<Integer> idxPareto = pareto.extractParetoNondominated(mapIdxToObjectives);
-            for (int idx: idxPareto) {
-                // number of solutions in pareto-optimal set cannot be more than P_MAX
-                if (paretoOptimal.size() >= conf.pMax) {
-                    System.out.println("exceeded maximum allowed size of pareto-optimal set");
-                    break;
+            if (conf.miniMax) {
+                calculateMaxiMin();
+            } else {
+                //straightforward determination of pareto optimal
+                Set<Integer> idxPareto = pareto.extractParetoNondominated(mapIdxToObjectives);
+                for (int idx : idxPareto) {
+                    // number of solutions in pareto-optimal set cannot be more than P_MAX
+                    if (paretoOptimal.size() >= conf.pMax) {
+                        System.out.println("exceeded maximum allowed size of pareto-optimal set");
+                        break;
+                    }
+                    // for optimization purposes copy of solution is not created and original one is inserted instead,
+                    // so that same solution object won't be included again in pareto-optimal set
+                    paretoOptimal.add(swarm.get(idx).getSolution());
                 }
-                // for optimization purposes copy of solution is not created and original one is inserted instead,
-                // so that same solution object won't be included again in pareto-optimal set
-                paretoOptimal.add(swarm.get(idx).getSolution());
             }
             numOfIterWithoutImprov++;
         } else {
@@ -222,6 +227,32 @@ public class PSO {
             System.out.print(obj + " ");
         }
         System.out.println();
+    }
+
+    private void calculateMaxiMin() {
+        for (int i = 0; i < swarm.size(); ++i) {
+            double max = Double.NEGATIVE_INFINITY;
+            double[] objI = swarm.get(i).getSolution().getObjectives();
+            double[] objJ;
+            for (int j = 0; j < swarm.size(); ++j) {
+                if (i == j) continue;
+                objJ = swarm.get(j).getSolution().getObjectives();
+                double min = Double.POSITIVE_INFINITY;
+                for (int m = 0; m < problem.getD(); ++m) {
+                    double curDiff = objI[m] - objJ[m];
+                    if (curDiff < min) {
+                        min = curDiff;
+                    }
+                }
+                if (min > max) {
+                    max = min;
+                }
+            }
+            // max >= 0 then solution i is weakly dominated
+            if (max < 0) {
+                paretoOptimal.add(swarm.get(i).getSolution());
+            }
+        }
     }
 
     /** Select global best solution according to certain criteria - proximity to utopia point */
