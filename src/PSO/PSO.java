@@ -50,7 +50,7 @@ public class PSO {
         setSeed(seed_default);
 
         this.velocityCalculator = new VelocityCalculator(conf.c1, conf.c2);
-        velocityCalculator.setSeed(this.seed);
+        velocityCalculator.setSeed(generator.nextInt());
         this.swarmSize = 2 * conf.maxK;
         this.psoList = new ArrayList<>();
 
@@ -81,6 +81,7 @@ public class PSO {
         }
         // update nonDomPSOList
         nonDomPSOList = determineParetoSet(psoList);
+        updateUtopiaPoint();
         Particle leader = pickALeader(false);
         System.out.println("\nSolution found at iteration " + (curIterationNum - 1) + ", the solutions is:");
         System.out.print("     Best ");
@@ -126,23 +127,23 @@ public class PSO {
                 vel[dimIdx] = 0.0;
             }
             p = new Particle(solution, vel);
-            p.setSeed(this.seed);
+            p.setSeed(generator.nextInt());
             psoList.add(p);
         }
     }
 
     private int[] kMeansAssignments(int clusterNum) {
         KMeans kMeans = new KMeans(problem.getData(), problem.getN(), problem.getD(), clusterNum, this.seed);
-        kMeans.setSeed(this.seed);
+        kMeans.setSeed(generator.nextInt());
         // perform one iteration of k-mean
-        kMeans.oneIter();
+        //kMeans.oneIter();
         // perform complete k-means clustering
         kMeans.clustering(50);
         return kMeans.getLabels();
     }
     private int[] kMeansAssignments(Instances instances, int k) throws Exception {
         SimpleKMeans kMeans = new SimpleKMeans();
-        kMeans.setSeed(seed);
+        kMeans.setSeed(generator.nextInt());
         kMeans.setPreserveInstancesOrder(true);
         kMeans.setMaxIterations(50);
         kMeans.setNumClusters(k);
@@ -185,7 +186,6 @@ public class PSO {
         // according maxiMinPSO algorithm global best value should be chosen for each dimension separately.
         // However, cluster numbers from different solution vectors do not relate to each other.
         // Therefore, as it's mentioned in MCPSO a single leader is chosen randomly from pareto set
-        Particle paretoLeaderSolution = pickALeader(true);
 
         // step 5 - Update velocity and particles
         // clone psoList to nextPopList
@@ -197,7 +197,9 @@ public class PSO {
         // update cloned particles
         double w = (conf.maxW - conf.minW) * (conf.maxIteration - curIterationNum) / conf.maxIteration + conf.minW;
         velocityCalculator.setW(w);
+        updateUtopiaPoint();
         for(int i = 0; i< nextPopList.size(); i++) {
+            Particle paretoLeaderSolution = pickALeader(true);
             double[] newVel = velocityCalculator.calculate(nextPopList.get(i));
             nextPopList.get(i).setVelocity(newVel);
             Utils.checkClusterLabels(paretoLeaderSolution.getSolution().getSolution(), paretoLeaderSolution.getSolution().getK(false));
@@ -302,15 +304,19 @@ public class PSO {
 
     private Particle pickALeader(boolean pickLeaderRandomly) {
         // update best found solution so far
-        updateUtopiaPoint();
-
         Particle leader = null;
         if (pickLeaderRandomly) {
             int iLeader;
-            if (conf.numTopParticlesToPickForLeader == -1 || conf.numTopParticlesToPickForLeader > nonDomPSOList.size()) {
+            if (conf.numTopParticlesToPickForLeader <= 0.0 || conf.numTopParticlesToPickForLeader > 1.0
+                    || conf.numTopParticlesToPickForLeader > nonDomPSOList.size()) {
                 iLeader=generator.nextInt(nonDomPSOList.size());
             } else {
-                iLeader=generator.nextInt(conf.numTopParticlesToPickForLeader);
+                int tmp = (int)(conf.numTopParticlesToPickForLeader * nonDomPSOList.size());
+                if (tmp == 0) {
+                    iLeader = 0;
+                } else {
+                    iLeader = generator.nextInt(tmp);
+                }
             }
             leader = nonDomPSOList.get(iLeader);
         } else {
@@ -377,7 +383,7 @@ public class PSO {
     }
 
     public static void main(String[] args) {
-        double[] obj1 = new double[]{0,2};
+        /*double[] obj1 = new double[]{0,2};
         double[] obj2 = new double[]{0.5,0.5};
         double[] obj3 = new double[]{2,0};
         Solution s1 = dummySolution();
@@ -395,6 +401,6 @@ public class PSO {
         list.add(p3);
         for (Particle particle: determineParetoSet(list)) {
             System.out.println(particle.getSolution().getFitness());
-        }
+        }*/
     }
 }

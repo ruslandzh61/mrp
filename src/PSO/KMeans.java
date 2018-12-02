@@ -24,7 +24,7 @@ public class KMeans {
     Random rnd;
 
     KMeans(double[][] aData, int aN, int aD, int aK, int aSeed) {
-        data = Utils.deepCopy(aData);
+        data = aData;
         N = aN;
         D = aD;
         label = new int[N];
@@ -34,7 +34,7 @@ public class KMeans {
             this.k = aK;
         }
 
-        setSeed(seed);
+        setSeed(aSeed);
 
         // choose existing data points as initial data points
         centroids = new double[k][D];
@@ -47,7 +47,7 @@ public class KMeans {
             }
         }
         // assign data points to closest centroids
-        for (int i=0; i<N; i++){
+        for (int i=0; i < N; i++){
             label[i] = closest(data[i]);
         }
         Utils.checkClusterLabels(getLabels(), k);
@@ -216,8 +216,8 @@ public class KMeans {
         return seed;
     }
 
-    public void setSeed(int seed) {
-        rnd = new Random(seed);
-        this.seed = seed;
+    public void setSeed(int aSeed) {
+        rnd = new Random(aSeed);
+        this.seed = aSeed;
     }
 }

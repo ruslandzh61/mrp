@@ -12,6 +12,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils;
 import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.Remove;
 
 /**
@@ -57,7 +58,8 @@ public class PSODriver {
     /**
      * main method to run PSO-based clustering
      * */
-    public void run(int runs, String path, String filePathForWeka, PSOConfiguration configuration, char sep, boolean removeFirst) throws Exception {
+    public void run(int runs, String path, String filePathForWeka, PSOConfiguration configuration,
+                    char sep, boolean removeFirst) throws Exception {
         double[][] data;
         int[] labelsTrue, labelsPred;
         double meanARI = 0;
@@ -84,7 +86,18 @@ public class PSODriver {
         }
         data = Utils.extractAttributes(dataStr, excludedColumns);
 
-        Instances instances = getData(filePathForWeka, removeFirst);
+        Instances instances = getData(filePathForWeka, removeFirst, true);
+        /*for (int seed = 1; seed <= runs; ++seed) {
+            SimpleKMeans kMeans = new SimpleKMeans();
+            kMeans.setPreserveInstancesOrder(true);
+            kMeans.setSeed(seed);
+            kMeans.setNumClusters(7);
+            kMeans.buildClusterer(instances);
+            HashMap<Integer, double[]> centroids = Utils.centroids(data, kMeans.getAssignments());
+            System.out.println("DB score of kMeans:  " + Utils.dbIndexScore(centroids, kMeans.getAssignments(), data));
+            System.out.println("ARI score of kMeans: " + adjustedRandIndex.measure(labelsTrue, kMeans.getAssignments()));
+        }*/
+
 
         // step 2 - pick objectives
         NCConstruct ncConstruct = new NCConstruct(data);
@@ -92,12 +105,13 @@ public class PSODriver {
         Evaluator evaluator = new Evaluator();
         Problem problem = new Problem(data, evaluator);
 
-        for (int seed = 1; seed <= runs+1; ++seed) {
+        Random rnd = new Random(1);
+        for (int seed = 1; seed <= runs; ++seed) {
             // step 3 - run PSO algorithm
             //maxK = (int)Math.sqrt(data.length);
             //configuration.maxK = maxK;
             PSO pso = new PSO(problem, ncConstruct, evaluation, configuration, instances);
-            pso.setSeed(seed);
+            pso.setSeed(rnd.nextInt());
             // constructed clusters
             labelsPred = Utils.adjustLabels(pso.execute());
 
@@ -146,17 +160,9 @@ public class PSODriver {
         System.out.println("mean DB Index score:     " + meanDB/runs);
         System.out.println("mean number of clusters: " + meanNumClusters/runs);
         System.out.println("--------------------------");
-
-        SimpleKMeans kMeans = new SimpleKMeans();
-        kMeans.setPreserveInstancesOrder(true);
-        kMeans.setNumClusters(7);
-        kMeans.buildClusterer(instances);
-        HashMap<Integer, double[]> centroids = Utils.centroids(data, kMeans.getAssignments());
-        System.out.println("DB score of kMeans:  " + Utils.dbIndexScore(centroids, kMeans.getAssignments(), data));
-        System.out.println("ARI score of kMeans: " + adjustedRandIndex.measure(labelsTrue, kMeans.getAssignments()));
     }
 
-    private Instances getData(String filePath, boolean removeFirst) throws Exception {
+    private Instances getData(String filePath, boolean removeFirst, boolean normalize) throws Exception {
         ClusterEvaluation eval;
         Instances data;
         MyGenClustPlusPlus cl;
@@ -172,10 +178,12 @@ public class PSODriver {
             data.setClassIndex(data.numAttributes() - 1);
         }
 
-        /*Normalize normFilter = new Normalize();
-        normFilter.setInputFormat(data);
-        data = Filter.useFilter(data,normFilter);
-        data.setClassIndex(data.numAttributes() - 1);*/
+        if (normalize) {
+            Normalize normFilter = new Normalize();
+            normFilter.setInputFormat(data);
+            data = Filter.useFilter(data, normFilter);
+            data.setClassIndex(data.numAttributes() - 1);
+        }
 
         filter = new Remove();
         //filter.setAttributeIndicesArray(new int[]{0, data.numAttributes()-1});

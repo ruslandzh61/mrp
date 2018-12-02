@@ -31,6 +31,7 @@ public class Particle implements Comparable<Particle> {
         this.velocity = aVelocity;
         this.solution = aSolution;
         this.dummySol = new int[solution.getSolution().length];
+        this.setpBest(this.solution);
         setSeed(default_seed);
     }
 

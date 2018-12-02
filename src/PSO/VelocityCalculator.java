@@ -39,8 +39,8 @@ public class VelocityCalculator {
         return seed;
     }
 
-    public void setSeed(int seed) {
-        generator = new Random(seed);
-        this.seed = seed;
+    public void setSeed(int aSeed) {
+        generator = new Random(aSeed);
+        this.seed = aSeed;
     }
 }
