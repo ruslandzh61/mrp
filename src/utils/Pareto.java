@@ -95,7 +95,7 @@ public class Pareto {
     }
 
     public static void main(String[] args) {
-        double[][] values = new double[6][];
+        /*double[][] values = new double[6][];
         values[0] = new double[]{0.2, 0.17590848575069545};
         values[1] = new double[]{0.2, 0.22910852642658405};
         values[2] = new double[]{0.2, 0.19483310610576984};
@@ -107,6 +107,6 @@ public class Pareto {
             map.put(i, values[i]);
         }
         Set<Integer> set = new Pareto().extractParetoNondominated(map);
-        System.out.println(set);
+        System.out.println(set);*/
     }
 }

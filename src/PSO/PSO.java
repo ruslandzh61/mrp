@@ -3,6 +3,9 @@ package PSO;
 import utils.NCConstruct;
 import utils.Pareto;
 import utils.Utils;
+import weka.clusterers.SimpleKMeans;
+import weka.core.Instance;
+import weka.core.Instances;
 
 import java.util.*;
 
@@ -15,70 +18,79 @@ public class PSO {
     private int swarmSize;
     private int curIterationNum, numOfIterWithoutImprov;
 
-    private List<Particle> swarm;
+    private List<Particle> psoList;
     /* record of objectives of personal best solution are stored
         for the purpose of not calculating them every time pBest is updated */
-    private double[][] pBestObjective;
+    private double[] pBestObjective;
     private Problem problem;
     /* solutions will be evaluated on objectives stored in evaluation array */
     private Evaluator.Evaluation[] evaluation;
     //private Solution gBestSolution;
-    private Set<Solution> paretoOptimal;
+    private List<Particle> nonDomPSOList;
     /* NCConstruct is used for evaluating connectivy objective function */
     private NCConstruct ncc;
-    private Pareto pareto = new Pareto();
+    //private Pareto pareto = new Pareto();
     /* idealObjectives represent utopia point */
     private double[] idealObjectives;
-    private Random generator = new Random();
+    private Random generator;
     private VelocityCalculator velocityCalculator;
+    private int prevParetoSize = 0;
+    private int seed;
+    private static int seed_default = 10;
+    private Instances instances;
 
-    public PSO(Problem aProblem, NCConstruct aNCconstruct, Evaluator.Evaluation[] aEvaluation, PSOConfiguration configuration) {
+    public PSO(Problem aProblem, NCConstruct aNCconstruct, Evaluator.Evaluation[] aEvaluation,
+               PSOConfiguration configuration, Instances aInstances) {
         this.problem = aProblem;
         this.ncc = aNCconstruct;
         this.evaluation = aEvaluation;
         this.conf = configuration;
+        this.instances = aInstances;
+
+        setSeed(seed_default);
 
         this.velocityCalculator = new VelocityCalculator(conf.c1, conf.c2);
+        velocityCalculator.setSeed(this.seed);
         this.swarmSize = 2 * conf.maxK;
-        this.swarm = new ArrayList<>();
+        this.psoList = new ArrayList<>();
 
         int numOfObj = evaluation.length;
-        pBestObjective = new double[swarmSize][numOfObj];
+        pBestObjective = new double[swarmSize];
         for (int iP = 0; iP < swarmSize; ++iP) {
-            for (int iO = 0; iO < numOfObj; ++iO) {
-                pBestObjective[iP][iO] = Double.NEGATIVE_INFINITY;
-            }
+            pBestObjective[iP] = Double.POSITIVE_INFINITY;
         }
 
         idealObjectives = new double[evaluation.length];
         for (int iO = 0; iO < numOfObj; ++iO) {
-            idealObjectives[iO] = Double.NEGATIVE_INFINITY;
+            idealObjectives[iO] = Double.POSITIVE_INFINITY;
         }
     }
 
-    public int[] execute() {
+    public int[] execute() throws Exception {
         initializeSwarm();
 
         curIterationNum = 0;
         numOfIterWithoutImprov = 0;
 
         while(curIterationNum < conf.maxIteration && numOfIterWithoutImprov < conf.maxIterWithoutImprovement) { // && err > ProblemSet.ERR_TOLERANCE) {
-            System.out.println("ITERATION " + curIterationNum + ": ");
+            //System.out.println("ITERATION " + curIterationNum + ": ");
             update();
             curIterationNum++;
-            System.out.println("size of pareto-optimal set: " + paretoOptimal.size());
-            System.out.println("without improv: " + numOfIterWithoutImprov);
+            //System.out.println("size of pareto-optimal set: " + nonDomPSOList.size());
+            //System.out.println("without improv: " + numOfIterWithoutImprov);
         }
-        Solution leader = pickALeader();
+        // update nonDomPSOList
+        nonDomPSOList = determineParetoSet(psoList);
+        Particle leader = pickALeader(false);
         System.out.println("\nSolution found at iteration " + (curIterationNum - 1) + ", the solutions is:");
         System.out.print("     Best ");
         for (int dimIdx = 0; dimIdx < problem.getN(); ++dimIdx) {
-            System.out.print(leader.getSolutionAt(dimIdx) + " ");
+            System.out.print(leader.getSolution().getSolutionAt(dimIdx) + " ");
         }
         System.out.println();
 
         System.out.print("     objectives: ");
-        double[] objs = problem.evaluate(leader, evaluation, ncc);
+        double[] objs = problem.evaluate(leader.getSolution(), evaluation, ncc);
         for (double obj: objs) {
             System.out.print(obj + " ");
         }
@@ -90,24 +102,21 @@ public class PSO {
         }
         System.out.println();
         System.out.println("pareto-optimal set:");
-        for (Solution s: paretoOptimal) {
-            System.out.println(Arrays.toString(s.getObjectives()));
+        for (Particle s: nonDomPSOList) {
+            System.out.println(Arrays.toString(s.getSolution().getObjectives()));
         }
-        return leader.getSolution();
+        return leader.getSolution().getSolution();
     }
 
-    public void initializeSwarm() {
+    public void initializeSwarm() throws Exception {
         Particle p;
         for(int i = 0; i < swarmSize; i++) {
             // step 1 - randomize particle location using k-means
             int clusterNum = generator.nextInt(conf.maxK-1) + 2;
             // k-means centroids are initialized and point are assigned to a particular centroid
-            KMeans kMeans = new KMeans(problem.getData(),problem.getN(),problem.getD(),clusterNum);
-            // perform one iteration of k-mean
-            //kMeans.oneIter();
-            // perform complete k-means clustering
-            //kMeans.clustering(50);
-            Solution solution = new Solution(kMeans.getLabels(), clusterNum);
+
+
+            Solution solution = new Solution(kMeansAssignments(clusterNum), clusterNum);
 
             // step 2 -randomize velocity in the defined range
             double[] vel = new double[problem.getN()];
@@ -117,169 +126,198 @@ public class PSO {
                 vel[dimIdx] = 0.0;
             }
             p = new Particle(solution, vel);
-            swarm.add(p);
+            p.setSeed(this.seed);
+            psoList.add(p);
         }
+    }
+
+    private int[] kMeansAssignments(int clusterNum) {
+        KMeans kMeans = new KMeans(problem.getData(), problem.getN(), problem.getD(), clusterNum, this.seed);
+        kMeans.setSeed(this.seed);
+        // perform one iteration of k-mean
+        kMeans.oneIter();
+        // perform complete k-means clustering
+        kMeans.clustering(50);
+        return kMeans.getLabels();
+    }
+    private int[] kMeansAssignments(Instances instances, int k) throws Exception {
+        SimpleKMeans kMeans = new SimpleKMeans();
+        kMeans.setSeed(seed);
+        kMeans.setPreserveInstancesOrder(true);
+        kMeans.setMaxIterations(50);
+        kMeans.setNumClusters(k);
+        kMeans.buildClusterer(instances);
+        return kMeans.getAssignments();
     }
 
     private void update() {
         // step 1 - Evaluate objective functions for each particle
         for(int iP = 0; iP < swarmSize; iP++) {
-            Particle p = swarm.get(iP);
-            p.getSolution().setObjectives(problem.evaluate(swarm.get(iP).getSolution(), evaluation, ncc));
+            Particle p = psoList.get(iP);
+            p.getSolution().setObjectives(problem.evaluate(psoList.get(iP).getSolution(), evaluation, ncc));
         }
 
-        // step 2 - include non-dominated particles in pareto-optimal set
-        // map particle position in swarm to particle objectives
-        Map<Integer, double[]> mapIdxToObjectives = new HashMap<>();
-
-        for (int iP = 0; iP < swarmSize; ++iP) {
-            mapIdxToObjectives.put(iP, swarm.get(iP).getSolution().getObjectives().clone());
-        }
-
-        if (paretoOptimal == null) {
-            // if paretoOptimal has not been initialized yet
-            paretoOptimal = new HashSet<>();
-            if (conf.miniMax) {
-                calculateMaxiMin();
-            } else {
-                //straightforward determination of pareto optimal
-                Set<Integer> idxPareto = pareto.extractParetoNondominated(mapIdxToObjectives);
-                for (int idx : idxPareto) {
-                    // number of solutions in pareto-optimal set cannot be more than P_MAX
-                    if (paretoOptimal.size() >= conf.pMax) {
-                        System.out.println("exceeded maximum allowed size of pareto-optimal set");
-                        break;
-                    }
-                    // for optimization purposes copy of solution is not created and original one is inserted instead,
-                    // so that same solution object won't be included again in pareto-optimal set
-                    paretoOptimal.add(swarm.get(idx).getSolution());
-                }
-            }
-            numOfIterWithoutImprov++;
-        } else {
-            // otherwise
-            // consider each particle to be included into pareto-optimal set
-            int prevSize = paretoOptimal.size();
-            for (Particle p: swarm) {
-                if (paretoOptimal.size() > conf.pMax) {
-                    System.out.println("exceeded maximum allowed size of pareto-optimal set");
+        // step 2 - determine pareto-optimal set
+        nonDomPSOList = determineParetoSet(psoList);
+        /* in case there are no strongly non-dominated particles */
+        if (nonDomPSOList.size() == 0) {
+            for (int i = 0; i < psoList.size(); ++i) {
+                if (psoList.get(i).getSolution().getFitness() == 0) {
+                    nonDomPSOList.add(new Particle(psoList.get(i)));
                     break;
                 }
-                if (!dominatedByParetoSet(p.getSolution(), paretoOptimal)) {
-                    paretoOptimal.add(p.getSolution());
-                }
-            }
-
-            if (paretoOptimal.size() != prevSize) {
-                // changed
-                numOfIterWithoutImprov = 0;
-            } else {
-                //didn't change
-                numOfIterWithoutImprov++;
             }
         }
+        assert (nonDomPSOList != null && nonDomPSOList.size() > 0);
+        Collections.sort(nonDomPSOList);
 
-        /*System.out.println("pareto frontier");
-        for (int iPotentialL: paretoFrontier) {
-            int[] potLeaderSol = swarm.get(iPotentialL).getSolution().getSolution();
-            System.out.println(Arrays.toString(swarm.get(iPotentialL).getObjectives()) +
-                    ": " + Arrays.toString(potLeaderSol));
-        }*/
 
         // step 3 - Update Personal Best of each particle
-        for(int i = 0; i< swarmSize; i++) {
-            double[] curIterObjs = swarm.get(i).getSolution().getObjectives();
-            if(pareto.testDominance(curIterObjs, pBestObjective[i], false)) {
-                //System.out.println(Arrays.toString(curIterObjs) + " > " + Arrays.toString(pBestObjective[i]));
-                pBestObjective[i] = swarm.get(i).getSolution().getObjectives();
-                swarm.get(i).setpBest(swarm.get(i).getSolution());
-                //System.out.println("pbest updated at iteration: " + curIterationNum);
-            } else {
-                //System.out.println(Arrays.toString(curIterObjs) + " <= " + Arrays.toString(pBestObjective[i]));
+        for(int i = 0; i < swarmSize; i++) {
+            if(psoList.get(i).getSolution().getFitness() < pBestObjective[i]) {
+                pBestObjective[i] = psoList.get(i).getSolution().getFitness();
+                psoList.get(i).setpBest(psoList.get(i).getSolution());
             }
         }
 
         // step 4 - Select Leader from NonDomRepos
         // randomly or utopia point
-        Solution paretoLeaderSolution = getLeader();
+        // according maxiMinPSO algorithm global best value should be chosen for each dimension separately.
+        // However, cluster numbers from different solution vectors do not relate to each other.
+        // Therefore, as it's mentioned in MCPSO a single leader is chosen randomly from pareto set
+        Particle paretoLeaderSolution = pickALeader(true);
 
         // step 5 - Update velocity and particles
-        for(int i = 0; i< swarmSize; i++) {
-            double w = (conf.maxW - conf.minW) * (conf.maxIteration - curIterationNum) / conf.maxIteration + conf.minW;
-            velocityCalculator.setW(w);
-            double[] newVel = velocityCalculator.calculate(swarm.get(i));
-            swarm.get(i).setVelocity(newVel);
-            Utils.checkClusterLabels(paretoLeaderSolution.getSolution(), paretoLeaderSolution.getK(false));
-            // update and check for boundaries: k cannot be more than kMax
-            swarm.get(i).update(paretoLeaderSolution, conf.maxK);
+        // clone psoList to nextPopList
+        List<Particle> nextPopList = new ArrayList<Particle>(swarmSize * 2);
+        for (int i = 0; i < psoList.size(); ++i) {
+            nextPopList.add(new Particle(psoList.get(i)));
         }
 
+        // update cloned particles
+        double w = (conf.maxW - conf.minW) * (conf.maxIteration - curIterationNum) / conf.maxIteration + conf.minW;
+        velocityCalculator.setW(w);
+        for(int i = 0; i< nextPopList.size(); i++) {
+            double[] newVel = velocityCalculator.calculate(nextPopList.get(i));
+            nextPopList.get(i).setVelocity(newVel);
+            Utils.checkClusterLabels(paretoLeaderSolution.getSolution().getSolution(), paretoLeaderSolution.getSolution().getK(false));
+            // update and check for boundaries: k cannot be more than kMax
+            nextPopList.get(i).update(paretoLeaderSolution.getSolution(), conf.maxK);
+        }
+
+        // evaluate before determining pareto set
+        // step 1 - Evaluate objective functions for each particle
+        for(int iP = 0; iP < nextPopList.size(); iP++) {
+            Particle p = nextPopList.get(iP);
+            p.getSolution().setObjectives(problem.evaluate(nextPopList.get(iP).getSolution(), evaluation, ncc));
+        }
+
+        // copy main psoList particles to nextPopList
+        for (int i = 0; i < psoList.size(); ++i) {
+            nextPopList.add(new Particle(psoList.get(i)));
+        }
+
+        List<Particle> nonDomFromNextPSOList = determineParetoSet(nextPopList);
+
+        // copy non-dominated solutions to next generation
+        psoList = new ArrayList<Particle>();
+        for (int i = 0; i < nonDomFromNextPSOList.size(); ++i) {
+            if (i >= conf.pMax) {
+                break;
+            }
+            psoList.add(new Particle(nonDomFromNextPSOList.get(i)));
+        }
+
+        int roomToFill = swarmSize - psoList.size();
+        // first - remove non-dominated
+        nextPopList.removeIf(particle -> (particle.getSolution().getFitness() < 0));
+        // now randomly pick nextPopList
+        int i = 0;
+        while (i < roomToFill) {
+            int idxPick  = generator.nextInt(nextPopList.size());
+            if (nextPopList.get(idxPick) != null) {
+                psoList.add(nextPopList.get(idxPick));
+                i++;
+                nextPopList.remove(idxPick);
+                // nextPopList.set(idxPick, null);
+            }
+        }
+
+        // naive method to identify whether pareto set changed
+        if (this.nonDomPSOList.size() == prevParetoSize) {
+            numOfIterWithoutImprov++;
+        } else {
+            numOfIterWithoutImprov = 0;
+        }
+        prevParetoSize = this.nonDomPSOList.size();
+
         // step - print best in iteration curIterationNum
-        System.out.print("     Best: ");
+        /*System.out.print("     Best: ");
         for (int dimIdx = 0; dimIdx < problem.getN(); ++dimIdx) {
-            System.out.print(paretoLeaderSolution.getSolutionAt(dimIdx) + " ");
+            System.out.print(paretoLeaderSolution.getSolution().getSolutionAt(dimIdx) + " ");
         }
         System.out.println();
 
         System.out.print("     Value: ");
-        double[] objs = problem.evaluate(paretoLeaderSolution, evaluation, ncc);
+        double[] objs = problem.evaluate(paretoLeaderSolution.getSolution(), evaluation, ncc);
         for (double obj: objs) {
             System.out.print(obj + " ");
         }
-        System.out.println();
+        System.out.println("utopia: " + Arrays.toString(idealObjectives));
+        System.out.println();*/
     }
 
-    private void calculateMaxiMin() {
-        for (int i = 0; i < swarm.size(); ++i) {
-            double max = Double.NEGATIVE_INFINITY;
-            double[] objI = swarm.get(i).getSolution().getObjectives();
+    private static List<Particle> determineParetoSet(List<Particle> particleList) {
+        List<Particle> nonDomList = new ArrayList<Particle>();
+        for (int i = 0; i < particleList.size(); ++i) {
+            double maxiMin = Double.NEGATIVE_INFINITY;
+            double[] objI = particleList.get(i).getSolution().getObjectives();
             double[] objJ;
-            for (int j = 0; j < swarm.size(); ++j) {
+            for (int j = 0; j < particleList.size(); ++j) {
                 if (i == j) continue;
-                objJ = swarm.get(j).getSolution().getObjectives();
+                objJ = particleList.get(j).getSolution().getObjectives();
+                assert (objI.length==objJ.length);
+
                 double min = Double.POSITIVE_INFINITY;
-                for (int m = 0; m < problem.getD(); ++m) {
+                for (int m = 0; m < objI.length; ++m) {
                     double curDiff = objI[m] - objJ[m];
                     if (curDiff < min) {
                         min = curDiff;
                     }
                 }
-                if (min > max) {
-                    max = min;
+                if (min > maxiMin) {
+                    maxiMin = min;
                 }
             }
-            // max >= 0 then solution i is weakly dominated
-            if (max < 0) {
-                paretoOptimal.add(swarm.get(i).getSolution());
+            particleList.get(i).getSolution().setFitness(maxiMin);
+            // max > 0 then solution i is strongly dominated
+            if (maxiMin < 0) {
+                nonDomList.add(particleList.get(i));
             }
         }
+        return nonDomList;
     }
 
     /** Select global best solution according to certain criteria - proximity to utopia point */
-    private Solution getLeader() {
-        // optional: if a leader is selected randomly
+
+    private Particle pickALeader(boolean pickLeaderRandomly) {
+        // update best found solution so far
         updateUtopiaPoint();
 
-        // step 1 -  pick a leader in pareto set closest to utopia point
-        return pickALeader();
-    }
-
-    private Solution pickALeader() {
-        Solution leader = null;
-        if (conf.pickLeaderRandomly) {
-            int iLeader = generator.nextInt(paretoOptimal.size());
-            int i = 0;
-            for (Solution s: paretoOptimal) {
-                if (i == iLeader) {
-                    leader = s;
-                    break;
-                }
-                i++;
+        Particle leader = null;
+        if (pickLeaderRandomly) {
+            int iLeader;
+            if (conf.numTopParticlesToPickForLeader == -1 || conf.numTopParticlesToPickForLeader > nonDomPSOList.size()) {
+                iLeader=generator.nextInt(nonDomPSOList.size());
+            } else {
+                iLeader=generator.nextInt(conf.numTopParticlesToPickForLeader);
             }
+            leader = nonDomPSOList.get(iLeader);
         } else {
             double minDist = Double.POSITIVE_INFINITY;
-            for (Solution s: paretoOptimal) {
-                double[] cur = s.getObjectives();
+            assert (nonDomPSOList != null && nonDomPSOList.size() > 0);
+            for (Particle s: nonDomPSOList) {
+                double[] cur = s.getSolution().getObjectives();
                 double distToUtopia = Utils.dist(cur, idealObjectives);
                 if (distToUtopia < minDist) {
                     leader = s;
@@ -297,15 +335,24 @@ public class PSO {
         // update utopia point
         for (int i = 0; i < swarmSize; ++i) {
             for (int iO = 0; iO < evaluation.length; ++iO) {
-                double obj = swarm.get(i).getSolution().getObjective(iO);
-                if (obj > idealObjectives[iO]) {
+                double obj = psoList.get(i).getSolution().getObjective(iO);
+                if (obj < idealObjectives[iO]) {
                     idealObjectives[iO] = obj;
                 }
             }
         }
     }
 
-    private boolean dominatedByParetoSet(Solution solution, Set<Solution> paretoOptimal) {
+    public int getSeed() {
+        return seed;
+    }
+
+    public void setSeed(int seed) {
+        generator = new Random(seed);
+        this.seed = seed;
+    }
+
+    /*private boolean dominatedByParetoSet(Solution solution, Set<Solution> paretoOptimal) {
         List<Solution> dominatedBySolution = new ArrayList<>();
         for (Solution s: paretoOptimal) {
             if (pareto.testDominance(s.getObjectives(), solution.getObjectives(), true)) {
@@ -318,5 +365,36 @@ public class PSO {
         // if not dominated remove all solutions in pareto-optimal set that are dominated by 'solution'
         paretoOptimal.removeAll(dominatedBySolution);
         return false;
+    }*/
+
+    public static Solution dummySolution() {
+        Random rnd = new Random();
+        return new Solution(new int[]{rnd.nextInt(), rnd.nextInt()}, rnd.nextInt());
+    }
+    public static double[] dummyArr() {
+        Random rnd = new Random();
+        return new double[]{rnd.nextDouble(), rnd.nextDouble()};
+    }
+
+    public static void main(String[] args) {
+        double[] obj1 = new double[]{0,2};
+        double[] obj2 = new double[]{0.5,0.5};
+        double[] obj3 = new double[]{2,0};
+        Solution s1 = dummySolution();
+        s1.setObjectives(obj1);
+        Solution s2 = dummySolution();
+        s2.setObjectives(obj2);
+        Solution s3 = dummySolution();
+        s3.setObjectives(obj3);
+        Particle p1 = new Particle(s1,dummyArr());
+        Particle p2 = new Particle(s2,dummyArr());
+        Particle p3 = new Particle(s3,dummyArr());
+        List<Particle> list = new ArrayList<Particle>();
+        list.add(p1);
+        list.add(p2);
+        list.add(p3);
+        for (Particle particle: determineParetoSet(list)) {
+            System.out.println(particle.getSolution().getFitness());
+        }
     }
 }

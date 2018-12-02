@@ -1,10 +1,18 @@
 package PSO;
 
+import GA.MyGenClustPlusPlus;
 import utils.NCConstruct;
 import utils.Utils;
 import java.io.IOException;
 import java.util.*;
 import smile.validation.AdjustedRandIndex;
+import weka.clusterers.ClusterEvaluation;
+import weka.clusterers.SimpleKMeans;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.converters.ConverterUtils;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
 
 /**
  * Created by rusland on 27.10.18.
@@ -23,7 +31,7 @@ public class PSODriver {
      *  similar to the one used in (Inkaya, 2014) depicted on Fig. 3:
      *      'Adaptive neighbourhood construction algorithm based on density and connectivity'
      * */
-    public void runDummy() {
+    /*public void runDummy() {
         double[][] data;
         int[] labels;
         labels = new int[]{0,0,0,0,0,0,1,1,1,2};
@@ -44,16 +52,18 @@ public class PSODriver {
         int[] labelsPred = pso.execute();
 
         System.out.println(new AdjustedRandIndex().measure(labels, labelsPred));
-    }
+    }*/
 
     /**
      * main method to run PSO-based clustering
      * */
-    public void run(int runs, String path, PSOConfiguration configuration, char sep, boolean removeFirst) throws IOException {
-        int maxK;
+    public void run(int runs, String path, String filePathForWeka, PSOConfiguration configuration, char sep, boolean removeFirst) throws Exception {
         double[][] data;
-        int[] labelsTrue;
-        int skipLines = 0;
+        int[] labelsTrue, labelsPred;
+        double meanARI = 0;
+        double meanDB = 0;
+        double meanNumClusters = 0;
+        AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
 
         /* process data */
         // step 1 - read data from file
@@ -73,8 +83,8 @@ public class PSODriver {
             excludedColumns = new int[]{dataStr.get(0).length - 1};
         }
         data = Utils.extractAttributes(dataStr, excludedColumns);
-        // pick maxK 2-10% of total number of data point
-        maxK = (int)Math.sqrt(data.length);
+
+        Instances instances = getData(filePathForWeka, removeFirst);
 
         // step 2 - pick objectives
         NCConstruct ncConstruct = new NCConstruct(data);
@@ -82,36 +92,98 @@ public class PSODriver {
         Evaluator evaluator = new Evaluator();
         Problem problem = new Problem(data, evaluator);
 
-        // step 3 - run PSO algorithm
-        configuration.maxK = maxK;
-        PSO pso = new PSO(problem, ncConstruct, evaluation, configuration);
-        // constructed clusters
-        int[] labelsPred = pso.execute();
+        for (int seed = 1; seed <= runs+1; ++seed) {
+            // step 3 - run PSO algorithm
+            //maxK = (int)Math.sqrt(data.length);
+            //configuration.maxK = maxK;
+            PSO pso = new PSO(problem, ncConstruct, evaluation, configuration, instances);
+            pso.setSeed(seed);
+            // constructed clusters
+            labelsPred = Utils.adjustLabels(pso.execute());
 
-        // step 4 - measure comparing to true labels
-        AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
-        HashMap<Integer,double[]> centroids = Utils.centroids(data, labelsPred);
-        System.out.println("DB index score of PSO: " + Utils.dbIndexScore(centroids,labelsPred,data));
-        System.out.println("ARI of PSO algorithm:  " + adjustedRandIndex.measure(labelsTrue, labelsPred));
-        System.out.println(Arrays.toString(labelsTrue));
-        System.out.println(Arrays.toString(labelsPred));
+            // step 4 - measure comparing to true labels
+            HashMap<Integer, double[]> centroids = Utils.centroids(data, labelsPred);
+            double ARIScore = adjustedRandIndex.measure(labelsTrue, labelsPred);
+            double dbScore = Utils.dbIndexScore(centroids, labelsPred, data);
+            int numClusters = Utils.distinctNumberOfItems(labelsPred);
 
+            meanARI += ARIScore;
+            meanDB += dbScore;
+            meanNumClusters += numClusters;
 
-        // k-means baseline algorithm
-        KMeans kMeans = new KMeans(data,problem.getN(), problem.getD(), maxK);
-        kMeans.clustering(100);
-        System.out.println("DB index score of PSO: " + Utils.dbIndexScore(centroids,kMeans.getLabels(),data));
-        System.out.println("ARI of k-means baseline algorithm: " + adjustedRandIndex.measure(labelsTrue, kMeans.getLabels()));
+            System.out.println("run: " + seed);
+            System.out.println("ARI score of PSO:   " + ARIScore);
+            System.out.println("DB score of PSO:    " + dbScore);
+            System.out.println("number of clusters: " + numClusters);
+            System.out.println(Arrays.toString(labelsPred));
+            System.out.println(Arrays.toString(labelsTrue));
 
-        // optional step - write true and constructed labels into a file
+            // k-means baseline algorithm
+            //KMeans kMeans = new KMeans(data,problem.getN(), problem.getD(), maxK);
+            /*SimpleKMeans kMeans = new SimpleKMeans();
+            kMeans.setSeed(seed);
+            kMeans.buildClusterer(instances);
+            kMeans.setNumClusters(Utils.distinctNumberOfItems(labelsTrue));
+            centroids = Utils.centroids(data, kMeans.getAssignments());
+            int i = 0;
+            for (Instance instance: new Instances(instances)) {
+                labelsPred[i++] = kMeans.clusterInstance(instance);
+            }
+            System.out.println("DB score of kMeans:  " + Utils.dbIndexScore(centroids, kMeans.getAssignments(), data));
+            System.out.println("ARI score of kMeans: " + adjustedRandIndex.measure(labelsTrue, kMeans.getAssignments()));
+            System.out.println("----------------------");*/
+
+            // optional step - write true and constructed labels into a file
         /*Utils.whenWriteStringUsingBufferedWritter_thenCorrect(Arrays.toString(labelsTrue) +
                 System.getProperty("line.separator") + "," + Arrays.toString(labelsPred), "data/output.txt");*/
 
-        // optional step - objectives of true clusters
+            // optional step - objectives of true clusters
         /*System.out.println("objectives of true clusters: " + Arrays.toString(problem.evaluate(
                 new Solution(labelsTrue, Utils.distinctNumberOfItems(labelsTrue)), evaluation, new NCConstruct(data))));*/
+        }
+
+        System.out.println("mean ARI score:          " + meanARI/runs);
+        System.out.println("mean DB Index score:     " + meanDB/runs);
+        System.out.println("mean number of clusters: " + meanNumClusters/runs);
+        System.out.println("--------------------------");
+
+        SimpleKMeans kMeans = new SimpleKMeans();
+        kMeans.setPreserveInstancesOrder(true);
+        kMeans.setNumClusters(7);
+        kMeans.buildClusterer(instances);
+        HashMap<Integer, double[]> centroids = Utils.centroids(data, kMeans.getAssignments());
+        System.out.println("DB score of kMeans:  " + Utils.dbIndexScore(centroids, kMeans.getAssignments(), data));
+        System.out.println("ARI score of kMeans: " + adjustedRandIndex.measure(labelsTrue, kMeans.getAssignments()));
     }
 
+    private Instances getData(String filePath, boolean removeFirst) throws Exception {
+        ClusterEvaluation eval;
+        Instances data;
+        MyGenClustPlusPlus cl;
+        Remove filter;
+        // step 2 - preprocess data
+        data = ConverterUtils.DataSource.read(filePath);
+        data.setClassIndex(data.numAttributes() - 1);
+        if (removeFirst) {
+            filter = new Remove();
+            filter.setAttributeIndices("1");
+            filter.setInputFormat(data);
+            data = Filter.useFilter(data, filter);
+            data.setClassIndex(data.numAttributes() - 1);
+        }
+
+        /*Normalize normFilter = new Normalize();
+        normFilter.setInputFormat(data);
+        data = Filter.useFilter(data,normFilter);
+        data.setClassIndex(data.numAttributes() - 1);*/
+
+        filter = new Remove();
+        //filter.setAttributeIndicesArray(new int[]{0, data.numAttributes()-1});
+        filter.setAttributeIndices("" + data.numAttributes());
+        filter.setInputFormat(data);
+        Instances dataClusterer = Filter.useFilter(data, filter);
+        return dataClusterer;
+    }
 
     public static void main(String[] args) throws Exception {
         //new PSODriver().runDummy();
@@ -119,10 +191,9 @@ public class PSODriver {
             // test using UCI 'glass' public data set - https://archive.ics.uci.edu/ml/datasets/glass+identification
             // pick file manually or pass a path string
             boolean pickManually = false;
-            String filePath;
-            filePath = "data/yeast.csv";
-            //filePath = "data/p-yeast.csv";
-            String path = pickManually ? Utils.pickAFile(): filePath;
+            String filePath, filePathForWeka;
+            filePath = pickManually ? Utils.pickAFile(): "data/glass.csv";
+            filePathForWeka = pickManually ? Utils.pickAFile(): "data/p-glass.csv";
             PSOConfiguration configuration = new PSOConfiguration();
             // default configuration
             /*configuration.c1 = 1.42;
@@ -133,7 +204,7 @@ public class PSODriver {
             configuration.maxIterWithoutImprovement = 50;
             configuration.pMax = 150;
             configuration.pickLeaderRandomly = false;*/
-            new PSODriver().run(30, path, configuration,',',true);
+            new PSODriver().run(30, filePath, filePathForWeka, configuration, ',', false);
             //Utils.nominalForm("data/glass.csv");
         } catch (IOException e) {
             e.printStackTrace();

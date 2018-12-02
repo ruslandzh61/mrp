@@ -7,12 +7,15 @@ import java.util.Random;
  * calculates velocity of particle
  */
 public class VelocityCalculator {
-    private Random generator = new Random();
+    private Random generator;
     private double w,c1,c2;
+    private static int default_seed = 10;
+    private int seed;
 
     public VelocityCalculator(double aC1, double aC2) {
         this.c1 = aC1;
         this.c2 = aC2;
+        setSeed(default_seed);
     }
 
     public void setW(double aW) {
@@ -30,5 +33,14 @@ public class VelocityCalculator {
                     (r2 * c2) * (1 - p.getDummySolAt(dimIdx));
         }
         return newVel;
+    }
+
+    public int getSeed() {
+        return seed;
+    }
+
+    public void setSeed(int seed) {
+        generator = new Random(seed);
+        this.seed = seed;
     }
 }

@@ -11,7 +11,7 @@ import java.util.Random;
  * Extended particle stores real solution 'solution' and intermediate dummy solution vector
  * This version is able to deal with a combinatorial representation of PSO
  */
-public class Particle {
+public class Particle implements Comparable<Particle> {
     public static double ALPHA = 0.5;
     /* solution stores real reprsentation */
     private Solution solution;
@@ -19,12 +19,29 @@ public class Particle {
     private double[] velocity;
 
     private int[] dummySol; // dummy intermediate discrete representation
-    private final Random rnd = new Random();
+    private Random rnd;
+    private int seed;
+    private static int default_seed = 10;
 
     public Particle(Solution aSolution, double[] aVelocity) {
+        assert (aVelocity != null);
+        assert (aSolution != null);
+        assert (aSolution.getSolution().length==aVelocity.length);
+
         this.velocity = aVelocity;
         this.solution = aSolution;
         this.dummySol = new int[solution.getSolution().length];
+        setSeed(default_seed);
+    }
+
+    public Particle(Particle particle) {
+        this.solution = new Solution(particle.getSolution());
+        if (particle.getpBest() != null) {
+            this.setpBest(particle.getpBest());
+        }
+        this.velocity = particle.getVelocity().clone();
+        this.dummySol = particle.getDummySol().clone();
+        setSeed(particle.getSeed());
     }
 
     /**
@@ -116,13 +133,17 @@ public class Particle {
         return dummySol[dimIdx];
     }
 
+    public int[] getDummySol() {
+        return dummySol;
+    }
+
     // pBest is not used in client PSO code, since gBest is calculated using records of particle's objectives
     public Solution getpBest() {
         return pBest;
     }
 
-    public void setpBest(Solution pBest) {
-        this.pBest = new Solution(pBest.getSolution(),pBest.getK(false));
+    public void setpBest(Solution aPBest) {
+        this.pBest = new Solution(aPBest.getSolution(),aPBest.getK(false));
     }
 
     private void calcIntermediateSol(Solution gBest) {
@@ -141,9 +162,13 @@ public class Particle {
         }
     }
 
+    @Override
+    public int compareTo(Particle other) {
+        return this.solution.compareTo(other.getSolution());
+    }
 
     public static void main(String[] args) {
-        int[] s = {0,0,0,1,2,1};
+        /*int[] s = {0,0,0,1,2,1};
         int k = 3;
         int[] pbest = {1,0,2,1,2,0};
         int[] gbest = {2,1,2,0,1,1};
@@ -156,8 +181,16 @@ public class Particle {
         // pretend velocity is updated
         p.setVelocity(vel);
         p.setpBest(pbestSol);
-        p.update(gbestSol, k);
+        p.update(gbestSol, k);*/
     }
 
+    public int getSeed() {
+        return seed;
+    }
+
+    public void setSeed(int seed) {
+        rnd = new Random(seed);
+        this.seed = seed;
+    }
 }
 

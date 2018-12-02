@@ -16,13 +16,14 @@ public class Evaluator {
 
     /**
      * 'data' and 'ncc' parameters are needed for the evaluation of connectivity function
+     * minimize fitness
      * */
     public Double evaluate(Solution solution, Evaluation evaluation, double[][] data, NCConstruct ncc) {
         if (evaluation == Evaluation.CONNECTIVITY) {
-            return connectivity(solution, data, ncc);
+            return -connectivity(solution, data, ncc);
         } else if (evaluation == Evaluation.COHESION) {
             /* returns 1 / (value of cohesion objective) to enable maximization of this objective */
-            return -cohesion(solution, data); //1.0 / cohesion(solution, data);
+            return cohesion(solution, data); //1.0 / cohesion(solution, data);
         }
 
         return null;

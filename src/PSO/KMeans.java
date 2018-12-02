@@ -19,8 +19,11 @@ public class KMeans {
     private int N, D;
     private double[][] centroids;
     private int k;
+    private int seed;
+    private static int default_seed = 10;
+    Random rnd;
 
-    KMeans(double[][] aData, int aN, int aD, int aK) {
+    KMeans(double[][] aData, int aN, int aD, int aK, int aSeed) {
         data = Utils.deepCopy(aData);
         N = aN;
         D = aD;
@@ -31,10 +34,11 @@ public class KMeans {
             this.k = aK;
         }
 
+        setSeed(seed);
+
         // choose existing data points as initial data points
         centroids = new double[k][D];
         double[][] copy = Utils.deepCopy(data);
-        Random rnd = new Random();
         for (int i = 0; i < k; i++) {
             int rand = rnd.nextInt(N - i);
             for (int j = 0; j < D; j++) {
@@ -177,14 +181,14 @@ public class KMeans {
     }
 
     public static void main(String[] args) throws IOException {
-        double[][] data;
+        /*double[][] data;
         int k;
         int[] labels;
         int skipLines = 0;
-        /*data = new double[][]{{2,2}, {3,3}, {3,1}, {4,2},
-                {1.6,-0.5}, {3.01, -1.5}, {-4, 2}, {-2, 2}, {-3, 3},{7,7}};
-        k = 4;
-        labels = {0,0,0,0,0,0,1,1,1,2};*/
+        //data = new double[][]{{2,2}, {3,3}, {3,1}, {4,2},
+        //        {1.6,-0.5}, {3.01, -1.5}, {-4, 2}, {-2, 2}, {-3, 3},{7,7}};
+        //k = 4;
+        //labels = {0,0,0,0,0,0,1,1,1,2};
 
 
         List<String[]> dataStr = Utils.readDataFromCustomSeperator("data/glass.csv", ',');
@@ -205,6 +209,15 @@ public class KMeans {
         //smile.clustering.KMeans kMeans = new smile.clustering.KMeans(data,k,100);
         //int[] labelsPred = kMeans.getClusterLabel();
         System.out.println(Arrays.toString(labelsPred));
-        System.out.println(new AdjustedRandIndex().measure(labels, labelsPred));
+        System.out.println(new AdjustedRandIndex().measure(labels, labelsPred));*/
+    }
+
+    public int getSeed() {
+        return seed;
+    }
+
+    public void setSeed(int seed) {
+        rnd = new Random(seed);
+        this.seed = seed;
     }
 }

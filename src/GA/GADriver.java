@@ -47,6 +47,14 @@ public class GADriver {
         labelsTrue = Utils.extractLabels(dataStr, dataStr.get(0).length - 1);
         temp = Arrays.toString(labelsTrue);
         output.append(temp.substring(1,temp.length()-1)+System.getProperty("line.separator"));
+        // retrieve data in two-dim array format
+        int[] excludedColumns;
+        if (removeFirst) {
+            excludedColumns = new int[]{0, dataStr.get(0).length - 1};
+        } else {
+            excludedColumns = new int[]{dataStr.get(0).length - 1};
+        }
+        double[][] dataArr = Utils.extractAttributes(dataStr, excludedColumns);
 
         // step 2 - preprocess data
         data = ConverterUtils.DataSource.read(filename);
@@ -74,29 +82,21 @@ public class GADriver {
         //System.out.println(dataClusterer);
 
         // step 3 - build model
+
         for (int seed = 1; seed <= runs; ++seed) {
             cl = new MyGenClustPlusPlus();
             cl.setSeed(seed);
             cl.buildClusterer(dataClusterer);
 
-            eval = new ClusterEvaluation();
+            /*eval = new ClusterEvaluation();
             eval.setClusterer(cl);
-            eval.evaluateClusterer(new Instances(data));
+            eval.evaluateClusterer(new Instances(data));*/
             //System.out.println(eval.clusterResultsToString());
 
-            labelsPred = cl.getLabels();
+            labelsPred = Utils.adjustLabels(cl.getLabels());
             temp = Arrays.toString(labelsPred);
             output.append(temp.substring(1, temp.length() - 1)).append(System.getProperty("line.separator"));
 
-
-            // retrieve data in two-dim array format
-            int[] excludedColumns;
-            if (removeFirst) {
-                excludedColumns = new int[]{0, data.numAttributes() - 1};
-            } else {
-                excludedColumns = new int[]{data.numAttributes() - 1};
-            }
-            double[][] dataArr = Utils.extractAttributes(dataStr, excludedColumns);
             HashMap<Integer, double[]> centroids = Utils.centroidsFromWekaInstance(cl.getCentroids());
             HashMap<Integer, double[]> myCentroids = Utils.centroids(dataArr, labelsPred);
 
@@ -134,6 +134,6 @@ public class GADriver {
 
     public static void main(String[] args) throws Exception {
         // weka doesn't work with other separators other than ','
-        GADriver gaDriver = new GADriver(30, "data/p-glass.csv","data/glass.csv", false, ',');
+        GADriver gaDriver = new GADriver(3, "data/p-glass.csv","data/glass.csv", false, ',');
     }
 }

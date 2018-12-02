@@ -6,6 +6,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import weka.core.EuclideanDistance;
 import weka.core.Instances;
+import weka.filters.unsupervised.attribute.Normalize;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -259,10 +260,10 @@ public class Utils {
     public static double dbIndexScore(HashMap<Integer, double[]> clusters, int[] labels, double[][] data) {
         int numberOfClusters = clusters.size();
         double david = 0.0;
-        HashMap<Integer, List<Integer>> labelToClusterPoints = new HashMap<>();
+        HashMap<Integer, HashSet<Integer>> labelToClusterPoints = new HashMap<>();
         Set<Integer> distLabels = Utils.distinctItems(labels);
         for (int label: distLabels) {
-            labelToClusterPoints.put(label, new ArrayList<>());
+            labelToClusterPoints.put(label, new HashSet<>());
         }
         for (int i = 0; i < labels.length; ++i) {
             labelToClusterPoints.get(labels[i]).add(i);
@@ -276,7 +277,7 @@ public class Utils {
         HashMap<Integer, Double> clustersDiameter = new HashMap<>();
 
         for (int clusterID: labelToClusterPoints.keySet()) {
-            List<Integer> cluster = labelToClusterPoints.get(clusterID);
+            HashSet<Integer> cluster = labelToClusterPoints.get(clusterID);
             clustersDiameter.put(clusterID, 0.0);
             for (int p: cluster) {
                 double[] punto = data[p];
@@ -339,6 +340,25 @@ public class Utils {
         return result;
     }
 
+    public static void normalize(double[] dataset) {
+        Normalize filter = new Normalize();
+    }
+
+
+    public static int[] adjustLabels(int[] labels) {
+        HashMap<Integer, Integer> map = new HashMap<>();
+        int[] result = new int[labels.length];
+        int id = 0;
+        for (int i = 0; i < labels.length; ++i) {
+            int label = labels[i];
+            if (!map.containsKey(label)) {
+                map.put(label, id++);
+            }
+            result[i] = map.get(label);
+        }
+        return result;
+    }
+
     public static void main(String[] args) throws Exception {
         //replaceInFile("data/winequality-red.csv", ";",",");
         //replaceInFile("data/output.csv", " ","");
@@ -352,5 +372,7 @@ public class Utils {
         for (int c: centroids.keySet()) {
             System.out.println(Arrays.toString(centroids.get(c)));
         }*/
+        int[] l = new int[] {0, 3, 2, 1};
+        System.out.println(Arrays.toString(adjustLabels(l)));
     }
 }

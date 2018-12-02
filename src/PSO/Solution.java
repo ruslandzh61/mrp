@@ -9,7 +9,7 @@ import utils.*;
  *      which represents a clustering solution consisting of three clusters
  *      first 5 points belong to cluster with 1, next 3 points - to cluster 2, last point - to cluster 3
  */
-public class Solution {
+public class Solution implements Comparable<Solution> {
     private int[] solution;
     private double fitness;
     private int k;
@@ -22,6 +22,7 @@ public class Solution {
         this.solution = s.getSolution();
         this.k = s.getK(false);
         this.fitness = s.getFitness();
+        this.objectives = s.getObjectives().clone();
         checkSolution();
     }
 
@@ -66,8 +67,8 @@ public class Solution {
         return fitness;
     }
 
-    public int getK(boolean includeEmptyClusters) {
-        if (includeEmptyClusters) {
+    public int getK(boolean dontIncludeEmptyClusters) {
+        if (dontIncludeEmptyClusters) {
             return Utils.distinctNumberOfItems(solution);
         } else {
             return k;
@@ -91,5 +92,10 @@ public class Solution {
         for (int kNum: this.solution) {
             assert (kNum < this.k);
         }
+    }
+
+    @Override
+    public int compareTo(Solution other) {
+        return Double.compare(this.fitness, other.fitness);
     }
 }
