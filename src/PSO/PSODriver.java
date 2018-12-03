@@ -10,6 +10,7 @@ import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.SimpleKMeans;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.SelectedTag;
 import weka.core.converters.ConverterUtils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Normalize;
@@ -86,31 +87,90 @@ public class PSODriver {
         }
         data = Utils.extractAttributes(dataStr, excludedColumns);
 
-        Instances instances = getData(filePathForWeka, removeFirst, true);
-        /*for (int seed = 1; seed <= runs; ++seed) {
-            SimpleKMeans kMeans = new SimpleKMeans();
-            kMeans.setPreserveInstancesOrder(true);
-            kMeans.setSeed(seed);
-            kMeans.setNumClusters(7);
-            kMeans.buildClusterer(instances);
-            HashMap<Integer, double[]> centroids = Utils.centroids(data, kMeans.getAssignments());
-            System.out.println("DB score of kMeans:  " + Utils.dbIndexScore(centroids, kMeans.getAssignments(), data));
-            System.out.println("ARI score of kMeans: " + adjustedRandIndex.measure(labelsTrue, kMeans.getAssignments()));
-        }*/
+        Instances instances = getData(filePathForWeka, removeFirst, false);
+        Random rnd = new Random(1);
 
+        /*double meanDbKmeans = 0.0;
+        double meanARIKmeans = 0.0;
+        double meanK = 0.0;
+        for (int seed = 1; seed <= runs; ++seed) {
+            int bestK = -1;
+            double bestARI = -1;
+            double bestDB = -1;
+            for (double i = 0.02; i <= 0.1; i += 0.01) {
+                int k = (int)(i*data.length)+1;
+                SimpleKMeans kMeans = new SimpleKMeans();
+                kMeans.setPreserveInstancesOrder(true);
+                SelectedTag selectedTag = new SelectedTag(SimpleKMeans.FARTHEST_FIRST, SimpleKMeans.TAGS_SELECTION);
+                kMeans.setInitializationMethod(selectedTag);
+                kMeans.setSeed(rnd.nextInt());
+                kMeans.setNumClusters(k);
+                kMeans.buildClusterer(instances);
+                HashMap<Integer, double[]> centroids = Utils.centroids(data, kMeans.getAssignments());
+                double tmpDB = Utils.dbIndexScore(centroids, kMeans.getAssignments(), data);
+                double tmpARI = adjustedRandIndex.measure(labelsTrue, kMeans.getAssignments());
+                if (tmpARI > bestARI) {
+                    bestARI = tmpARI;
+                    bestDB = tmpDB;
+                    bestK = k;
+                }
+            }
+            meanDbKmeans += bestDB;
+            meanARIKmeans += bestARI;
+            meanK += bestK;
+            System.out.println("DB score of kMeans:      " + bestDB);
+            System.out.println("ARI score of kMeans:     " + bestARI);
+            System.out.println("# of clusters of kMeans: " + bestK);
+        }
+        System.out.println("mean DB score of kMeans:  " + meanDbKmeans/runs);
+        System.out.println("mean ARI score of kMeans: " + meanARIKmeans/runs);
+        System.out.println("# of clusters of kMeans: " + meanK/runs);*/
 
         // step 2 - pick objectives
+        rnd = new Random(1);
+
         NCConstruct ncConstruct = new NCConstruct(data);
         Evaluator.Evaluation[] evaluation = {Evaluator.Evaluation.CONNECTIVITY, Evaluator.Evaluation.COHESION};
         Evaluator evaluator = new Evaluator();
         Problem problem = new Problem(data, evaluator);
 
-        Random rnd = new Random(1);
+        double meanDbKmeans = 0.0;
+        double meanARIKmeans = 0.0;
+        double meanK = 0.0;
+        for (int seed = 1; seed <= runs; ++seed) {
+            int bestK = -1;
+            double bestARI = -1;
+            double bestDB = -1;
+            for (double i = 0.02; i <= 0.1; i += 0.01) {
+                int k = (int)(i*data.length)+1;
+                KMeans kMeans = new KMeans(problem.getData(), problem.getN(), problem.getD(), k, rnd.nextInt());
+                kMeans.clustering(100);
+                HashMap<Integer, double[]> centroids = Utils.centroids(data, kMeans.getLabels());
+                double tmpDB = Utils.dbIndexScore(centroids, kMeans.getLabels(), data);
+                double tmpARI = adjustedRandIndex.measure(labelsTrue, kMeans.getLabels());
+                if (tmpARI > bestARI) {
+                    bestARI = tmpARI;
+                    bestDB = tmpDB;
+                    bestK = k;
+                }
+            }
+            meanDbKmeans += bestDB;
+            meanARIKmeans += bestARI;
+            meanK += bestK;
+            System.out.println("DB score of kMeans:      " + bestDB);
+            System.out.println("ARI score of kMeans:     " + bestARI);
+            System.out.println("# of clusters of kMeans: " + bestK);
+        }
+        System.out.println("mean DB score of kMeans:  " + meanDbKmeans/runs);
+        System.out.println("mean ARI score of kMeans: " + meanARIKmeans/runs);
+        System.out.println("# of clusters of kMeans: " + meanK/runs);
+
+        rnd = new Random(1);
         for (int seed = 1; seed <= runs; ++seed) {
             // step 3 - run PSO algorithm
             //maxK = (int)Math.sqrt(data.length);
             //configuration.maxK = maxK;
-            PSO pso = new PSO(problem, ncConstruct, evaluation, configuration, instances);
+            PSO pso = new PSO(problem, ncConstruct, evaluation, configuration, instances, labelsTrue);
             pso.setSeed(rnd.nextInt());
             // constructed clusters
             labelsPred = Utils.adjustLabels(pso.execute());
@@ -163,12 +223,8 @@ public class PSODriver {
     }
 
     private Instances getData(String filePath, boolean removeFirst, boolean normalize) throws Exception {
-        ClusterEvaluation eval;
-        Instances data;
-        MyGenClustPlusPlus cl;
         Remove filter;
-        // step 2 - preprocess data
-        data = ConverterUtils.DataSource.read(filePath);
+        Instances data = ConverterUtils.DataSource.read(filePath);
         data.setClassIndex(data.numAttributes() - 1);
         if (removeFirst) {
             filter = new Remove();
@@ -184,13 +240,12 @@ public class PSODriver {
             data = Filter.useFilter(data, normFilter);
             data.setClassIndex(data.numAttributes() - 1);
         }
-
         filter = new Remove();
-        //filter.setAttributeIndicesArray(new int[]{0, data.numAttributes()-1});
         filter.setAttributeIndices("" + data.numAttributes());
         filter.setInputFormat(data);
-        Instances dataClusterer = Filter.useFilter(data, filter);
-        return dataClusterer;
+        data = Filter.useFilter(data, filter);
+
+        return data;
     }
 
     public static void main(String[] args) throws Exception {

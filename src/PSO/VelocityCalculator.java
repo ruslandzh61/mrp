@@ -10,7 +10,6 @@ public class VelocityCalculator {
     private Random generator;
     private double w,c1,c2;
     private static int default_seed = 10;
-    private int seed;
 
     public VelocityCalculator(double aC1, double aC2) {
         this.c1 = aC1;
@@ -35,12 +34,7 @@ public class VelocityCalculator {
         return newVel;
     }
 
-    public int getSeed() {
-        return seed;
-    }
-
     public void setSeed(int aSeed) {
         generator = new Random(aSeed);
-        this.seed = aSeed;
     }
 }

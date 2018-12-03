@@ -372,7 +372,11 @@ public class Utils {
         for (int c: centroids.keySet()) {
             System.out.println(Arrays.toString(centroids.get(c)));
         }*/
-        int[] l = new int[] {0, 3, 2, 1};
-        System.out.println(Arrays.toString(adjustLabels(l)));
+        /*int[] l = new int[] {0, 3, 2, 1};
+        System.out.println(Arrays.toString(adjustLabels(l)));*/
+        Random rnd = new Random();
+        System.out.println(rnd.nextInt(1));
+        System.out.println(rnd.nextInt(1));
+        System.out.println(rnd.nextInt(1));
     }
 }

@@ -17,7 +17,7 @@ public class Pareto {
     public static int PRECISION = 8;
     public static double THRESHOLD = Math.pow(0.1, PRECISION);
 
-    public Set<Integer> extractParetoNondominated(Map<Integer, double[]> data) {
+    public static Set<Integer> extractParetoNondominated(Map<Integer, double[]> data) {
         //Create an array of the names in arbitrary order
         List<Integer> ranked = sort(data);
         //Rank on a first objective, if equal rank on the next one and so on,
@@ -46,7 +46,7 @@ public class Pareto {
         return pareto;
     }
 
-    public List<Integer> sort(Map<Integer, double[]> data) {
+    public static List<Integer> sort(Map<Integer, double[]> data) {
         List<Integer> ranked = new ArrayList<>(data.keySet());
         Collections.sort(ranked, (o1, o2) -> {
             double[] p1 = data.get(o1);
@@ -72,9 +72,9 @@ public class Pareto {
 
     /**
      * if dominatesIfEqual set to true, then p1 dominates p2 in case p1 and p2 are equal
-     * if dominatesIfEqual set to false, then p1 doesn't dominates p2 in case p1 and p2 are equal
+     * if dominatesIfEqual set to false, then p1 doesn't dominate p2 in case p1 and p2 are equal
      * */
-    public boolean testDominance(double[] p1, double[] p2, boolean dominatesIfEqual) {
+    public static boolean testDominance(double[] p1, double[] p2, boolean dominatesIfEqual) {
         assert (p1.length==p2.length);
         int equalObjNum = 0;
         //If any of the individual scores of datum1 are higher than those of the domDatum, it is not dominated
