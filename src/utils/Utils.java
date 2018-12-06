@@ -6,7 +6,10 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import weka.core.EuclideanDistance;
 import weka.core.Instances;
+import weka.core.converters.ConverterUtils;
+import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Normalize;
+import weka.filters.unsupervised.attribute.Remove;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -357,6 +360,49 @@ public class Utils {
             result[i] = map.get(label);
         }
         return result;
+    }
+
+    public static Instances getData(String filePath, boolean removeFirst, boolean normalize) throws Exception {
+        Remove filter;
+        Instances data = ConverterUtils.DataSource.read(filePath);
+        data.setClassIndex(data.numAttributes() - 1);
+        if (removeFirst) {
+            filter = new Remove();
+            filter.setAttributeIndices("1");
+            filter.setInputFormat(data);
+            data = Filter.useFilter(data, filter);
+            data.setClassIndex(data.numAttributes() - 1);
+        }
+
+        if (normalize) {
+            Normalize normFilter = new Normalize();
+            normFilter.setInputFormat(data);
+            data = Filter.useFilter(data, normFilter);
+            data.setClassIndex(data.numAttributes() - 1);
+        }
+        filter = new Remove();
+        filter.setAttributeIndices("" + data.numAttributes());
+        filter.setInputFormat(data);
+        data = Filter.useFilter(data, filter);
+
+        return data;
+    }
+
+    public static double standardDeviation(double arr[]) {
+        double sum = 0.0;
+        double standardDeviation = 0.0;
+
+        for(double num : arr) {
+            sum += num;
+        }
+
+        double mean = sum / arr.length;
+
+        for(double num: arr) {
+            standardDeviation += Math.pow(num - mean, 2);
+        }
+
+        return Math.sqrt(standardDeviation / arr.length);
     }
 
     public static void main(String[] args) throws Exception {

@@ -14,28 +14,22 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.Remove;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by rusland on 23.11.18.
  */
 public class GADriver {
 
-    public GADriver(int runs, String filename, String filenameForTrueLabels, boolean removeFirst, char sep) throws Exception {
-        ClusterEvaluation eval;
+    public GADriver(int runs, String filename, String filenameForTrueLabels, char sep,
+                    boolean removeFirst,  boolean normalize) throws Exception {
         Instances data;
         MyGenClustPlusPlus cl;
         Remove filter;
 
         AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
-        double meanMyDBWithInnerC = 0.0;
         double meanMyDBWithMyCentroids = 0.0;
-        double meanInnerDBIndex = 0.0;
         double meanARI = 0.0;
-        //double meanInnerDBWithMyCentroids;
         int[] labelsTrue, labelsPred;
         StringBuffer output= new StringBuffer();
         String temp;
@@ -45,8 +39,10 @@ public class GADriver {
         assert (dataStr.size() > 0);
         assert (dataStr.get(0).length > 0);
         labelsTrue = Utils.extractLabels(dataStr, dataStr.get(0).length - 1);
+
         temp = Arrays.toString(labelsTrue);
         output.append(temp.substring(1,temp.length()-1)+System.getProperty("line.separator"));
+
         // retrieve data in two-dim array format
         int[] excludedColumns;
         if (removeFirst) {
@@ -67,10 +63,12 @@ public class GADriver {
             data.setClassIndex(data.numAttributes() - 1);
         }
 
-        /*Normalize normFilter = new Normalize();
-        normFilter.setInputFormat(data);
-        data = Filter.useFilter(data,normFilter);
-        data.setClassIndex(data.numAttributes() - 1);*/
+        if (normalize) {
+            Normalize normFilter = new Normalize();
+            normFilter.setInputFormat(data);
+            data = Filter.useFilter(data, normFilter);
+            data.setClassIndex(data.numAttributes() - 1);
+        }
 
         filter = new Remove();
         //filter.setAttributeIndicesArray(new int[]{0, data.numAttributes()-1});
@@ -82,49 +80,35 @@ public class GADriver {
         //System.out.println(dataClusterer);
 
         // step 3 - build model
-
-        for (int seed = 1; seed <= runs; ++seed) {
+        Random rnd = new Random(1);
+        for (int run = 1; run <= runs; ++run) {
             cl = new MyGenClustPlusPlus();
-            cl.setSeed(seed);
+            cl.setSeed(rnd.nextInt());
             cl.buildClusterer(dataClusterer);
-
-            /*eval = new ClusterEvaluation();
-            eval.setClusterer(cl);
-            eval.evaluateClusterer(new Instances(data));*/
-            //System.out.println(eval.clusterResultsToString());
 
             labelsPred = Utils.adjustLabels(cl.getLabels());
             temp = Arrays.toString(labelsPred);
             output.append(temp.substring(1, temp.length() - 1)).append(System.getProperty("line.separator"));
 
-            HashMap<Integer, double[]> centroids = Utils.centroidsFromWekaInstance(cl.getCentroids());
             HashMap<Integer, double[]> myCentroids = Utils.centroids(dataArr, labelsPred);
 
             // step 4 - measure
             double ARI = adjustedRandIndex.measure(labelsTrue, labelsPred);
-            double myDBWithInnerCentroids = Utils.dbIndexScore(centroids,labelsPred,dataArr);
-            double myDBWithMyCentroids = Utils.dbIndexScore(myCentroids,labelsPred,dataArr);
-            double innerDBIndex = cl.daviesBouldinScore();
+            double myDBWithMyCentroids = Utils.dbIndexScore(myCentroids, labelsPred, dataArr);
 
             meanARI += ARI;
-            meanMyDBWithInnerC += myDBWithInnerCentroids;
             meanMyDBWithMyCentroids += myDBWithMyCentroids;
-            meanInnerDBIndex += innerDBIndex;
 
-            System.out.println("run " + seed + ": " + Arrays.toString(labelsPred));
-            System.out.println("mean ARI score:                   " + ARI);
-            System.out.println("my DB Index with inner centroids: " + myDBWithInnerCentroids);
-            System.out.println("my DB score with my centroid:     " + myDBWithMyCentroids);
-            System.out.println("inner DB Index score:             " + innerDBIndex);
+            System.out.println("run " + run + ": " + Arrays.toString(labelsPred));
+            System.out.println("ARI score: " + ARI);
+            System.out.println("DB score:  " + myDBWithMyCentroids);
         }
 
 
         // step 4 - measure comparing to true labels
         //System.out.println("DB Index score: " + cl.calcularDavidBouldin().getResultado());
-        System.out.println("mean ARI score:                   " + meanARI/runs);
-        System.out.println("my DB score with inner centroids: " + meanMyDBWithInnerC/runs);
-        System.out.println("my DB score with my centroid:     " + meanMyDBWithMyCentroids/runs);
-        System.out.println("inner DB Index score:             " + meanInnerDBIndex/runs);
+        System.out.println("mean ARI score: " + meanARI/runs);
+        System.out.println("mean DB score: " + meanMyDBWithMyCentroids/runs);
 
         //System.out.println(Arrays.toString(labelsTrue));
         //System.out.println(Arrays.toString(cl.getLabels()));
@@ -134,6 +118,7 @@ public class GADriver {
 
     public static void main(String[] args) throws Exception {
         // weka doesn't work with other separators other than ','
-        GADriver gaDriver = new GADriver(3, "data/p-glass.csv","data/glass.csv", false, ',');
+        // (false, false) - first attribute not removed, not normalized
+        GADriver gaDriver = new GADriver(30, "data/p-yeast.csv","data/yeast.csv", ',', true, false);
     }
 }
