@@ -19,7 +19,7 @@ public class Solution implements Comparable<Solution> {
     * */
 
     public Solution(Solution s) {
-        this.solution = s.getSolution();
+        this.solution = s.getSolution().clone();
         this.k = s.getK(false);
         this.fitness = s.getFitness();
         this.objectives = s.getObjectives().clone();
@@ -44,7 +44,7 @@ public class Solution implements Comparable<Solution> {
     }
 
     public int[] getSolution() {
-        return solution.clone();
+        return solution;
     }
 
     /*

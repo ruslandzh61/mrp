@@ -140,8 +140,6 @@ public class Utils {
         return set;
     }
 
-
-
     public static double[][] extractAttributes(List<String[]> data, int[] excludedColumns) {
         double[][] result = new double[data.size()][data.get(0).length-excludedColumns.length];
         for (int i = 0; i < result.length; ++i) {
@@ -260,6 +258,34 @@ public class Utils {
         return newc;
     }
 
+    public static void normalize(double[][] data) {
+        double[] dataLow = new double[data[0].length];
+        for (int i = 0; i < dataLow.length; ++i) {
+            dataLow[i] = Double.POSITIVE_INFINITY;
+        }
+        double[] dataHigh = new double[data[0].length];
+        for (int i = 0; i < dataLow.length; ++i) {
+            dataHigh[i] = Double.NEGATIVE_INFINITY;
+        }
+        for (int i = 0; i < data.length; ++i) {
+            for (int j = 0; j < data[0].length; ++j) {
+                double tmp = data[i][j];
+                if (tmp < dataLow[j]) {
+                    dataLow[j] = tmp;
+                }
+                if (tmp > dataHigh[j]) {
+                    dataHigh[j] = tmp;
+                }
+            }
+        }
+        for (int i = 0; i < data.length; ++i) {
+            for (int j = 0; j < data[0].length; ++j) {
+                data[i][j] = (data[i][j] - dataLow[j])
+                        / (dataHigh[j] - dataLow[j]);
+            }
+        }
+    }
+
     public static double dbIndexScore(HashMap<Integer, double[]> clusters, int[] labels, double[][] data) {
         int numberOfClusters = clusters.size();
         double david = 0.0;
@@ -272,10 +298,10 @@ public class Utils {
             labelToClusterPoints.get(labels[i]).add(i);
         }
 
-        if (numberOfClusters == 1) {
+        /*if (numberOfClusters == 1) {
             throw new RuntimeException(
                     "Impossible to evaluate Davies-Bouldin index over a single cluster");
-        }
+        }*/
         // counting distances within
         HashMap<Integer, Double> clustersDiameter = new HashMap<>();
 
@@ -343,10 +369,6 @@ public class Utils {
         return result;
     }
 
-    public static void normalize(double[] dataset) {
-        Normalize filter = new Normalize();
-    }
-
 
     public static int[] adjustLabels(int[] labels) {
         HashMap<Integer, Integer> map = new HashMap<>();
@@ -405,11 +427,76 @@ public class Utils {
         return Math.sqrt(standardDeviation / arr.length);
     }
 
+    public static void adjustAssignments(int[] labels) {
+        HashMap<Integer, Integer> map = new HashMap();
+        for (int i = 0; i < labels.length; ++i) {
+            if (map.containsKey(labels[i])) {
+                map.put(labels[i], map.get(labels[i])+1);
+            } else {
+                map.put(labels[i], 1);
+            }
+        }
+        HashMap<Integer, Integer> map2 = new HashMap<>();
+        int newLabel = 0;
+
+        for (int cluser: map.keySet()) {
+            map2.put(cluser, newLabel++);
+            System.out.println(cluser + " : " + map.get(cluser));
+        }
+        for (int i = 0; i < labels.length; ++i) {
+            assert (map2.containsKey(labels[i]));
+            labels[i] = map2.get(labels[i]);
+        }
+    }
+
+    public static void removeNoise(int[] labels, double[][] data, int minSizeOfCluster) {
+        Set<Integer> goodClusters = new HashSet<>();
+
+        // count size of clusters
+        HashMap<Integer, Integer> map = new HashMap();
+        for (int i = 0; i < labels.length; ++i) {
+            int clID = labels[i];
+            if (map.containsKey(clID)) {
+                map.put(clID, map.get(clID)+1);
+            } else {
+                map.put(clID, 1);
+            }
+        }
+
+        // identify good clusters
+        for (int clID: map.keySet()) {
+            if (map.get(clID) >= minSizeOfCluster) {
+                goodClusters.add(clID);
+            }
+        }
+
+        System.out.println(goodClusters.size());
+        // remove bad clusters
+        HashMap<Integer, double[]> centroids = Utils.centroids(data, labels);
+        for (int i = 0; i < labels.length; ++i) {
+            if (!goodClusters.contains(labels[i])) {
+                double minDist = Double.POSITIVE_INFINITY;
+                int targetC = -1;
+                for (int c : centroids.keySet()) {
+                    if (!goodClusters.contains(c)) {
+                        continue;
+                    }
+                    double tmpDist = dist(centroids.get(c), data[i]);
+                    if (minDist > tmpDist) {
+                        minDist = tmpDist;
+                        targetC = c;
+                    }
+                }
+                labels[i] = targetC;
+            }
+        }
+    }
+
     public static void main(String[] args) throws Exception {
         //replaceInFile("data/winequality-red.csv", ";",",");
-        //replaceInFile("data/output.csv", " ","");
+        //replaceInFile("data/p-flame.csv", " ","");
         //Utils.nominalFormToNumber("data/output.csv", ',', -1);
-        //Utils.nominalForm("data/dermatology.csv");
+        //Utils.nominalForm("data/flame.csv");
 
         //test centroids
         /*double[][] data = {{1,1},{5,5},{10,10},{11,11}};
@@ -420,9 +507,24 @@ public class Utils {
         }*/
         /*int[] l = new int[] {0, 3, 2, 1};
         System.out.println(Arrays.toString(adjustLabels(l)));*/
-        Random rnd = new Random();
-        System.out.println(rnd.nextInt(1));
-        System.out.println(rnd.nextInt(1));
-        System.out.println(rnd.nextInt(1));
+
+        /*double[][] data = {{-1, 0.1}, {0.5, 0}, {1, 1}};
+        normalize(data);
+        for (int i = 0; i < data.length; ++i) {
+            System.out.println(Arrays.toString(data[i]));
+        }*/
+
+        /*int[] labels = {1, 0, 5, 2, 2};
+        //adjustAssignments(labels);
+        System.out.println(Arrays.toString(labels));
+
+        int distNumK = Utils.distinctNumberOfItems(labels);
+        Integer[] distClusters = Utils.distinctItems(labels).toArray(new Integer[distNumK]);
+        int idx = new Random().nextInt(distClusters.length);
+        System.out.println(distClusters[idx]);*/
+        double[][] data = {{1,1}, {1,2},{5,5},{5,5.5},{4,5},{1,0}};
+        int[] label = {5,5,1,1,0,10};
+        removeNoise(label, data, 2);
+        System.out.println(Arrays.toString(label));
     }
 }

@@ -76,7 +76,7 @@ public class KMeans {
             // recompute centroids based on the assignments
             c1 = updateCentroids();
             round++;
-            if ((niter > 0 && round >= niter))
+            if (niter > 0 && round >= niter)
                 break;
             if (converge(centroids, c1, threshold)) {
                 //System.out.println("converged at: " + round);

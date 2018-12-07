@@ -3,6 +3,7 @@ package PSO;
 import utils.Utils;
 
 import java.util.Random;
+import java.util.Set;
 
 /**
  * Created by rusland on 09.09.18.
@@ -49,7 +50,7 @@ public class Particle implements Comparable<Particle> {
      * update real solution vector X through intermediate solution vector Y. update Y first and then X for step t
      * gBest is global best solution at step t-1, pBest is personal best at step t-1 before calling update method
      * */
-    public void update(Solution gBest, int maxK) {
+    public void update(Solution gBest, int maxK, PSO.Tracker tracker) {
         assert (gBest != null);
 
         int[] sol = solution.getSolution();
@@ -81,17 +82,24 @@ public class Particle implements Comparable<Particle> {
         // step 5 - obtain new real solution vector from intermediate solution vector
 
         int[] newSol = new int[N];
+        int distNumK = Utils.distinctNumberOfItems(solution.getSolution());
+        Integer[] distClusters = Utils.distinctItems(solution.getSolution()).toArray(new Integer[distNumK]);
         for (int j = 0; j < N; ++j) {
             if (dummySol[j] == 1) {
                 newSol[j] = gBest.getSolutionAt(j);
+                tracker.gBest++;
             } else if (dummySol[j] == -1) {
                 newSol[j] = pBest.getSolutionAt(j);
+                tracker.pBest++;
             } else {
                 // randomly select cluster
                 //use only if solution is in locus-based representation
                 //newSol[j] = rnd.nextInt(solution.toClusters().count());
-                int randomCluster = rnd.nextInt(solution.getK(false));
+                // randomly assign to existing cluster
+                int rndIdx = rnd.nextInt(distClusters.length);
+                int randomCluster = distClusters[rndIdx];
                 newSol[j] = randomCluster;
+                tracker.random++;
             }
         }
 
@@ -144,7 +152,7 @@ public class Particle implements Comparable<Particle> {
     }
 
     public void setpBest(Solution aPBest) {
-        this.pBest = new Solution(aPBest.getSolution(),aPBest.getK(false));
+        this.pBest = new Solution(aPBest.getSolution().clone(),aPBest.getK(false));
     }
 
     private void calcIntermediateSol(Solution gBest) {
