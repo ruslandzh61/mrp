@@ -8,9 +8,9 @@ public class PSOConfiguration {
     public double c2  = 1.63;
     public double maxW = 0.9;
     public double minW = 0.4;
-    public int maxIteration = 500;
+    public int maxIteration = 1000;
     public int maxIterWithoutImprovement = 50;
-    public int maxK = 10;
+    public int maxK = 150;
     public int pMax = 150;
     public double numTopParticlesToPickForLeader = 0.2;
 }

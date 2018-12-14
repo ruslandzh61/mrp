@@ -57,10 +57,10 @@ public class KMeans {
      * performs complete clustering
      *  */
     public void clustering(int niter) {
-        if (niter <= 0 || niter > 1000)
-            niter = 100;
+        if (niter <= 0 || niter > 500)
+            niter = 500;
         double [][] c1 = centroids;
-        double threshold = 0.00001;
+        double threshold = 0.000000001;
         int round=0;
 
         while (true) {

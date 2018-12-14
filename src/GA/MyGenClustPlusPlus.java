@@ -41,20 +41,15 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
     private int m_maxKMeansIterationsQuick = 15;
     private int m_maxKMeansIterationsFinal = 50;
     private double m_duplicateThreshold = 0.0D;
-    private int m_startChromosomeSelectionGeneration = 50;
+    private int m_startChromosomeSelectionGeneration = 11;
     private MyGenClustPlusPlus.MKMeans m_bestChromosome;
     private double m_bestFitness;
     private int m_bestFitnessIndex;
     protected MyGenClustPlusPlus.MKMeans m_builtClusterer = null;
     private Random m_rand = null;
-    private ReplaceMissingValues m_ReplaceMissingFilter = null;
     private boolean m_dontReplaceMissing = false;
     public static final int SUPPLIED = 4;
     public static final Tag[] TAGS_SELECTION_MK = new Tag[]{new Tag(0, "Random"), new Tag(1, "k-means++"), new Tag(2, "Canopy"), new Tag(3, "Farthest first"), new Tag(4, "Supplied Centroids")};
-
-    Instances getCentroids() {
-        return this.m_builtClusterer.getClusterCentroids();
-    }
 
     public int numberOfClusters() {
         return this.m_numberOfClusters;
@@ -69,165 +64,182 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         this.m_rand = new Random((long)this.getSeed());
         this.getCapabilities().testWithFail(data);
         this.m_data = new Instances(data);
-        boolean allMissing = true;
 
-        for(int initialPopulation = 0; initialPopulation < this.m_data.numAttributes(); ++initialPopulation) {
-            if(this.m_data.attributeStats(initialPopulation).missingCount != this.m_data.numInstances()) {
-                allMissing = false;
+        this.m_distFunc = new ManhattanDistance(this.m_data);
+        /* Component 3: generate initial population */
+        MyGenClustPlusPlus.MKMeans[] initialPopulation = this.generateInitialPopulation(this.m_data);
+        assert (initialPopulation != null);
+
+        this.m_bestFitness = -1.0D / 0.0;
+        this.m_bestFitnessIndex = -2147483648;
+
+        /* identify best chromosome */
+        for(int selectedPopulation = 0; selectedPopulation < initialPopulation.length; ++selectedPopulation) {
+            double previous = this.fitness(initialPopulation[selectedPopulation]);
+            if(previous > this.m_bestFitness) {
+                if(previous == 1.0D / 0.0) {
+                    this.m_builtClusterer = initialPopulation[selectedPopulation];
+                    this.m_numberOfClusters = initialPopulation[selectedPopulation].getClusterCentroids().size();
+                    System.out.println("failed in selection of initial population out of pre-initial population");
+                    return;
+                }
+
+                this.m_bestFitness = previous;
+                this.m_bestFitnessIndex = selectedPopulation;
+            }
+        }
+        this.m_bestChromosome = new MyGenClustPlusPlus.MKMeans(initialPopulation[this.m_bestFitnessIndex]);
+
+        /* select initial population out of pre-initial population probabilistically
+         * When a value of k is chosen, the next available solution in order of descending fitness
+         * is added to initial population. */
+        MyGenClustPlusPlus.MKMeans[] mainPopulation = this.probabilisticSelection(initialPopulation);
+        MyGenClustPlusPlus.MKMeans[] prevPopulation = new MyGenClustPlusPlus.MKMeans[mainPopulation.length];
+
+        int newBestIndex;
+        MyGenClustPlusPlus.MKMeans finalRun;
+        /* 60 generations */
+        for(int generationIdx = 0; generationIdx <= this.m_numberOfGenerations; ++generationIdx) {
+            MyGenClustPlusPlus.MKMeans[] resultingPopulation;
+            int f;
+            // step 1 - crossover or prob. cloning
+            if((generationIdx + 1) % 10 != 0) {
+                resultingPopulation = this.crossover(mainPopulation);
+            } else {
+                /* improve At every 10th iteration (i.e. the 10th, 20th, 30th etc.)
+                we perform a probabilistic cloning of the chromosomes.
+                We clone chromosomes with probability proportional to
+                the fitness of the chromosomes as per the wheel technique. */
+
+                // step 1 - probabilistic cloning
+                resultingPopulation = this.probabilisticCloning(mainPopulation);
+                // step 2 - elitism
+                resultingPopulation = this.elitism(resultingPopulation);
+
+                /* step 3 - polishing. undergo a short length (15 iterations) MK-Means.
+                 * The application of a few iterations of the hill-climber of MK-Means is justified
+                 * because generally the K-Means hill-climber reaches a reasonably good clustering solution
+                 * within a small number of iterations ( Rahman et al., 2014 ).
+                 * Moreover, the aim of the MK-Means here is not to produce a final clustering solutions,
+                 * but to repair any slight fitness damage caused by the mutation operation
+                 * to maintain a population of high achievers.
+                 * We refer to the application of the hill-climber as polishing. */
+                for(newBestIndex = 0; newBestIndex < resultingPopulation.length; ++newBestIndex) {
+                    do {
+                        finalRun = new MyGenClustPlusPlus.MKMeans();
+                        finalRun.setSeed(this.m_rand.nextInt());
+                        finalRun.setInitializationMethod(new SelectedTag(4, TAGS_SELECTION_MK));
+                        finalRun.setInitial(resultingPopulation[newBestIndex].getClusterCentroids());
+
+                        finalRun.setMaxIterations(this.m_maxKMeansIterationsQuick);
+                        finalRun.setDontReplaceMissingValues(this.m_dontReplaceMissing);
+                        finalRun.setPreserveInstancesOrder(true);
+                        finalRun.buildClusterer(this.m_data, this.m_distFunc);
+                        if(finalRun.getClusterCentroids().numInstances() <= 1) {
+                            f = this.m_rand.nextInt((int)(Math.sqrt((double)data.size()) - 2.0D)) + 2;
+                            MyGenClustPlusPlus.MKMeans t = new MyGenClustPlusPlus.MKMeans();
+                            t.setSeed(this.m_rand.nextInt());
+                            t.setNumClusters(f);
+                            t.setDontReplaceMissingValues(this.m_dontReplaceMissing);
+                            t.setPreserveInstancesOrder(true);
+                            t.buildClusterer(data, this.m_distFunc);
+                            resultingPopulation[newBestIndex] = new MyGenClustPlusPlus.MKMeans(t);
+                        }
+                    } while(finalRun.getClusterCentroids().numInstances() <= 1);
+
+                    resultingPopulation[newBestIndex] = finalRun;
+                }
+            }
+            /* step 2 (4 of prob. cloning) - elitism */
+            resultingPopulation = this.elitism(resultingPopulation);
+            /* step 3 (5 of prob. cloning) - mutation */
+            resultingPopulation = this.mutation(resultingPopulation);
+            /* step 4 (6 of prob. cloning) - elitism */
+            resultingPopulation = this.elitism(resultingPopulation);
+            if(this.m_builtClusterer != null) {
+                System.out.println("failed after crossover/probabilistic cloning");
+                return;
+            }
+
+            if(generationIdx <= this.m_startChromosomeSelectionGeneration) {
+                /* copy resulting population into main population instance */
+                for(newBestIndex = 0; newBestIndex < resultingPopulation.length; ++newBestIndex) {
+                    mainPopulation[newBestIndex] = new MyGenClustPlusPlus.MKMeans(resultingPopulation[newBestIndex]);
+                }
+            } else {
+                /* start chromosome selection at this point
+                 * merges all chromosomes between two populations of size s:
+                 * the last (most recent) population and the resulting generation from all operations.
+                 * This second type of elitism chooses the highest fitted s chromosomes from the merged populations.
+                 * This restricts radical disruption by the genetic operators,
+                 * but it still enables their exploratory nature to drive the genetic search. */
+                /* fitness corresponding to resulting population */
+                MyGenClustPlusPlus.FitnessContainer[] var18 = new MyGenClustPlusPlus.FitnessContainer[resultingPopulation.length];
+                /* fitness corresponding to previous population */
+                MyGenClustPlusPlus.FitnessContainer[] var19 = new MyGenClustPlusPlus.FitnessContainer[prevPopulation.length];
+
+                for(f = 0; f < resultingPopulation.length; ++f) {
+                    var18[f] = new MyGenClustPlusPlus.FitnessContainer(this.fitness(resultingPopulation[f]), resultingPopulation[f]);
+                }
+
+                for(f = 0; f < prevPopulation.length; ++f) {
+                    var19[f] = new MyGenClustPlusPlus.FitnessContainer(this.fitness(prevPopulation[f]), prevPopulation[f]);
+                }
+
+                MyGenClustPlusPlus.FitnessContainer[] var22 = new MyGenClustPlusPlus.FitnessContainer[resultingPopulation.length * 2];
+
+                int var21;
+                for(var21 = 0; var21 < resultingPopulation.length; ++var21) {
+                    var22[var21] = var18[var21];
+                }
+
+                var21 = 0;
+
+                int i;
+                for(i = resultingPopulation.length; i < resultingPopulation.length * 2; ++i) {
+                    var22[i] = var19[var21++];
+                }
+
+                Arrays.sort(var22, Collections.reverseOrder());
+                for(i = 0; i < resultingPopulation.length; ++i) {
+                    mainPopulation[i] = new MyGenClustPlusPlus.MKMeans(var22[i].clustering);
+                }
+            }
+
+            /* update previous population */
+            for(newBestIndex = 0; newBestIndex < mainPopulation.length; ++newBestIndex) {
+                prevPopulation[newBestIndex] = new MyGenClustPlusPlus.MKMeans(mainPopulation[newBestIndex]);
+            }
+        }
+        /* FINAL step - choose best performing chromosome to use as
+         * the initial solution of a final full-length MK-Means to deliver the final clustering solution */
+        double var17 = 4.9E-324D;
+        newBestIndex = 2147483647;
+
+        for(int var20 = 0; var20 < mainPopulation.length; ++var20) {
+            double var23 = this.fitness(mainPopulation[var20]);
+            if(var23 > var17) {
+                var17 = var23;
+                newBestIndex = var20;
             }
         }
 
-        if(allMissing) {
-            MyGenClustPlusPlus.MKMeans var14 = new MyGenClustPlusPlus.MKMeans();
-            var14.buildClusterer(this.m_data);
-            this.m_builtClusterer = var14;
-            this.m_numberOfClusters = var14.numberOfClusters();
-        } else {
-            this.m_ReplaceMissingFilter = new ReplaceMissingValues();
-            this.m_data.setClassIndex(-1);
-            if(!this.m_dontReplaceMissing) {
-                this.m_ReplaceMissingFilter.setInputFormat(this.m_data);
-                this.m_data = Filter.useFilter(this.m_data, this.m_ReplaceMissingFilter);
-            }
-
-            this.m_distFunc = new ManhattanDistance(this.m_data);
-            MyGenClustPlusPlus.MKMeans[] var13 = this.generateInitialPopulation(this.m_data);
-            if(var13 != null) {
-                this.m_bestFitness = -1.0D / 0.0;
-                this.m_bestFitnessIndex = -2147483648;
-
-                for(int selectedPopulation = 0; selectedPopulation < var13.length; ++selectedPopulation) {
-                    double previous = this.fitness(var13[selectedPopulation]);
-                    if(previous > this.m_bestFitness) {
-                        if(previous == 1.0D / 0.0) {
-                            this.m_builtClusterer = var13[selectedPopulation];
-                            this.m_numberOfClusters = var13[selectedPopulation].getClusterCentroids().size();
-                            return;
-                        }
-
-                        this.m_bestFitness = previous;
-                        this.m_bestFitnessIndex = selectedPopulation;
-                    }
-                }
-
-                this.m_bestChromosome = new MyGenClustPlusPlus.MKMeans(var13[this.m_bestFitnessIndex]);
-                MyGenClustPlusPlus.MKMeans[] var15 = this.probabilisticSelection(var13);
-                MyGenClustPlusPlus.MKMeans[] var16 = new MyGenClustPlusPlus.MKMeans[var15.length];
-
-                int newBestIndex;
-                MyGenClustPlusPlus.MKMeans finalRun;
-                for(int newBestFitness = 0; newBestFitness <= this.m_numberOfGenerations; ++newBestFitness) {
-                    MyGenClustPlusPlus.MKMeans[] crossoverPopulation;
-                    int f;
-                    if((newBestFitness + 1) % 10 != 0) {
-                        crossoverPopulation = this.crossover(var15);
-                    } else {
-                        crossoverPopulation = this.probabilisticCloning(var15);
-                        crossoverPopulation = this.elitism(crossoverPopulation);
-
-                        for(newBestIndex = 0; newBestIndex < crossoverPopulation.length; ++newBestIndex) {
-                            do {
-                                finalRun = new MyGenClustPlusPlus.MKMeans();
-                                finalRun.setSeed(this.m_rand.nextInt());
-                                finalRun.setInitializationMethod(new SelectedTag(4, TAGS_SELECTION_MK));
-                                finalRun.setInitial(crossoverPopulation[newBestIndex].getClusterCentroids());
-                                finalRun.setMaxIterations(this.m_maxKMeansIterationsQuick);
-                                finalRun.setDontReplaceMissingValues(this.m_dontReplaceMissing);
-                                finalRun.setPreserveInstancesOrder(true);
-                                finalRun.buildClusterer(this.m_data, this.m_distFunc);
-                                if(finalRun.getClusterCentroids().numInstances() <= 1) {
-                                    f = this.m_rand.nextInt((int)(Math.sqrt((double)data.size()) - 2.0D)) + 2;
-                                    MyGenClustPlusPlus.MKMeans t = new MyGenClustPlusPlus.MKMeans();
-                                    t.setSeed(this.m_rand.nextInt());
-                                    t.setNumClusters(f);
-                                    t.setDontReplaceMissingValues(this.m_dontReplaceMissing);
-                                    t.setPreserveInstancesOrder(true);
-                                    t.buildClusterer(data, this.m_distFunc);
-                                    crossoverPopulation[newBestIndex] = new MyGenClustPlusPlus.MKMeans(t);
-                                }
-                            } while(finalRun.getClusterCentroids().numInstances() <= 1);
-
-                            crossoverPopulation[newBestIndex] = finalRun;
-                        }
-                    }
-
-                    crossoverPopulation = this.elitism(crossoverPopulation);
-                    crossoverPopulation = this.mutation(crossoverPopulation);
-                    crossoverPopulation = this.elitism(crossoverPopulation);
-                    if(this.m_builtClusterer != null) {
-                        return;
-                    }
-
-                    if(newBestFitness <= this.m_startChromosomeSelectionGeneration) {
-                        for(newBestIndex = 0; newBestIndex < crossoverPopulation.length; ++newBestIndex) {
-                            var15[newBestIndex] = new MyGenClustPlusPlus.MKMeans(crossoverPopulation[newBestIndex]);
-                        }
-                    } else {
-                        MyGenClustPlusPlus.FitnessContainer[] var18 = new MyGenClustPlusPlus.FitnessContainer[crossoverPopulation.length];
-                        MyGenClustPlusPlus.FitnessContainer[] var19 = new MyGenClustPlusPlus.FitnessContainer[var16.length];
-
-                        for(f = 0; f < crossoverPopulation.length; ++f) {
-                            var18[f] = new MyGenClustPlusPlus.FitnessContainer(this.fitness(crossoverPopulation[f]), crossoverPopulation[f]);
-                        }
-
-                        for(f = 0; f < var16.length; ++f) {
-                            var19[f] = new MyGenClustPlusPlus.FitnessContainer(this.fitness(var16[f]), var16[f]);
-                        }
-
-                        MyGenClustPlusPlus.FitnessContainer[] var22 = new MyGenClustPlusPlus.FitnessContainer[crossoverPopulation.length * 2];
-
-                        int var21;
-                        for(var21 = 0; var21 < crossoverPopulation.length; ++var21) {
-                            var22[var21] = var18[var21];
-                        }
-
-                        var21 = 0;
-
-                        int i;
-                        for(i = crossoverPopulation.length; i < crossoverPopulation.length * 2; ++i) {
-                            var22[i] = var19[var21++];
-                        }
-
-                        Arrays.sort(var22, Collections.reverseOrder());
-
-                        for(i = 0; i < crossoverPopulation.length; ++i) {
-                            var15[i] = new MyGenClustPlusPlus.MKMeans(var22[i].clustering);
-                        }
-                    }
-
-                    for(newBestIndex = 0; newBestIndex < var15.length; ++newBestIndex) {
-                        var16[newBestIndex] = new MyGenClustPlusPlus.MKMeans(var15[newBestIndex]);
-                    }
-                }
-
-                double var17 = 4.9E-324D;
-                newBestIndex = 2147483647;
-
-                for(int var20 = 0; var20 < var15.length; ++var20) {
-                    double var23 = this.fitness(var15[var20]);
-                    if(var23 > var17) {
-                        var17 = var23;
-                        newBestIndex = var20;
-                    }
-                }
-
-                this.m_bestChromosome = new MyGenClustPlusPlus.MKMeans(var15[newBestIndex]);
-                this.m_bestFitness = var17;
-                finalRun = new MyGenClustPlusPlus.MKMeans();
-                finalRun.setSeed(this.m_rand.nextInt());
-                finalRun.setInitializationMethod(new SelectedTag(4, TAGS_SELECTION_MK));
-                finalRun.setInitial(this.m_bestChromosome.getClusterCentroids());
-                finalRun.setDontReplaceMissingValues(this.m_dontReplaceMissing);
-                finalRun.setPreserveInstancesOrder(true);
-                finalRun.setMaxIterations(this.m_maxKMeansIterationsFinal);
-                finalRun.buildClusterer(this.m_data, this.m_distFunc);
-                this.m_builtClusterer = finalRun;
-                this.m_numberOfClusters = this.m_builtClusterer.getClusterCentroids().size();
-            }
-        }
+        this.m_bestChromosome = new MyGenClustPlusPlus.MKMeans(mainPopulation[newBestIndex]);
+        this.m_bestFitness = var17;
+        finalRun = new MyGenClustPlusPlus.MKMeans();
+        finalRun.setSeed(this.m_rand.nextInt());
+        finalRun.setInitializationMethod(new SelectedTag(4, TAGS_SELECTION_MK));
+        finalRun.setInitial(this.m_bestChromosome.getClusterCentroids());
+        finalRun.setDontReplaceMissingValues(this.m_dontReplaceMissing);
+        finalRun.setPreserveInstancesOrder(true);
+        finalRun.setMaxIterations(this.m_maxKMeansIterationsFinal);
+        finalRun.buildClusterer(this.m_data, this.m_distFunc);
+        this.m_builtClusterer = finalRun;
+        this.m_numberOfClusters = this.m_builtClusterer.getClusterCentroids().size();
     }
 
     private MyGenClustPlusPlus.MKMeans[] generateInitialPopulation(Instances data) throws Exception {
+        /* pre-initial size is 3 * initial size = 90 */
         int maxK = 3 * this.m_initialPopulationSize / 10 + 1;
         int numberOfChromosomes = 5 * (maxK - 1) * 2;
         MyGenClustPlusPlus.MKMeans[] population = new MyGenClustPlusPlus.MKMeans[numberOfChromosomes];
@@ -235,11 +247,14 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
 
         int i;
         int randomK;
+        /* Initial Population with Probabilistic Selection */
         for(i = 2; i <= maxK; ++i) {
+            /* five clusterings for each value of k */
             for(randomK = 0; randomK < 5; ++randomK) {
                 MyGenClustPlusPlus.MKMeans j = new MyGenClustPlusPlus.MKMeans();
                 int chromosome = -1;
 
+                /* chromosome is built until number of clusters is at least two */
                 do {
                     ++chromosome;
                     if(chromosome > 100) {
@@ -255,6 +270,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
                     j.setPreserveInstancesOrder(true);
                     j.setMaxIterations(this.m_maxKMeansIterationsInitial);
                     j.setDontReplaceMissingValues(this.m_dontReplaceMissing);
+                    j.setInitializationMethod(new SelectedTag(1, TAGS_SELECTION_MK));
                     j.buildClusterer(data, this.m_distFunc);
                 } while(j.getNumClusters() < 2);
 
@@ -271,7 +287,9 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
                 var11.setNumClusters(randomK);
                 var11.setDontReplaceMissingValues(this.m_dontReplaceMissing);
                 var11.setPreserveInstancesOrder(true);
+                var11.setInitializationMethod(new SelectedTag(1, TAGS_SELECTION_MK));
 
+                /* chromosome is built until number of clusters is at least two */
                 do {
                     var11.buildClusterer(data, this.m_distFunc);
                 } while(var11.getNumClusters() < 2);
@@ -283,15 +301,26 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         return population;
     }
 
-    public double daviesBouldinScore() {
-        return 1.0/fitness(m_builtClusterer);
-    }
-
     public int[] getLabels() throws Exception {
         return m_builtClusterer.getAssignments();
     }
 
     private double fitness(MyGenClustPlusPlus.MKMeans chromosome) {
+        /*int[] labelsPred = null;
+        try {
+            labelsPred = chromosome.getAssignments();
+        } catch (Exception var19) {
+            var19.printStackTrace();
+        }
+
+        HashMap<Integer, double[]> centroids = utils.Utils.centroids(myData, labelsPred);
+        if (centroids.size() < 2) {
+            return 0.0;
+        }
+
+        double dbScore = utils.Utils.dbIndexScore(centroids, labelsPred, myData);
+
+        return 1.0D / dbScore;*/
         EuclideanDistance eu = new EuclideanDistance(this.m_data);
         Instances centroids = chromosome.getClusterCentroids();
         double[] Si = new double[centroids.numInstances()];
@@ -366,6 +395,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         int[] kArray = new int[population.length / 5];
         double sumTk = 0.0D;
 
+        /* compute average fitness value for each value of k */
         for(int p = 0; p < population.length; p += 5) {
             kArray[p / 5] = population[p].getNumClusters();
             double Tk = 0.0D;
@@ -380,51 +410,60 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
             TkArray[p / 5] = Tk;
         }
 
-        while(true) {
-            while(currentSelections < selectedPopulation.length) {
-                double var21 = this.m_rand.nextDouble();
-                double cumulativeProbability = 0.0D;
+        /* choose probabilistically next chromosome to include in initial population */
+        while(currentSelections < selectedPopulation.length) {
+            double var21 = this.m_rand.nextDouble();
+            double cumulativeProbability = 0.0D;
 
-                for(int var22 = 0; var22 < TkArray.length; ++var22) {
-                    cumulativeProbability += TkArray[var22] / sumTk;
-                    if(var21 <= cumulativeProbability) {
-                        double max = -1.0D / 0.0;
-                        int maxIndex = 2147483647;
+            /* iterate through each value of k,
+             * roulette-wheel selection, the higher average fitness the higher chance to be selected */
+            for(int var22 = 0; var22 < TkArray.length; ++var22) {
+                cumulativeProbability += TkArray[var22] / sumTk;
+                if(var21 <= cumulativeProbability) {
+                    double max = -1.0D / 0.0;
+                    int maxIndex = 2147483647;
 
-                        for(int selected = 0; selected < 5; ++selected) {
-                            if(fitnessArray[var22 + selected] > max && !usedChromosome[var22 + selected]) {
-                                max = fitnessArray[var22 + selected];
-                                maxIndex = var22 + selected;
-                            }
+                    /* 5 clusterings belong to each of the values k
+                    *  choose the next one with the best fitness function */
+                    for(int selected = 0; selected < 5; ++selected) {
+                        if(fitnessArray[var22 + selected] > max && !usedChromosome[var22 + selected]) {
+                            max = fitnessArray[var22 + selected];
+                            maxIndex = var22 + selected;
                         }
-
-                        MyGenClustPlusPlus.MKMeans var23;
-                        if(maxIndex == 2147483647) {
-                            try {
-                                MyGenClustPlusPlus.MKMeans ex = new MyGenClustPlusPlus.MKMeans();
-                                ex.setSeed(this.m_rand.nextInt());
-                                ex.setNumClusters(kArray[var22]);
-                                ex.setPreserveInstancesOrder(true);
-                                ex.setDontReplaceMissingValues(this.m_dontReplaceMissing);
-                                ex.buildClusterer(this.m_data, this.m_distFunc);
-                                var23 = ex;
-                            } catch (Exception var20) {
-                                var20.printStackTrace();
-                                return null;
-                            }
-                        } else {
-                            usedChromosome[maxIndex] = true;
-                            var23 = population[maxIndex];
-                        }
-
-                        selectedPopulation[currentSelections++] = var23;
-                        break;
                     }
+
+                    MyGenClustPlusPlus.MKMeans var23;
+                    if(maxIndex == 2147483647) {
+                        /* if clusterings corresponding to given k are chosen more than five times
+                         * then we create a new chromosome by running MK-Means/MK-Means++ once more
+                         * with input k for the number of clusters. */
+                        try {
+                            MyGenClustPlusPlus.MKMeans ex = new MyGenClustPlusPlus.MKMeans();
+                            ex.setSeed(this.m_rand.nextInt());
+                            ex.setNumClusters(kArray[var22]);
+                            ex.setPreserveInstancesOrder(true);
+                            ex.setDontReplaceMissingValues(this.m_dontReplaceMissing);
+                            ex.buildClusterer(this.m_data, this.m_distFunc);
+                            var23 = ex;
+                        } catch (Exception var20) {
+                            var20.printStackTrace();
+                            System.out.println("failed in probabilistic selection to generate new clustering" +
+                                    "when given k is chosen more than five times");
+                            return null;
+                        }
+                    } else {
+                        /* otherwise include in initial population and indicate that it's already chosen */
+                        usedChromosome[maxIndex] = true;
+                        var23 = population[maxIndex];
+                    }
+
+                    selectedPopulation[currentSelections++] = var23;
+                    break;
                 }
             }
-
-            return selectedPopulation;
         }
+
+        return selectedPopulation;
     }
 
     public TechnicalInformation getTechnicalInformation() {
@@ -815,7 +854,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
     }
 
     public static void main(String[] args) throws Exception {
-        runClusterer(new MyGenClustPlusPlus(), args);
+        //runClusterer(new MyGenClustPlusPlus(), args);
     }
 
     public void setOptions(String[] options) throws Exception {
@@ -1123,7 +1162,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
                     hk = new DecisionTableHashKey(initInstances.instance(instIndex), initInstances.numAttributes(), true);
                     if(!initC.containsKey(hk)) {
                         this.m_ClusterCentroids.add(initInstances.instance(instIndex));
-                        initC.put(hk, (Object)null);
+                        initC.put(hk, null);
                     }
 
                     initInstances.swap(i, instIndex);
@@ -1134,6 +1173,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
 
                 this.m_initialStartPoints = new Instances(this.m_ClusterCentroids);
             } else {
+                /* hill-climber */
                 this.m_ClusterCentroids = this.m_initialStartPoints;
                 this.m_NumClusters = this.m_initialStartPoints.numInstances();
                 if(!this.m_supplied) {

@@ -17,6 +17,8 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -441,7 +443,7 @@ public class Utils {
 
         for (int cluser: map.keySet()) {
             map2.put(cluser, newLabel++);
-            System.out.println(cluser + " : " + map.get(cluser));
+            //System.out.println(cluser + " : " + map.get(cluser));
         }
         for (int i = 0; i < labels.length; ++i) {
             assert (map2.containsKey(labels[i]));
@@ -470,7 +472,7 @@ public class Utils {
             }
         }
 
-        System.out.println(goodClusters.size());
+        //System.out.println(goodClusters.size());
         // remove bad clusters
         HashMap<Integer, double[]> centroids = Utils.centroids(data, labels);
         for (int i = 0; i < labels.length; ++i) {
@@ -490,6 +492,12 @@ public class Utils {
                 labels[i] = targetC;
             }
         }
+    }
+
+    public static double doublePrecision(double toBeTruncated, int precision) {
+        return BigDecimal.valueOf(toBeTruncated)
+                .setScale(precision, RoundingMode.HALF_UP)
+                .doubleValue();
     }
 
     public static void main(String[] args) throws Exception {
@@ -522,9 +530,11 @@ public class Utils {
         Integer[] distClusters = Utils.distinctItems(labels).toArray(new Integer[distNumK]);
         int idx = new Random().nextInt(distClusters.length);
         System.out.println(distClusters[idx]);*/
-        double[][] data = {{1,1}, {1,2},{5,5},{5,5.5},{4,5},{1,0}};
+        /*double[][] data = {{1,1}, {1,2},{5,5},{5,5.5},{4,5},{1,0}};
         int[] label = {5,5,1,1,0,10};
         removeNoise(label, data, 2);
-        System.out.println(Arrays.toString(label));
+        System.out.println(Arrays.toString(label));*/
+
+        //System.out.println(doublePrecision(10.3453453455, 5));
     }
 }

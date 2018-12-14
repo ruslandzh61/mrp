@@ -42,6 +42,8 @@ public class PSO {
     private static int seed_default = 10;
     private Instances instances;
     private int[] labelsTrue;
+    private int minSizeOfCluster;
+
     AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
 
     public PSO(Problem aProblem, NCConstruct aNCconstruct, Evaluator.Evaluation[] aEvaluation,
@@ -52,7 +54,7 @@ public class PSO {
         this.conf = configuration;
         this.instances = aInstances;
         this.labelsTrue = aLabelsTrue;
-
+        minSizeOfCluster = (int) (Math.sqrt(problem.getN()) / 2);
         setSeed(seed_default);
 
         this.velocityCalculator = new VelocityCalculator(conf.c1, conf.c2);
@@ -98,7 +100,6 @@ public class PSO {
         nonDomPSOList = determineParetoSet(psoList);
         updateUtopiaPoint();
         Particle leader = pickALeader(false);
-        int minSizeOfCluster = (int) Math.sqrt(problem.getN()) / 2;
         Utils.removeNoise(leader.getSolution().getSolution(), problem.getData(), minSizeOfCluster);
         Utils.adjustAssignments(leader.getSolution().getSolution());
 
@@ -135,7 +136,7 @@ public class PSO {
             int clusterNum = generator.nextInt(conf.maxK - 2 + 1) + 2;
             // k-means centroids are initialized and point are assigned to a particular centroid
 
-            Solution solution = new Solution(kMeansAssignments(clusterNum), clusterNum);
+            Solution solution = new Solution(kMeansAssignments(instances, clusterNum), clusterNum);
 
             // step 2 -randomize velocity in the defined range
             double[] vel = new double[problem.getN()];
@@ -148,29 +149,42 @@ public class PSO {
             p.setSeed(generator.nextInt());
             psoList.add(p);
         }
+
+        System.out.println("initial population");
+        for(int i = 0; i < swarmSize; i++) {
+            int[] sol = psoList.get(i).getSolution().getSolution();
+            System.out.println(adjustedRandIndex.measure(sol, labelsTrue));
+            System.out.println(Arrays.toString(psoList.get(i).getSolution().getSolution()));
+        }
     }
 
-    private int[] kMeansAssignments(int clusterNum) {
+    /*private int[] kMeansAssignments(int clusterNum) {
         KMeans kMeans = new KMeans(problem.getData(), problem.getN(), problem.getD(), clusterNum, generator.nextInt());
         kMeans.setSeed(generator.nextInt());
         // perform one iteration of k-mean
         //kMeans.oneIter();
         // perform complete k-means clustering
-        kMeans.clustering(50);
-        return kMeans.getLabels();
-    }
+        kMeans.clustering(500);
+        int[] labelsPred = kMeans.getLabels();
+        Utils.removeNoise(labelsPred, problem.getData(), (int) (Math.sqrt(problem.getN())));
+        Utils.adjustAssignments(labelsPred);
+        return labelsPred;
+    }*/
 
-    /*private int[] kMeansAssignments(Instances instances, int k) throws Exception {
+    private int[] kMeansAssignments(Instances instances, int k) throws Exception {
         SimpleKMeans kMeans = new SimpleKMeans();
         kMeans.setSeed(generator.nextInt());
-        SelectedTag selectedTag = new SelectedTag(SimpleKMeans.RANDOM, SimpleKMeans.TAGS_SELECTION);
+        SelectedTag selectedTag = new SelectedTag(SimpleKMeans.KMEANS_PLUS_PLUS, SimpleKMeans.TAGS_SELECTION);
         kMeans.setInitializationMethod(selectedTag);
         kMeans.setPreserveInstancesOrder(true);
-        kMeans.setMaxIterations(50);
+        kMeans.setMaxIterations(500);
         kMeans.setNumClusters(k);
         kMeans.buildClusterer(instances);
-        return kMeans.getAssignments();
-    }*/
+        int[] labelsPred = kMeans.getAssignments();
+        Utils.removeNoise(labelsPred, problem.getData(), minSizeOfCluster);
+        Utils.adjustAssignments(labelsPred);
+        return labelsPred;
+    }
 
     private void update() {
         // step 1 - Evaluate objective functions for each particle

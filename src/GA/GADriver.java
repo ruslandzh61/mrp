@@ -30,6 +30,7 @@ public class GADriver {
         AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
         double meanMyDBWithMyCentroids = 0.0;
         double meanARI = 0.0;
+        double meanK = 0.0;
         int[] labelsTrue, labelsPred;
         StringBuffer output= new StringBuffer();
         String temp;
@@ -75,6 +76,11 @@ public class GADriver {
         filter.setAttributeIndices("" + data.numAttributes());
         filter.setInputFormat(data);
         Instances dataClusterer = Filter.useFilter(data, filter);
+        /*double[][] myData = new double[dataClusterer.size()][];
+        int var1Idx = 0;
+        for (Instance instance: dataClusterer) {
+            myData[var1Idx++] = instance.toDoubleArray();
+        }*/
 
         //dataClusterer.setClassIndex(dataClusterer.numAttributes() - 1);
         //System.out.println(dataClusterer);
@@ -82,6 +88,7 @@ public class GADriver {
         // step 3 - build model
         Random rnd = new Random(1);
         for (int run = 1; run <= runs; ++run) {
+
             cl = new MyGenClustPlusPlus();
             cl.setSeed(rnd.nextInt());
             cl.buildClusterer(dataClusterer);
@@ -95,20 +102,23 @@ public class GADriver {
             // step 4 - measure
             double ARI = adjustedRandIndex.measure(labelsTrue, labelsPred);
             double myDBWithMyCentroids = Utils.dbIndexScore(myCentroids, labelsPred, dataArr);
-
+            double k = Utils.distinctNumberOfItems(labelsPred);
             meanARI += ARI;
             meanMyDBWithMyCentroids += myDBWithMyCentroids;
+            meanK += k;
 
-            System.out.println("run " + run + ": " + Arrays.toString(labelsPred));
-            System.out.println("ARI score: " + ARI);
-            System.out.println("DB score:  " + myDBWithMyCentroids);
+            //System.out.println("run " + run + ": " + Arrays.toString(labelsPred));
+            System.out.println("ARI score: " + Utils.doublePrecision(ARI, 4));
+            System.out.println("DB score:  " + Utils.doublePrecision(myDBWithMyCentroids, 4));
+            System.out.println("num of clusters: " + k);
         }
 
 
         // step 4 - measure comparing to true labels
         //System.out.println("DB Index score: " + cl.calcularDavidBouldin().getResultado());
-        System.out.println("mean ARI score: " + meanARI/runs);
-        System.out.println("mean DB score: " + meanMyDBWithMyCentroids/runs);
+        System.out.println("mean ARI score: " + Utils.doublePrecision(meanARI/runs, 4));
+        System.out.println("mean DB score: " + Utils.doublePrecision(meanMyDBWithMyCentroids/runs, 4));
+        System.out.println("mean # of clusters: " + Utils.doublePrecision(meanK/runs, 4));
 
         //System.out.println(Arrays.toString(labelsTrue));
         //System.out.println(Arrays.toString(cl.getLabels()));
@@ -119,6 +129,7 @@ public class GADriver {
     public static void main(String[] args) throws Exception {
         // weka doesn't work with other separators other than ','
         // (false, false) - first attribute not removed, not normalized
-        GADriver gaDriver = new GADriver(30, "data/p-yeast.csv","data/yeast.csv", ',', true, false);
+
+        GADriver gaDriver = new GADriver(15, "data/p-glass.csv","data/glass.csv", ',', false, false);
     }
 }
