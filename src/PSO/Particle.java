@@ -8,7 +8,7 @@ import java.util.Set;
 /**
  * Created by rusland on 09.09.18.
  * represents extended version of particle, defined in (Jarboui, 2007):
- *      'Combinatorial particle swarm optimization (CPSO) for partitional clustering problem'
+ *      'Combinatorial particle swarm optimization (CPSO) for partitional buildClusterer problem'
  * Extended particle stores real solution 'solution' and intermediate dummy solution vector
  * This version is able to deal with a combinatorial representation of PSO
  */
@@ -50,7 +50,7 @@ public class Particle implements Comparable<Particle> {
      * update real solution vector X through intermediate solution vector Y. update Y first and then X for step t
      * gBest is global best solution at step t-1, pBest is personal best at step t-1 before calling update method
      * */
-    public void update(Solution gBest, int maxK, PSO.Tracker tracker) {
+    public void update(Solution gBest, int maxK) {
         assert (gBest != null);
 
         int[] sol = solution.getSolution();
@@ -87,10 +87,8 @@ public class Particle implements Comparable<Particle> {
         for (int j = 0; j < N; ++j) {
             if (dummySol[j] == 1) {
                 newSol[j] = gBest.getSolutionAt(j);
-                tracker.gBest++;
             } else if (dummySol[j] == -1) {
                 newSol[j] = pBest.getSolutionAt(j);
-                tracker.pBest++;
             } else {
                 // randomly select cluster
                 //use only if solution is in locus-based representation
@@ -99,7 +97,6 @@ public class Particle implements Comparable<Particle> {
                 int rndIdx = rnd.nextInt(distClusters.length);
                 int randomCluster = distClusters[rndIdx];
                 newSol[j] = randomCluster;
-                tracker.random++;
             }
         }
 

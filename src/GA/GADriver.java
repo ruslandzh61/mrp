@@ -1,6 +1,8 @@
 package GA;
 
+import PSO.Evaluator;
 import smile.validation.AdjustedRandIndex;
+import utils.NCConstruct;
 import utils.Utils;
 import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.DensityBasedClusterer;
@@ -86,11 +88,20 @@ public class GADriver {
         //System.out.println(dataClusterer);
 
         // step 3 - build model
+        NCConstruct ncConstruct = new NCConstruct(dataArr);
+        Evaluator.Evaluation[] evaluations = {Evaluator.Evaluation.CONNECTIVITY, Evaluator.Evaluation.COHESION};
+        Evaluator evaluator = new Evaluator();
+
         Random rnd = new Random(1);
         for (int run = 1; run <= runs; ++run) {
 
             cl = new MyGenClustPlusPlus();
             cl.setSeed(rnd.nextInt());
+            cl.setNcConstruct(ncConstruct);
+            cl.setEvaluator(evaluator);
+            cl.setEvaluations(evaluations);
+            cl.setMyData(dataArr);
+            cl.setTrueLabels(labelsTrue);
             cl.buildClusterer(dataClusterer);
 
             labelsPred = Utils.adjustLabels(cl.getLabels());

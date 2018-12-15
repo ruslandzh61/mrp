@@ -41,7 +41,7 @@ public class GabrielGraph {
                 for (int d = 0; d < D; ++d) {
                     center[d] = 0.5*(data[i][d] + data[j][d]);
                 }
-                double r = Utils.dist(center,data[i]); // radius of ball (half-distance between i and j)
+                double r = Utils.dist(center, data[i], 2); // radius of ball (half-distance between i and j)
 
                 // check for each vertex that it's not in inside of i-j ball
                 int p = 0;
@@ -51,7 +51,7 @@ public class GabrielGraph {
                         ++p;
                         continue;
                     }
-                    double dist = Utils.dist(data[p], center);
+                    double dist = Utils.dist(data[p], center, 2);
                     // if inside or on the edge
                     if ( dist <= r)
                         ++denIJ;

@@ -36,7 +36,7 @@ public class Problem {
 
     public double getDimHigh(int dimIdx) { return dimHigh[dimIdx];}*/
 
-    public double[] evaluate(Solution solution, Evaluator.Evaluation[] evaluation, NCConstruct ncc) {
+    public double[] evaluate(int[] solution, Evaluator.Evaluation[] evaluation, NCConstruct ncc) {
         assert (evaluation.length>0);
         double[] result = new double[evaluation.length];
         for (int iE = 0; iE < evaluation.length; ++iE) {

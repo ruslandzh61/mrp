@@ -6,7 +6,7 @@ import utils.*;
  * Created by rusland on 06.10.18.
  * locus-based solution representation
  * e.g. [1,1,1,1,1,2,2,2,3] - transform nine data points to a particle vector
- *      which represents a clustering solution consisting of three clusters
+ *      which represents a buildClusterer solution consisting of three clusters
  *      first 5 points belong to cluster with 1, next 3 points - to cluster 2, last point - to cluster 3
  */
 public class Solution implements Comparable<Solution> {

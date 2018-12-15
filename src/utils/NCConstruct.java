@@ -258,7 +258,7 @@ public class NCConstruct {
                     p++;
                     continue;
                 }
-                orderedByDist[i][j] = new PointDistance(p, Utils.dist(data[i], data[p]));
+                orderedByDist[i][j] = new PointDistance(p, Utils.dist(data[i], data[p], 2));
                 ++p;
                 ++j;
             }

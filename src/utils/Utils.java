@@ -76,10 +76,10 @@ public class Utils {
         return allData;
     }
 
-    public static double dist(double[] v,double[] w) {
+    public static double dist(double[] v,double[] w, double pow) {
         double sum = 0.0;
         for(int i=0;i<v.length;i++) {
-            sum = sum + Math.pow((v[i]-w[i]),2.0);
+            sum = sum + Math.pow((v[i]-w[i]),pow);
         }
         return Math.sqrt(sum);
     }
@@ -313,7 +313,7 @@ public class Utils {
             for (int p: cluster) {
                 double[] punto = data[p];
                 clustersDiameter.put(clusterID,
-                        clustersDiameter.get(clusterID)+Utils.dist(punto, clusters.get(clusterID)));
+                        clustersDiameter.get(clusterID)+Utils.dist(punto, clusters.get(clusterID), 2));
             }
             clustersDiameter.put(clusterID,
                     clustersDiameter.get(clusterID)/cluster.size());
@@ -329,7 +329,7 @@ public class Utils {
                     //if the cluster is null
                     if (i != j && clusters.get(j) != null) {
                         double val = (clustersDiameter.get(i) + clustersDiameter.get(j))
-                                / Utils.dist(clusters.get(i), clusters.get(j));
+                                / Utils.dist(clusters.get(i), clusters.get(j), 2);
                         if (val > max)
                             max = val;
                     }
@@ -451,11 +451,21 @@ public class Utils {
         }
     }
 
-    public static void removeNoise(int[] labels, double[][] data, int minSizeOfCluster) {
+
+    public static double[] normalize(double[] cur, double[] low, double[] high) {
+        assert (low.length == cur.length);
+        double[] normCur = cur.clone();
+        for (int i = 0; i < normCur.length; ++i) {
+            normCur[i] = (cur[i] - low[i]) / (high[i] - low[i]);
+        }
+        return normCur;
+    }
+
+    public static void removeNoise(int[] labels, double[][] data, int minSizeOfCluster, double pow) {
         Set<Integer> goodClusters = new HashSet<>();
 
         // count size of clusters
-        HashMap<Integer, Integer> map = new HashMap();
+        HashMap<Integer, Integer> map = new HashMap<>();
         for (int i = 0; i < labels.length; ++i) {
             int clID = labels[i];
             if (map.containsKey(clID)) {
@@ -483,7 +493,7 @@ public class Utils {
                     if (!goodClusters.contains(c)) {
                         continue;
                     }
-                    double tmpDist = dist(centroids.get(c), data[i]);
+                    double tmpDist = dist(centroids.get(c), data[i], pow);
                     if (minDist > tmpDist) {
                         minDist = tmpDist;
                         targetC = c;

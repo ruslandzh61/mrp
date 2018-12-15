@@ -18,7 +18,7 @@ public class Evaluator {
      * 'data' and 'ncc' parameters are needed for the evaluation of connectivity function
      * minimize fitness
      * */
-    public Double evaluate(Solution solution, Evaluation evaluation, double[][] data, NCConstruct ncc) {
+    public Double evaluate(int[] solution, Evaluation evaluation, double[][] data, NCConstruct ncc) {
         if (evaluation == Evaluation.CONNECTIVITY) {
             return -connectivity(solution, data, ncc);
         } else if (evaluation == Evaluation.COHESION) {
@@ -34,7 +34,7 @@ public class Evaluator {
      * value would fall in the interval [0, 1].
      * Should be maximized.
      * */
-    private double connectivity(Solution solution, double[][] data, NCConstruct ncc) {
+    private double connectivity(int[] solution, double[][] data, NCConstruct ncc) {
         HashMap<Integer, Set<Integer>> clustersHp = toHashMap(solution);
         /*NC construction and obtaining sub-clusters*/
 
@@ -65,7 +65,7 @@ public class Evaluator {
      *  value would fall in the interval [0, Infinity].
      *  Should be minimized.
      *  */
-    private double cohesion(Solution solution, double[][] data) {
+    private double cohesion(int[] solution, double[][] data) {
         // key is id of a cluster; value is set of data points in the cluster
         HashMap<Integer, Set<Integer>> clustersHp = toHashMap(solution);
         double[] coh = new double[clustersHp.size()];
@@ -84,17 +84,17 @@ public class Evaluator {
     private double cohesionDistance(double[][] data, int p, Set<Integer> neighbors) {
         double max = -1; // distance can't be negative
         for (Integer neighbor : neighbors) {
-            double distTo = Utils.dist(data[p], data[neighbor]);
+            double distTo = Utils.dist(data[p], data[neighbor], 2);
             max = (distTo > max) ? distTo : max;
         }
         return max;
     }
 
-    private HashMap<Integer, Set<Integer>> toHashMap(Solution solution) {
+    private HashMap<Integer, Set<Integer>> toHashMap(int[] solution) {
         // convert solution to efficient data structure
         HashMap<Integer, Set<Integer>> clustersHp = new HashMap<>(); // key is cluster id, value is set of data points
-        for (int i = 0; i < solution.size(); ++i) {
-            int id = solution.getSolutionAt(i);
+        for (int i = 0; i < solution.length; ++i) {
+            int id = solution[i];
             if (clustersHp.containsKey(id)) {
                 clustersHp.get(id).add(i);
             } else {
@@ -136,7 +136,7 @@ public class Evaluator {
         Solution s = new Solution(realS, Utils.distinctNumberOfItems(realS));
         Evaluator e = new Evaluator();
         NCConstruct ncc = new NCConstruct(data);
-        double cost = e.evaluate(s,Evaluation.CONNECTIVITY,data, ncc);
+        double cost = e.evaluate(realS,Evaluation.CONNECTIVITY,data, ncc);
         System.out.println(cost);
 
     }
