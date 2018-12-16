@@ -488,13 +488,13 @@ public class Utils {
         int i = 0;
         for (double[] cur: objs) {
             double distToUtopia = Utils.dist(cur, utopiaCoords, 2.0);
-            //double distToUtopia = Utils.dist(cur, objBestCoordinates, 2.0);
             if (distToUtopia < minDist) {
                 leader = i;
                 minDist = distToUtopia;
             }
             ++i;
         }
+        assert (leader > -1);
         return leader;
     }
 

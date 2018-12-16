@@ -1,11 +1,9 @@
-package PSO;
+package clustering;
 
-import smile.validation.AdjustedRandIndex;
 import utils.Utils;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -16,6 +14,14 @@ import java.util.Random;
  * http://commons.apache.org/proper/commons-math/apidocs/org/apache/commons/math4/ml/clustering/KMeansPlusPlusClusterer.html#KMeansPlusPlusClusterer-int-
  */
 public class KMeans {
+    private boolean supplied;
+
+    private int niter = 500;
+
+    public enum Initialization {
+        RANDOM, KMEANS_PLUS_PLUS, HILL_CLIMBER
+    }
+
     private int[] label;
     private double[][] data;
     private int N, D;
@@ -23,14 +29,16 @@ public class KMeans {
     private int k;
     private int seed;
     private static int default_seed = 10;
+    private static Initialization default_init = Initialization.KMEANS_PLUS_PLUS;
     private double pow = 2;
-    Random rnd;
-    private boolean plus = true;
+    private Random rnd;
+    private Initialization initialization;
+    private double[][] initialStartPoint;
 
-    KMeans(double[][] aData, int aN, int aD, int aK, double aPow) {
+    public KMeans(double[][] aData, int aK, double aPow) {
         data = aData;
-        N = aN;
-        D = aD;
+        N = aData.length;
+        D = aData[0].length;
         label = new int[N];
         this.pow = aPow;
         if (aK > N) {
@@ -42,10 +50,24 @@ public class KMeans {
         this.seed = default_seed;
     }
 
+    public void setInitializationMethod(Initialization aInitialization) {
+        this.initialization = aInitialization;
+    }
+
+    public void setMaxIterations(int aIter) {
+        this.niter = aIter;
+    }
+
+    public void setInitial(double[][] initial) {
+        this.supplied = true;
+        this.k = initial.length;
+        this.initialStartPoint = initial;
+    }
+
     /**
      * performs complete buildClusterer
      *  */
-    public void buildClusterer(int niter) {
+    public void buildClusterer() {
         initialize();
 
         if (niter <= 0 || niter > 500)
@@ -84,26 +106,22 @@ public class KMeans {
         return Utils.deepCopy(centroids);
     }
 
-    public void setPlus(boolean plus) {
-        this.plus = plus;
-    }
-
     /**
      * performs one iteration of k-means buildClusterer
      * */
-    void oneIter() {
+    /*void oneIter() {
         centroids = updateCentroids();
         //assign record to the closest centroid
         for (int i=0; i < N; i++){
             label[i] = closest(data[i]);
         }
-    }
+    }*/
 
     private void initialize() {
         // choose existing data points as initial data points
         centroids = new double[k][D];
 
-        if (plus) {
+        if (this.initialization == Initialization.KMEANS_PLUS_PLUS) {
             int firstIdx = rnd.nextInt(N);
             List<Integer> centroidList = new ArrayList<>();
             boolean[] taken = new boolean[N];
@@ -182,7 +200,7 @@ public class KMeans {
             for (int i = 0; i < centroidList.size(); ++i) {
                 centroids[i] = data[centroidList.get(i)];
             }
-        } else {
+        } else if (this.initialization == Initialization.RANDOM) {
             double[][] copy = Utils.deepCopy(data);
             for (int i = 0; i < k; i++) {
                 int rand = rnd.nextInt(N - i);
@@ -195,7 +213,12 @@ public class KMeans {
             for (int i = 0; i < N; i++) {
                 label[i] = closest(data[i]);
             }
+        } else if (this.initialization == Initialization.HILL_CLIMBER) {
+            assert (supplied == true);
+            this.centroids = this.initialStartPoint;
+            this.k = this.initialStartPoint.length;
         }
+
         Utils.checkClusterLabels(getLabels(), k);
     }
 
@@ -252,13 +275,13 @@ public class KMeans {
     private boolean converge(double [][] c1, double [][] c2, double threshold){
         // c1 and c2 are two sets of centroids
         double maxv = 0;
-        for (int i=0; i< k; i++){
-            double d= Utils.dist(c1[i], c2[i], this.pow);
-            if (maxv<d)
+        for (int i = 0; i < k; i++){
+            double d = Utils.dist(c1[i], c2[i], this.pow);
+            if (maxv < d)
                 maxv = d;
         }
 
-        if (maxv <threshold)
+        if (maxv < threshold)
             return true;
         else
             return false;
@@ -284,13 +307,13 @@ public class KMeans {
         int[] excludedColumns = {0,dataStr.get(0).length-1};
         data = Utils.extractAttributes(dataStr, excludedColumns);
         k = data.length/20;
-        KMeans kMeans;
-        kMeans = new KMeans(data, data.length, data[0].length, k);
+        clustering.KMeans kMeans;
+        kMeans = new clustering.KMeans(data, data.length, data[0].length, k);
         kMeans.oneIter();
         //kMeans.buildClusterer(100);
         int[] labelsPred = kMeans.getLabels();
 
-        //smile.buildClusterer.KMeans kMeans = new smile.buildClusterer.KMeans(data,k,100);
+        //smile.buildClusterer.clustering.KMeans kMeans = new smile.buildClusterer.clustering.KMeans(data,k,100);
         //int[] labelsPred = kMeans.getClusterLabel();
         System.out.println(Arrays.toString(labelsPred));
         System.out.println(new AdjustedRandIndex().measure(labels, labelsPred));*/
