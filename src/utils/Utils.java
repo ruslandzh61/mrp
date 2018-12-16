@@ -260,15 +260,7 @@ public class Utils {
         return newc;
     }
 
-    public static void normalize(double[][] data) {
-        double[] dataLow = new double[data[0].length];
-        for (int i = 0; i < dataLow.length; ++i) {
-            dataLow[i] = Double.POSITIVE_INFINITY;
-        }
-        double[] dataHigh = new double[data[0].length];
-        for (int i = 0; i < dataLow.length; ++i) {
-            dataHigh[i] = Double.NEGATIVE_INFINITY;
-        }
+    public static void normalize(double[][] data, double[] dataLow, double[] dataHigh) {
         for (int i = 0; i < data.length; ++i) {
             for (int j = 0; j < data[0].length; ++j) {
                 double tmp = data[i][j];
@@ -286,6 +278,18 @@ public class Utils {
                         / (dataHigh[j] - dataLow[j]);
             }
         }
+    }
+
+    public static void normalize(double[][] data) {
+        double[] dataLow = new double[data[0].length];
+        for (int i = 0; i < dataLow.length; ++i) {
+            dataLow[i] = Double.POSITIVE_INFINITY;
+        }
+        double[] dataHigh = new double[data[0].length];
+        for (int i = 0; i < dataLow.length; ++i) {
+            dataHigh[i] = Double.NEGATIVE_INFINITY;
+        }
+        normalize(data, dataLow, dataHigh);
     }
 
     public static double dbIndexScore(HashMap<Integer, double[]> clusters, int[] labels, double[][] data) {
@@ -451,6 +455,48 @@ public class Utils {
         }
     }
 
+    public static double[] determineParetoSet(double[][] objsList) {
+        double[] maxiMins = new double[objsList.length];
+        for (int i = 0; i < objsList.length; ++i) {
+            double maxiMin = Double.NEGATIVE_INFINITY;
+            double[] objI = objsList[i];
+            double[] objJ;
+            for (int j = 0; j < objsList.length; ++j) {
+                if (i == j) continue;
+                objJ = objsList[j];
+                assert (objI.length == objJ.length);
+
+                double min = Double.POSITIVE_INFINITY;
+                for (int m = 0; m < objI.length; ++m) {
+                    double curDiff = objI[m] - objJ[m];
+                    if (curDiff < min) {
+                        min = curDiff;
+                    }
+                }
+                if (min > maxiMin) {
+                    maxiMin = min;
+                }
+            }
+            maxiMins[i] = maxiMin;
+        }
+        return maxiMins;
+    }
+
+    public static int pickClosestToUtopia(double[][] objs, double[] utopiaCoords) {
+        double minDist = Double.POSITIVE_INFINITY;
+        int leader = -1;
+        int i = 0;
+        for (double[] cur: objs) {
+            double distToUtopia = Utils.dist(cur, utopiaCoords, 2.0);
+            //double distToUtopia = Utils.dist(cur, objBestCoordinates, 2.0);
+            if (distToUtopia < minDist) {
+                leader = i;
+                minDist = distToUtopia;
+            }
+            ++i;
+        }
+        return leader;
+    }
 
     public static double[] normalize(double[] cur, double[] low, double[] high) {
         assert (low.length == cur.length);
@@ -546,5 +592,16 @@ public class Utils {
         System.out.println(Arrays.toString(label));*/
 
         //System.out.println(doublePrecision(10.3453453455, 5));
+
+        double[] objLow = {-0.5, 20.0};
+        double[] objHigh = {-0.1, 120};
+        double[] utopia = {0.0, 0.0};
+        double[][] objs = {{-0.2, 60}, {-0.3, 50}, {-0.3, 40}};
+        Utils.normalize(objs, objLow, objHigh);
+        for (double[] obj: objs) {
+            System.out.println(Arrays.toString(obj));
+        }
+        System.out.println(pickClosestToUtopia(objs, utopia));
+        System.out.println(Arrays.toString(determineParetoSet(objs)));
     }
 }

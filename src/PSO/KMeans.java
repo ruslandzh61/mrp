@@ -13,6 +13,7 @@ import java.util.Random;
  * Created by rusland on 10.11.18.
  * code is taken from http://cecs.wright.edu/~keke.chen/cloud/labs/mapreduce/KMeans.java
  * https://github.com/JasonAltschuler/KMeansPlusPlus/blob/master/src/KMeans.java
+ * http://commons.apache.org/proper/commons-math/apidocs/org/apache/commons/math4/ml/clustering/KMeansPlusPlusClusterer.html#KMeansPlusPlusClusterer-int-
  */
 public class KMeans {
     private int[] label;

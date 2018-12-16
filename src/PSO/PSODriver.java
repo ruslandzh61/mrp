@@ -106,7 +106,7 @@ public class PSODriver {
                     kMeans.buildClusterer(500);
                     labelsPred = kMeans.getLabels();
                 }
-                Utils.removeNoise(labelsPred, data, (int) (Math.sqrt(data.length)/2), 2.0);
+                Utils.removeNoise(labelsPred, data, 2, 2.0);
                 Utils.adjustAssignments(labelsPred);
                 HashMap<Integer, double[]> centroids = Utils.centroids(data, labelsPred);
                 double tmpDB = Utils.dbIndexScore(centroids, labelsPred, data);
@@ -188,7 +188,7 @@ public class PSODriver {
                 kMeans.setNumClusters(k);
                 kMeans.buildClusterer(instances);
                 labelsPred = kMeans.getAssignments();
-                Utils.removeNoise(labelsPred, data, (int) (Math.sqrt(data.length)/2), 2.0);
+                Utils.removeNoise(labelsPred, data, 2, 2.0);
                 Utils.adjustAssignments(labelsPred);
                 HashMap<Integer, double[]> centroids = Utils.centroids(data, labelsPred);
                 double tmpDB = Utils.dbIndexScore(centroids, kMeans.getAssignments(), data);
@@ -258,6 +258,7 @@ public class PSODriver {
         Evaluator evaluator = new Evaluator();
         Problem problem = new Problem(data, evaluator);
         configuration.maxK = (int) (Math.sqrt(problem.getData().length));
+        boolean normObjectives = true;
 
         Random rnd = new Random(1);
         double[] sdofARI = new double[runs];
@@ -269,7 +270,7 @@ public class PSODriver {
             // step 3 - run PSO algorithm
             //maxK = (int)Math.sqrt(data.length);
             //configuration.maxK = maxK;
-            PSO pso = new PSO(problem, ncConstruct, evaluation, configuration, instances, labelsTrue);
+            PSO pso = new PSO(problem, ncConstruct, evaluation, configuration, instances, labelsTrue, normObjectives);
             pso.setSeed(rnd.nextInt());
             // constructed clusters
             labelsPred = Utils.adjustLabels(pso.execute());
