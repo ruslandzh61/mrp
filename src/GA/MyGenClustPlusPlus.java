@@ -7,8 +7,8 @@ package GA;
 
 import java.util.*;
 
-import PSO.Evaluator;
-import PSO.Particle;
+import clustering.Evaluator;
+import clustering.KMeans;
 import smile.validation.AdjustedRandIndex;
 import utils.NCConstruct;
 import weka.classifiers.rules.DecisionTableHashKey;
@@ -22,7 +22,6 @@ import weka.core.DistanceFunction;
 import weka.core.EuclideanDistance;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.ManhattanDistance;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.TechnicalInformation;
@@ -32,28 +31,28 @@ import weka.core.Capabilities.Capability;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.gui.streams.InstanceProducer;
 
 public class MyGenClustPlusPlus extends RandomizableClusterer implements TechnicalInformationHandler {
     private static final long serialVersionUID = -7247404718496233612L;
     private static final double MAXIMIN_THRESHOLD = -0.0001;
-    private Instances m_data;
+    //private Instances m_data;
     private int m_numberOfClusters = 0;
     private int m_numberOfGenerations = 60;
-    private ManhattanDistance m_distFunc;
+    private EuclideanDistance m_distFunc;
     private int m_initialPopulationSize = 30;
     private int m_maxKMeansIterationsInitial = 60;
     private int m_maxKMeansIterationsQuick = 15;
     private int m_maxKMeansIterationsFinal = 50;
     private double m_duplicateThreshold = 0.0D;
     private int m_startChromosomeSelectionGeneration = 11;
-    private MyGenClustPlusPlus.MKMeans m_bestChromosome;
+    private KMeans m_bestChromosome;
     private double m_bestFitness;
     private int m_bestFitnessIndex;
-    protected MyGenClustPlusPlus.MKMeans m_builtClusterer = null;
+    protected KMeans m_builtClusterer = null;
     private Random m_rand = null;
     private boolean m_dontReplaceMissing = false;
     public static final int SUPPLIED = 4;
-    public static final Tag[] TAGS_SELECTION_MK = new Tag[]{new Tag(0, "Random"), new Tag(1, "k-means++"), new Tag(2, "Canopy"), new Tag(3, "Farthest first"), new Tag(4, "Supplied Centroids")};
 
     public void setNcConstruct(NCConstruct ncConstruct) {
         this.ncConstruct = ncConstruct;
@@ -100,7 +99,6 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         }
     }
 
-
     public int numberOfClusters() {
         return this.m_numberOfClusters;
     }
@@ -113,15 +111,14 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
     public void buildClusterer(Instances data) throws Exception {
         this.m_rand = new Random((long)this.getSeed());
         this.getCapabilities().testWithFail(data);
-        this.m_data = new Instances(data);
+        this.myData = utils.Utils.wekaInstancesToArray(data);
 
-        this.m_distFunc = new ManhattanDistance(this.m_data);
         /* Component 3: generate initial population */
-        MyGenClustPlusPlus.MKMeans[] initialPopulation = this.generateInitialPopulation(this.m_data);
+        KMeans[] initialPopulation = this.generateInitialPopulation();
         /* evaluate and update utopia point */
         double[][] tmpObjectives = new double[initialPopulation.length][];
         for (int i = 0; i < initialPopulation.length; ++i) {
-            tmpObjectives[i] = evaluate(initialPopulation[i].getAssignments());
+            tmpObjectives[i] = evaluate(initialPopulation[i].getLabels());
         }
         updateUtopiaPoint(tmpObjectives);
 
@@ -136,7 +133,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
             if(previous > this.m_bestFitness) {
                 if(previous == 1.0D / 0.0) {
                     this.m_builtClusterer = initialPopulation[selectedPopulation];
-                    this.m_numberOfClusters = initialPopulation[selectedPopulation].getClusterCentroids().size();
+                    this.m_numberOfClusters = initialPopulation[selectedPopulation].getCentroids().length;
                     System.out.println("failed in selection of initial population out of pre-initial population");
                     return;
                 }
@@ -145,19 +142,19 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
                 this.m_bestFitnessIndex = selectedPopulation;
             }
         }
-        this.m_bestChromosome = new MyGenClustPlusPlus.MKMeans(initialPopulation[this.m_bestFitnessIndex]);
+        this.m_bestChromosome = new KMeans(initialPopulation[this.m_bestFitnessIndex]);
 
         /* select initial population out of pre-initial population probabilistically
          * When a value of k is chosen, the next available solution in order of descending fitness
          * is added to initial population. */
-        MyGenClustPlusPlus.MKMeans[] mainPopulation = this.probabilisticSelection(initialPopulation);
-        MyGenClustPlusPlus.MKMeans[] prevPopulation = new MyGenClustPlusPlus.MKMeans[mainPopulation.length];
+        KMeans[] mainPopulation = this.probabilisticSelection(initialPopulation);
+        KMeans[] prevPopulation = new KMeans[mainPopulation.length];
 
         int newBestIndex;
-        MyGenClustPlusPlus.MKMeans finalRun;
+        KMeans finalRun;
         /* 60 generations */
         for(int generationIdx = 0; generationIdx <= this.m_numberOfGenerations; ++generationIdx) {
-            MyGenClustPlusPlus.MKMeans[] resultingPopulation;
+            KMeans[] resultingPopulation;
             int f;
             // step 1 - crossover or prob. cloning
             if((generationIdx + 1) % 10 != 0) {
@@ -426,11 +423,11 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         }
     }
 
-    private MyGenClustPlusPlus.MKMeans[] generateInitialPopulation(Instances data) throws Exception {
+    private KMeans[] generateInitialPopulation() throws Exception {
         /* pre-initial size is 3 * initial size = 90 */
         int maxK = 3 * this.m_initialPopulationSize / 10 + 1;
         int numberOfChromosomes = 5 * (maxK - 1) * 2;
-        MyGenClustPlusPlus.MKMeans[] population = new MyGenClustPlusPlus.MKMeans[numberOfChromosomes];
+        KMeans[] population = new KMeans[numberOfChromosomes];
         int chromosomeCount = 0;
 
         int i;
@@ -439,48 +436,41 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         for(i = 2; i <= maxK; ++i) {
             /* five clusterings for each value of k */
             for(randomK = 0; randomK < 5; ++randomK) {
-                MyGenClustPlusPlus.MKMeans j = new MyGenClustPlusPlus.MKMeans();
+                KMeans j = new KMeans(i, 2.0);
                 int chromosome = -1;
 
-                /* chromosome is built until number of clusters is at least two */
+                // chromosome is built until number of clusters is at least two
                 do {
                     ++chromosome;
                     if(chromosome > 100) {
                         System.out.println("Unable to cluster this dataset using genetic algorithm, try imputing missing values first.");
-                        j.setUnable(true);
                         this.m_builtClusterer = j;
-                        this.m_numberOfClusters = this.m_builtClusterer.getClusterCentroids().size();
+                        this.m_numberOfClusters = this.m_builtClusterer.getCentroids().length;
                         return null;
                     }
 
                     j.setSeed(this.m_rand.nextInt());
-                    j.setNumClusters(i);
-                    j.setPreserveInstancesOrder(true);
                     j.setMaxIterations(this.m_maxKMeansIterationsInitial);
-                    j.setDontReplaceMissingValues(this.m_dontReplaceMissing);
-                    j.setInitializationMethod(new SelectedTag(1, TAGS_SELECTION_MK));
-                    j.buildClusterer(data, this.m_distFunc);
-                } while(j.getNumClusters() < 2);
+                    j.setInitializationMethod(KMeans.Initialization.KMEANS_PLUS_PLUS);
+                    j.buildClusterer(this.myData);
+                } while(utils.Utils.distinctNumberOfItems(j.getLabels()) < 2);
 
                 population[chromosomeCount++] = j;
             }
         }
 
         for(i = 0; i < maxK - 1; ++i) {
-            randomK = this.m_rand.nextInt((int)(Math.sqrt((double)data.size()) - 2.0D)) + 2;
+            randomK = this.m_rand.nextInt((int)(Math.sqrt((double)data.length) - 2.0D)) + 2;
 
             for(int var10 = 0; var10 < 5; ++var10) {
-                MyGenClustPlusPlus.MKMeans var11 = new MyGenClustPlusPlus.MKMeans();
+                KMeans var11 = new KMeans(data, randomK, 2.0);
                 var11.setSeed(this.m_rand.nextInt());
-                var11.setNumClusters(randomK);
-                var11.setDontReplaceMissingValues(this.m_dontReplaceMissing);
-                var11.setPreserveInstancesOrder(true);
-                var11.setInitializationMethod(new SelectedTag(1, TAGS_SELECTION_MK));
+                var11.setInitializationMethod(KMeans.Initialization.KMEANS_PLUS_PLUS);
 
-                /* chromosome is built until number of clusters is at least two */
+                // chromosome is built until number of clusters is at least two
                 do {
-                    var11.buildClusterer(data, this.m_distFunc);
-                } while(var11.getNumClusters() < 2);
+                    var11.buildClusterer();
+                } while(utils.Utils.distinctNumberOfItems(var11.getLabels()) < 2);
 
                 population[chromosomeCount++] = var11;
             }
@@ -490,7 +480,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
     }
 
     public int[] getLabels() throws Exception {
-        return m_builtClusterer.getAssignments();
+        return m_builtClusterer.getLabels();
     }
 
     private void updateUtopiaPoint(double[][] objectives) {
@@ -520,7 +510,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         return 1.0D / fitness(m_bestChromosome);
     }
 
-    private double fitness(MyGenClustPlusPlus.MKMeans chromosome) {
+    private double fitness(KMeans chromosome) {
         /*int[] labelsPred = null;
         try {
             labelsPred = chromosome.getAssignments();
@@ -537,19 +527,19 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
 
         return 1.0D / dbScore;*/
         EuclideanDistance eu = new EuclideanDistance(this.m_data);
-        Instances centroids = chromosome.getClusterCentroids();
+        double[][] centroids = chromosome.getCentroids();
 
-        double[] Si = new double[centroids.numInstances()];
-        int[] Ti = new int[centroids.numInstances()];
-        int[] clustSize = new int[centroids.numInstances()];
-        int numClust = centroids.numInstances();
+        int numClust = centroids.length;
+        double[] Si = new double[numClust];
+        int[] Ti = new int[numClust];
+        int[] clustSize = new int[numClust];
         if(numClust == 1) {
             return 0.0D;
         } else {
             int[] assignments = null;
 
             try {
-                assignments = chromosome.getAssignments();
+                assignments = utils.Utils.adjustLabels(chromosome.getLabels());
             } catch (Exception var19) {
                 var19.printStackTrace();
             }
@@ -559,10 +549,10 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
             for(DB = 0; DB < assignments.length; ++DB) {
                 try {
                     /* e is cluster id */
-                    int e = chromosome.clusterInstance(this.m_data.get(DB));
+                    int e = assignments[DB];
                     ++clustSize[e];
                     /* Si is cluster diamater, not averaged yet */
-                    Si[e] += Math.abs(eu.distance(this.m_data.get(DB), centroids.get(e)));
+                    Si[e] += Math.abs(utils.Utils.dist(this.m_data.get(DB).toDoubleArray(), centroids[e], 2.0));
                 } catch (Exception var18) {
                     var18.printStackTrace();
                     System.exit(0);
@@ -570,7 +560,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
             }
 
             /* still step 1 - compute average  */
-            for(DB = 0; DB < centroids.numInstances(); ++DB) {
+            for(DB = 0; DB < centroids.length; ++DB) {
                 Ti[DB] = clustSize[DB];
                 if(clustSize[DB] == 0) {
                     return 0.0D;
@@ -582,15 +572,15 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
             double var20 = 0.0D;
 
             /* step 2 - compute Rij for each possible pair of clusters */
-            for(int i = 0; i < centroids.numInstances(); ++i) {
+            for(int i = 0; i < centroids.length; ++i) {
                 if(clustSize[i] != 0) {
                     double max = -1.0D / 0.0;
                     int maxIndex = -2147483648;
 
                     /* find max Rij for cluster */
-                    for(int j = 0; j < centroids.numInstances(); ++j) {
+                    for(int j = 0; j < centroids.length; ++j) {
                         if(i != j) {
-                            double Rij = Si[i] + Si[j] / Math.abs(eu.distance(centroids.get(i), centroids.get(j)));
+                            double Rij = Si[i] + Si[j] / Math.abs(utils.Utils.dist(centroids[i], centroids[j], 2.0));
                             if(Rij > max) {
                                 max = Rij;
                             }
@@ -607,8 +597,8 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         }
     }
 
-    private MyGenClustPlusPlus.MKMeans[] probabilisticSelection(MyGenClustPlusPlus.MKMeans[] population) {
-        MyGenClustPlusPlus.MKMeans[] selectedPopulation = new MyGenClustPlusPlus.MKMeans[this.m_initialPopulationSize];
+    private KMeans[] probabilisticSelection(KMeans[] population) {
+        KMeans[] selectedPopulation = new KMeans[this.m_initialPopulationSize];
         int currentSelections = 0;
         double[] fitnessArray = new double[population.length];
         boolean[] usedChromosome = new boolean[population.length];
@@ -618,7 +608,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
 
         /* compute average fitness value for each value of k */
         for(int p = 0; p < population.length; p += 5) {
-            kArray[p / 5] = population[p].getNumClusters();
+            kArray[p / 5] = utils.Utils.distinctNumberOfItems(population[p].getLabels());
             double Tk = 0.0D;
 
             for(int j = 0; j < 5; ++j) {
@@ -653,18 +643,15 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
                         }
                     }
 
-                    MyGenClustPlusPlus.MKMeans var23;
+                    KMeans var23;
                     if(maxIndex == 2147483647) {
                         /* if clusterings corresponding to given k are chosen more than five times
                          * then we create a new chromosome by running MK-Means/MK-Means++ once more
                          * with input k for the number of clusters. */
                         try {
-                            MyGenClustPlusPlus.MKMeans ex = new MyGenClustPlusPlus.MKMeans();
+                            KMeans ex = new KMeans(kArray[var22], 2.0);
                             ex.setSeed(this.m_rand.nextInt());
-                            ex.setNumClusters(kArray[var22]);
-                            ex.setPreserveInstancesOrder(true);
-                            ex.setDontReplaceMissingValues(this.m_dontReplaceMissing);
-                            ex.buildClusterer(this.m_data, this.m_distFunc);
+                            ex.buildClusterer(this.myData);
                             var23 = ex;
                         } catch (Exception var20) {
                             var20.printStackTrace();
@@ -698,7 +685,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         return result;
     }
 
-    private MyGenClustPlusPlus.MKMeans[] crossover(MyGenClustPlusPlus.MKMeans[] selectedPopulation) throws Exception {
+    private KMeans[] crossover(KMeans[] selectedPopulation) throws Exception {
         Instances[] offspring = new Instances[selectedPopulation.length];
         int offspringCounter = 0;
         MyGenClustPlusPlus.FitnessContainer[] sorted = new MyGenClustPlusPlus.FitnessContainer[selectedPopulation.length];
@@ -713,10 +700,10 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         Arrays.sort(sorted, Collections.reverseOrder());
 
         while(sorted.length > 0) {
-            MyGenClustPlusPlus.MKMeans var27 = sorted[0].clustering;
+            KMeans var27 = sorted[0].clustering;
             fitnessSum -= sorted[0].fitness;
             sorted[0] = null;
-            MyGenClustPlusPlus.MKMeans var29 = sorted[sorted.length - 1].clustering;
+            KMeans var29 = sorted[sorted.length - 1].clustering;
             double toRemove = this.m_rand.nextDouble();
             double k = 0.0D;
 
@@ -729,7 +716,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
                     break;
                 }
             }
-
+            //DenseInstance
             Instances var33 = var27.getClusterCentroids();
             Instances parentTwoCentroids = var29.getClusterCentroids();
             Instances target = new Instances(var33, 0);
@@ -840,7 +827,9 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
                                 double var34;
                                 do {
                                     if(offspring[var30].attribute(attribute).isNumeric()) {
-                                        for(var34 = this.m_data.attributeStats(attribute).numericStats.min + this.m_rand.nextDouble() * (this.m_data.attributeStats(attribute).numericStats.max - this.m_data.attributeStats(attribute).numericStats.min + 1.0D); var34 == 1.0D / 0.0; var34 = this.m_data.attributeStats(attribute).numericStats.min + this.m_rand.nextDouble() * (this.m_data.attributeStats(attribute).numericStats.max - this.m_data.attributeStats(attribute).numericStats.min + 1.0D)) {
+                                        for(var34 = this.m_data.attributeStats(attribute).numericStats.min + this.m_rand.nextDouble() * (this.m_data.attributeStats(attribute).numericStats.max - this.m_data.attributeStats(attribute).numericStats.min + 1.0D);
+                                            var34 == 1.0D / 0.0;
+                                            var34 = this.m_data.attributeStats(attribute).numericStats.min + this.m_rand.nextDouble() * (this.m_data.attributeStats(attribute).numericStats.max - this.m_data.attributeStats(attribute).numericStats.min + 1.0D)) {
                                             ;
                                         }
                                     } else {
@@ -1083,7 +1072,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
     }
 
     public String globalInfo() {
-        return "Class implementing algorithm described in \"Combining K-Means and a Genetic Algorithm through a Novel Arrangement of Genetic Operators for High Quality Clustering\".\n\nDifferences to the original algorithm are: \n1. No use of VICUS similarity measure - standard ManhattanDistanceclass is used instead.\n2. Uses the basic missing value handling from SimpleKMeans.\n3. If an operation generates a chromosome where all records are assigned to a single cluster, chromosome will be mutated until at least 2 clusters are found.\n4. The starting generation for the chromosome selection operation is now modifiable, where in the original paperit was set to 11. The default is now after generation 50 (with the default number of generations being 60).\n\nFor more information see:" + this.getTechnicalInformation().toString();
+        return "Class implementing algorithm described in \"Combining K-Means and a Genetic Algorithm through a Novel Arrangement of Genetic Operators for High Quality Clustering\".\n\nDifferences to the original algorithm are: \n1. No use of VICUS similarity measure - standard EuclideanDistanceclass is used instead.\n2. Uses the basic missing value handling from SimpleKMeans.\n3. If an operation generates a chromosome where all records are assigned to a single cluster, chromosome will be mutated until at least 2 clusters are found.\n4. The starting generation for the chromosome selection operation is now modifiable, where in the original paperit was set to 11. The default is now after generation 50 (with the default number of generations being 60).\n\nFor more information see:" + this.getTechnicalInformation().toString();
     }
 
     public static void main(String[] args) throws Exception {
@@ -1285,641 +1274,6 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         return "Generation after which to start using the chromosome selection operation.";
     }
 
-    class MKMeans extends SimpleKMeans {
-        private static final long serialVersionUID = -2890080669539418269L;
-        protected boolean m_supplied = false;
-        protected boolean m_unable = false;
-
-        public MKMeans() {
-        }
-
-        public MKMeans(MyGenClustPlusPlus.MKMeans mk) throws Exception {
-            this.m_ReplaceMissingFilter = new ReplaceMissingValues();
-            this.m_ReplaceMissingFilter.setInputFormat(mk.m_ReplaceMissingFilter.getCopyOfInputFormat());
-            this.setPreserveInstancesOrder(true);
-            this.m_ClusterCentroids = new Instances(mk.getClusterCentroids());
-            this.m_NumClusters = this.m_ClusterCentroids.numInstances();
-            this.m_Assignments = new int[mk.getAssignments().length];
-            this.m_DistanceFunction = mk.m_DistanceFunction;
-            this.m_dontReplaceMissing = mk.getDontReplaceMissingValues();
-            System.arraycopy(mk.getAssignments(), 0, this.m_Assignments, 0, mk.getAssignments().length);
-        }
-
-        public void buildClusterer(Instances data) throws Exception {
-            this.m_DistanceFunction = new ManhattanDistance(data);
-            super.buildClusterer(data);
-        }
-
-        public void buildClusterer(Instances data, ManhattanDistance distance) throws Exception {
-            this.m_DistanceFunction = distance;
-            this.m_canopyClusters = null;
-            this.getCapabilities().testWithFail(data);
-            this.m_Iterations = 0;
-            this.m_ReplaceMissingFilter = new ReplaceMissingValues();
-            Instances instances = new Instances(data);
-            instances.setClassIndex(-1);
-            if(!this.m_dontReplaceMissing) {
-                this.m_ReplaceMissingFilter.setInputFormat(instances);
-            }
-
-            this.m_ClusterNominalCounts = new double[this.m_NumClusters][instances.numAttributes()][];
-            this.m_ClusterMissingCounts = new double[this.m_NumClusters][instances.numAttributes()];
-            if(this.m_displayStdDevs) {
-                this.m_FullStdDevs = instances.variances();
-            }
-
-            this.m_FullMeansOrMediansOrModes = this.moveCentroid(0, instances, true, false);
-            this.m_FullMissingCounts = this.m_ClusterMissingCounts[0];
-            this.m_FullNominalCounts = this.m_ClusterNominalCounts[0];
-            double sumOfWeights = instances.sumOfWeights();
-
-            for(int clusterAssignments = 0; clusterAssignments < instances.numAttributes(); ++clusterAssignments) {
-                if(instances.attribute(clusterAssignments).isNumeric()) {
-                    if(this.m_displayStdDevs) {
-                        this.m_FullStdDevs[clusterAssignments] = Math.sqrt(this.m_FullStdDevs[clusterAssignments]);
-                    }
-
-                    if(this.m_FullMissingCounts[clusterAssignments] == sumOfWeights) {
-                        this.m_FullMeansOrMediansOrModes[clusterAssignments] = 0.0D / 0.0;
-                    }
-                } else if(this.m_FullMissingCounts[clusterAssignments] > this.m_FullNominalCounts[clusterAssignments][Utils.maxIndex(this.m_FullNominalCounts[clusterAssignments])]) {
-                    this.m_FullMeansOrMediansOrModes[clusterAssignments] = -1.0D;
-                }
-            }
-
-            this.m_ClusterCentroids = new Instances(instances, this.m_NumClusters);
-            int[] var18 = new int[instances.numInstances()];
-            if(this.m_PreserveOrder) {
-                this.m_Assignments = var18;
-            }
-
-            this.m_DistanceFunction.setInstances(instances);
-            Random RandomO = new Random((long)this.getSeed());
-            HashMap initC = new HashMap();
-            DecisionTableHashKey hk = null;
-            Instances initInstances = null;
-            if(this.m_PreserveOrder) {
-                initInstances = new Instances(instances);
-            } else {
-                initInstances = instances;
-            }
-
-            if(this.m_speedUpDistanceCompWithCanopies) {
-                this.m_canopyClusters = new Canopy();
-                this.m_canopyClusters.setNumClusters(this.m_NumClusters);
-                this.m_canopyClusters.setSeed(this.getSeed());
-                this.m_canopyClusters.setT2(this.getCanopyT2());
-                this.m_canopyClusters.setT1(this.getCanopyT1());
-                this.m_canopyClusters.setMaxNumCandidateCanopiesToHoldInMemory(this.getCanopyMaxNumCanopiesToHoldInMemory());
-                this.m_canopyClusters.setPeriodicPruningRate(this.getCanopyPeriodicPruningRate());
-                this.m_canopyClusters.setMinimumCanopyDensity(this.getCanopyMinimumCanopyDensity());
-                this.m_canopyClusters.setDebug(this.getDebug());
-                this.m_canopyClusters.buildClusterer(initInstances);
-                this.m_centroidCanopyAssignments = new ArrayList();
-                this.m_dataPointCanopyAssignments = new ArrayList();
-            }
-
-            int i;
-            if(this.m_initializationMethod == 1) {
-                this.kMeansPlusPlusInit(initInstances);
-                this.m_initialStartPoints = new Instances(this.m_ClusterCentroids);
-            } else if(this.m_initializationMethod == 2) {
-                this.canopyInit(initInstances);
-                this.m_initialStartPoints = new Instances(this.m_canopyClusters.getCanopies());
-            } else if(this.m_initializationMethod == 3) {
-                this.farthestFirstInit(initInstances);
-                this.m_initialStartPoints = new Instances(this.m_ClusterCentroids);
-            } else if(this.m_initializationMethod != 4 && !this.m_supplied) {
-                for(i = initInstances.numInstances() - 1; i >= 0; --i) {
-                    int instIndex = RandomO.nextInt(i + 1);
-                    hk = new DecisionTableHashKey(initInstances.instance(instIndex), initInstances.numAttributes(), true);
-                    if(!initC.containsKey(hk)) {
-                        this.m_ClusterCentroids.add(initInstances.instance(instIndex));
-                        initC.put(hk, null);
-                    }
-
-                    initInstances.swap(i, instIndex);
-                    if(this.m_ClusterCentroids.numInstances() == this.m_NumClusters) {
-                        break;
-                    }
-                }
-
-                this.m_initialStartPoints = new Instances(this.m_ClusterCentroids);
-            } else {
-                /* hill-climber */
-                this.m_ClusterCentroids = this.m_initialStartPoints;
-                this.m_NumClusters = this.m_initialStartPoints.numInstances();
-                if(!this.m_supplied) {
-                    throw new Exception("Please supply a set of initial centroids.");
-                }
-            }
-
-            if(this.m_speedUpDistanceCompWithCanopies) {
-                for(i = 0; i < instances.numInstances(); ++i) {
-                    this.m_dataPointCanopyAssignments.add(this.m_canopyClusters.assignCanopies(instances.instance(i)));
-                }
-            }
-
-            this.m_NumClusters = this.m_ClusterCentroids.numInstances();
-            initInstances = null;
-            boolean converged = false;
-            Instances[] tempI = new Instances[this.m_NumClusters];
-            this.m_squaredErrors = new double[this.m_NumClusters];
-            this.m_ClusterNominalCounts = new double[this.m_NumClusters][instances.numAttributes()][0];
-            this.m_ClusterMissingCounts = new double[this.m_NumClusters][instances.numAttributes()];
-            this.startExecutorPool();
-
-            int j;
-            Instance var19;
-            while(!converged) {
-                if(this.m_speedUpDistanceCompWithCanopies) {
-                    this.m_centroidCanopyAssignments.clear();
-
-                    for(int vals2 = 0; vals2 < this.m_ClusterCentroids.numInstances(); ++vals2) {
-                        this.m_centroidCanopyAssignments.add(this.m_canopyClusters.assignCanopies(this.m_ClusterCentroids.instance(vals2)));
-                    }
-                }
-
-                int emptyClusterCount = 0;
-                ++this.m_Iterations;
-                converged = true;
-                if(this.m_executionSlots > 1 && instances.numInstances() >= 2 * this.m_executionSlots) {
-                    converged = this.launchAssignToClusters(instances, var18);
-                } else {
-                    for(i = 0; i < instances.numInstances(); ++i) {
-                        var19 = instances.instance(i);
-                        j = this.clusterProcessedInstance(var19, false, false, this.m_speedUpDistanceCompWithCanopies?(long[])this.m_dataPointCanopyAssignments.get(i):null);
-                        if(j != var18[i]) {
-                            converged = false;
-                        }
-
-                        var18[i] = j;
-                    }
-                }
-
-                this.m_ClusterCentroids = new Instances(instances, this.m_NumClusters);
-
-                for(i = 0; i < this.m_NumClusters; ++i) {
-                    tempI[i] = new Instances(instances, 0);
-                }
-
-                for(i = 0; i < instances.numInstances(); ++i) {
-                    tempI[var18[i]].add(instances.instance(i));
-                }
-
-                if(this.m_initializationMethod == 4 && this.m_MaxIterations == 1) {
-                    this.m_ClusterCentroids = this.m_initialStartPoints;
-                } else if(this.m_executionSlots > 1 && instances.numInstances() >= 2 * this.m_executionSlots) {
-                    this.launchMoveCentroids(tempI);
-                } else {
-                    for(i = 0; i < this.m_NumClusters; ++i) {
-                        if(tempI[i].numInstances() == 0) {
-                            ++emptyClusterCount;
-                        } else {
-                            this.moveCentroid(i, tempI[i], true, true);
-                        }
-                    }
-                }
-
-                if(this.m_Iterations == this.m_MaxIterations) {
-                    converged = true;
-                }
-
-                if(!converged) {
-                    this.m_ClusterNominalCounts = new double[this.m_NumClusters][instances.numAttributes()][0];
-                }
-            }
-
-            for(i = 0; i < instances.numInstances(); ++i) {
-                var19 = instances.instance(i);
-                j = this.clusterProcessedInstance(var19, false, true, this.m_speedUpDistanceCompWithCanopies?(long[])this.m_dataPointCanopyAssignments.get(i):null);
-                var18[i] = j;
-            }
-
-            this.m_Assignments = var18;
-            if(!this.m_FastDistanceCalc) {
-                for(i = 0; i < instances.numInstances(); ++i) {
-                    this.clusterProcessedInstance(instances.instance(i), true, false, (long[])null);
-                }
-            }
-
-            if(this.m_displayStdDevs) {
-                this.m_ClusterStdDevs = new Instances(instances, this.m_NumClusters);
-            }
-
-            this.m_ClusterSizes = new double[this.m_NumClusters];
-
-            for(i = 0; i < this.m_NumClusters; ++i) {
-                if(this.m_displayStdDevs) {
-                    double[] var20 = tempI[i].variances();
-
-                    for(j = 0; j < instances.numAttributes(); ++j) {
-                        if(instances.attribute(j).isNumeric()) {
-                            var20[j] = Math.sqrt(var20[j]);
-                        } else {
-                            var20[j] = Utils.missingValue();
-                        }
-                    }
-
-                    this.m_ClusterStdDevs.add(new DenseInstance(1.0D, var20));
-                }
-
-                this.m_ClusterSizes[i] = tempI[i].sumOfWeights();
-            }
-
-            this.m_executorPool.shutdown();
-            this.m_NumClusters = this.m_ClusterCentroids.numInstances();
-        }
-
-        public void setDistanceFunction(DistanceFunction df) throws Exception {
-            this.m_DistanceFunction = df;
-        }
-
-        private int clusterProcessedInstance(Instance instance, boolean updateErrors, boolean useFastDistCalc, long[] instanceCanopies) {
-            double minDist = 2.147483647E9D;
-            int bestCluster = 0;
-
-            for(int i = 0; i < this.m_ClusterCentroids.numInstances(); ++i) {
-                double dist;
-                if(useFastDistCalc) {
-                    if(this.m_speedUpDistanceCompWithCanopies && instanceCanopies != null && instanceCanopies.length > 0) {
-                        try {
-                            if(!Canopy.nonEmptyCanopySetIntersection((long[])this.m_centroidCanopyAssignments.get(i), instanceCanopies)) {
-                                continue;
-                            }
-                        } catch (Exception var12) {
-                            var12.printStackTrace();
-                        }
-
-                        dist = this.m_DistanceFunction.distance(instance, this.m_ClusterCentroids.instance(i), minDist);
-                    } else {
-                        dist = this.m_DistanceFunction.distance(instance, this.m_ClusterCentroids.instance(i), minDist);
-                    }
-                } else {
-                    dist = this.m_DistanceFunction.distance(instance, this.m_ClusterCentroids.instance(i));
-                }
-
-                if(dist < minDist) {
-                    minDist = dist;
-                    bestCluster = i;
-                }
-            }
-
-            if(updateErrors) {
-                if(this.m_DistanceFunction instanceof EuclideanDistance) {
-                    minDist *= minDist * instance.weight();
-                }
-
-                this.m_squaredErrors[bestCluster] += minDist;
-            }
-
-            return bestCluster;
-        }
-
-        public void setInitial(Instances initial) {
-            this.m_supplied = true;
-            this.m_NumClusters = initial.numInstances();
-            this.m_initialStartPoints = initial;
-        }
-
-        public void setInitializationMethod(SelectedTag method) {
-            if(method.getTags() == MyGenClustPlusPlus.TAGS_SELECTION_MK) {
-                this.m_initializationMethod = method.getSelectedTag().getID();
-            }
-
-        }
-
-        public int clusterInstance(Instance instance) throws Exception {
-            Instance inst = null;
-            if(!this.m_dontReplaceMissing) {
-                this.m_ReplaceMissingFilter.input(instance);
-                this.m_ReplaceMissingFilter.batchFinished();
-                inst = this.m_ReplaceMissingFilter.output();
-            } else {
-                inst = instance;
-            }
-
-            return this.clusterProcessedInstance(inst, false, false, (long[])null);
-        }
-
-        public String toString() {
-            if(this.m_ClusterCentroids == null) {
-                return "No clusterer built yet!";
-            } else {
-                int maxWidth = 0;
-                int maxAttWidth = 0;
-                boolean containsNumeric = false;
-
-                int plusMinus;
-                int temp;
-                for(plusMinus = 0; plusMinus < this.m_NumClusters; ++plusMinus) {
-                    for(temp = 0; temp < this.m_ClusterCentroids.numAttributes(); ++temp) {
-                        if(this.m_ClusterCentroids.attribute(temp).name().length() > maxAttWidth) {
-                            maxAttWidth = this.m_ClusterCentroids.attribute(temp).name().length();
-                        }
-
-                        if(this.m_ClusterCentroids.attribute(temp).isNumeric()) {
-                            containsNumeric = true;
-                            double cSize = Math.log(Math.abs(this.m_ClusterCentroids.instance(plusMinus).value(temp))) / Math.log(10.0D);
-                            if(cSize < 0.0D) {
-                                cSize = 1.0D;
-                            }
-
-                            cSize += 6.0D;
-                            if((int)cSize > maxWidth) {
-                                maxWidth = (int)cSize;
-                            }
-                        }
-                    }
-                }
-
-                String i;
-                int var24;
-                for(plusMinus = 0; plusMinus < this.m_ClusterCentroids.numAttributes(); ++plusMinus) {
-                    if(this.m_ClusterCentroids.attribute(plusMinus).isNominal()) {
-                        Attribute var20 = this.m_ClusterCentroids.attribute(plusMinus);
-
-                        for(var24 = 0; var24 < this.m_ClusterCentroids.numInstances(); ++var24) {
-                            i = var20.value((int)this.m_ClusterCentroids.instance(var24).value(plusMinus));
-                            if(i.length() > maxWidth) {
-                                maxWidth = i.length();
-                            }
-                        }
-
-                        for(var24 = 0; var24 < var20.numValues(); ++var24) {
-                            i = var20.value(var24) + " ";
-                            if(i.length() > maxAttWidth) {
-                                maxAttWidth = i.length();
-                            }
-                        }
-                    }
-                }
-
-                if(this.m_displayStdDevs) {
-                    for(plusMinus = 0; plusMinus < this.m_ClusterCentroids.numAttributes(); ++plusMinus) {
-                        if(this.m_ClusterCentroids.attribute(plusMinus).isNominal()) {
-                            temp = Utils.maxIndex(this.m_FullNominalCounts[plusMinus]);
-                            byte var26 = 6;
-                            i = "" + this.m_FullNominalCounts[plusMinus][temp];
-                            if(i.length() + var26 > maxWidth) {
-                                maxWidth = i.length() + 1;
-                            }
-                        }
-                    }
-                }
-
-                double[] var21 = this.m_ClusterSizes;
-                temp = var21.length;
-
-                String strVal;
-                for(var24 = 0; var24 < temp; ++var24) {
-                    double var25 = var21[var24];
-                    strVal = "(" + var25 + ")";
-                    if(strVal.length() > maxWidth) {
-                        maxWidth = strVal.length();
-                    }
-                }
-
-                if(this.m_displayStdDevs && maxAttWidth < "missing".length()) {
-                    maxAttWidth = "missing".length();
-                }
-
-                String var22 = "+/-";
-                maxAttWidth += 2;
-                if(this.m_displayStdDevs && containsNumeric) {
-                    maxWidth += var22.length();
-                }
-
-                if(maxAttWidth < "Attribute".length() + 2) {
-                    maxAttWidth = "Attribute".length() + 2;
-                }
-
-                if(maxWidth < "Full Data".length()) {
-                    maxWidth = "Full Data".length() + 1;
-                }
-
-                if(maxWidth < "missing".length()) {
-                    maxWidth = "missing".length() + 1;
-                }
-
-                StringBuffer var23 = new StringBuffer();
-                if(!this.m_unable) {
-                    var23.append("\nkMeans after final generation\n======\n");
-                } else {
-                    var23.append("\nSimpleKMeans Results\n======\n");
-                }
-
-                var23.append("\nNumber of iterations: " + this.m_Iterations);
-                if(!this.m_FastDistanceCalc) {
-                    var23.append("\n");
-                    if(this.m_DistanceFunction instanceof EuclideanDistance) {
-                        var23.append("Within cluster sum of squared errors: " + Utils.sum(this.m_squaredErrors));
-                    } else {
-                        var23.append("Sum of within cluster distances: " + Utils.sum(this.m_squaredErrors));
-                    }
-                }
-
-                var23.append("\n\nInitial starting points");
-                if(!this.m_unable) {
-                    var23.append(" (final chromosome)");
-                } else {
-                    var23.append("");
-                }
-
-                var23.append(":\n");
-                if(this.m_initializationMethod != 2) {
-                    var23.append("\n");
-
-                    for(var24 = 0; var24 < this.m_initialStartPoints.numInstances(); ++var24) {
-                        var23.append("Cluster " + var24 + ": " + this.m_initialStartPoints.instance(var24)).append("\n");
-                    }
-                } else {
-                    var23.append(this.m_canopyClusters.toString(false));
-                }
-
-                if(this.m_speedUpDistanceCompWithCanopies) {
-                    var23.append("\nReduced number of distance calculations by using canopies.");
-                    if(this.m_initializationMethod != 2) {
-                        var23.append("\nCanopy T2 radius: " + String.format("%-10.3f", new Object[]{Double.valueOf(this.m_canopyClusters.getActualT2())}));
-                        var23.append("\nCanopy T1 radius: " + String.format("%-10.3f", new Object[]{Double.valueOf(this.m_canopyClusters.getActualT1())})).append("\n");
-                    }
-                }
-
-                if(!this.m_dontReplaceMissing) {
-                    var23.append("\nMissing values globally replaced with mean/mode");
-                }
-
-                var23.append("\n\nFinal cluster centroids:\n");
-                var23.append(this.pad("Cluster#", " ", maxAttWidth + maxWidth * 2 + 2 - "Cluster#".length(), true));
-                var23.append("\n");
-                var23.append(this.pad("Attribute", " ", maxAttWidth - "Attribute".length(), false));
-                var23.append(this.pad("Full Data", " ", maxWidth + 1 - "Full Data".length(), true));
-
-                for(var24 = 0; var24 < this.m_NumClusters; ++var24) {
-                    i = "" + var24;
-                    var23.append(this.pad(i, " ", maxWidth + 1 - i.length(), true));
-                }
-
-                var23.append("\n");
-                String var29 = "(" + Utils.sum(this.m_ClusterSizes) + ")";
-                var23.append(this.pad(var29, " ", maxAttWidth + maxWidth + 1 - var29.length(), true));
-
-                int var27;
-                for(var27 = 0; var27 < this.m_NumClusters; ++var27) {
-                    var29 = "(" + this.m_ClusterSizes[var27] + ")";
-                    var23.append(this.pad(var29, " ", maxWidth + 1 - var29.length(), true));
-                }
-
-                var23.append("\n");
-                var23.append(this.pad("", "=", maxAttWidth + maxWidth * (this.m_ClusterCentroids.numInstances() + 1) + this.m_ClusterCentroids.numInstances() + 1, true));
-                var23.append("\n");
-
-                for(var27 = 0; var27 < this.m_ClusterCentroids.numAttributes(); ++var27) {
-                    String attName = this.m_ClusterCentroids.attribute(var27).name();
-                    var23.append(attName);
-
-                    for(int var28 = 0; var28 < maxAttWidth - attName.length(); ++var28) {
-                        var23.append(" ");
-                    }
-
-                    String valMeanMode;
-                    if(this.m_ClusterCentroids.attribute(var27).isNominal()) {
-                        if(this.m_FullMeansOrMediansOrModes[var27] == -1.0D) {
-                            valMeanMode = this.pad("missing", " ", maxWidth + 1 - "missing".length(), true);
-                        } else {
-                            valMeanMode = this.pad(strVal = this.m_ClusterCentroids.attribute(var27).value((int)this.m_FullMeansOrMediansOrModes[var27]), " ", maxWidth + 1 - strVal.length(), true);
-                        }
-                    } else if(Double.isNaN(this.m_FullMeansOrMediansOrModes[var27])) {
-                        valMeanMode = this.pad("missing", " ", maxWidth + 1 - "missing".length(), true);
-                    } else {
-                        valMeanMode = this.pad(strVal = Utils.doubleToString(this.m_FullMeansOrMediansOrModes[var27], maxWidth, 4).trim(), " ", maxWidth + 1 - strVal.length(), true);
-                    }
-
-                    var23.append(valMeanMode);
-
-                    for(int stdDevVal = 0; stdDevVal < this.m_NumClusters; ++stdDevVal) {
-                        if(this.m_ClusterCentroids.attribute(var27).isNominal()) {
-                            if(this.m_ClusterCentroids.instance(stdDevVal).isMissing(var27)) {
-                                valMeanMode = this.pad("missing", " ", maxWidth + 1 - "missing".length(), true);
-                            } else {
-                                valMeanMode = this.pad(strVal = this.m_ClusterCentroids.attribute(var27).value((int)this.m_ClusterCentroids.instance(stdDevVal).value(var27)), " ", maxWidth + 1 - strVal.length(), true);
-                            }
-                        } else if(this.m_ClusterCentroids.instance(stdDevVal).isMissing(var27)) {
-                            valMeanMode = this.pad("missing", " ", maxWidth + 1 - "missing".length(), true);
-                        } else {
-                            valMeanMode = this.pad(strVal = Utils.doubleToString(this.m_ClusterCentroids.instance(stdDevVal).value(var27), maxWidth, 4).trim(), " ", maxWidth + 1 - strVal.length(), true);
-                        }
-
-                        var23.append(valMeanMode);
-                    }
-
-                    var23.append("\n");
-                    if(this.m_displayStdDevs) {
-                        String var30 = "";
-                        if(this.m_ClusterCentroids.attribute(var27).isNominal()) {
-                            Attribute var31 = this.m_ClusterCentroids.attribute(var27);
-
-                            int k;
-                            for(int count = 0; count < var31.numValues(); ++count) {
-                                String val = "  " + var31.value(count);
-                                var23.append(this.pad(val, " ", maxAttWidth + 1 - val.length(), false));
-                                double percent = this.m_FullNominalCounts[var27][count];
-                                k = (int)(this.m_FullNominalCounts[var27][count] / Utils.sum(this.m_ClusterSizes) * 100.0D);
-                                String percentS1 = "" + k + "%)";
-                                percentS1 = this.pad(percentS1, " ", 5 - percentS1.length(), true);
-                                var30 = "" + percent + " (" + percentS1;
-                                var30 = this.pad(var30, " ", maxWidth + 1 - var30.length(), true);
-                                var23.append(var30);
-
-                                for(int k1 = 0; k1 < this.m_NumClusters; ++k1) {
-                                    k = (int)(this.m_ClusterNominalCounts[k1][var27][count] / this.m_ClusterSizes[k1] * 100.0D);
-                                    percentS1 = "" + k + "%)";
-                                    percentS1 = this.pad(percentS1, " ", 5 - percentS1.length(), true);
-                                    var30 = "" + this.m_ClusterNominalCounts[k1][var27][count] + " (" + percentS1;
-                                    var30 = this.pad(var30, " ", maxWidth + 1 - var30.length(), true);
-                                    var23.append(var30);
-                                }
-
-                                var23.append("\n");
-                            }
-
-                            if(this.m_FullMissingCounts[var27] > 0.0D) {
-                                var23.append(this.pad("  missing", " ", maxAttWidth + 1 - "  missing".length(), false));
-                                double var32 = this.m_FullMissingCounts[var27];
-                                int var33 = (int)(this.m_FullMissingCounts[var27] / Utils.sum(this.m_ClusterSizes) * 100.0D);
-                                String percentS = "" + var33 + "%)";
-                                percentS = this.pad(percentS, " ", 5 - percentS.length(), true);
-                                var30 = "" + var32 + " (" + percentS;
-                                var30 = this.pad(var30, " ", maxWidth + 1 - var30.length(), true);
-                                var23.append(var30);
-
-                                for(k = 0; k < this.m_NumClusters; ++k) {
-                                    var33 = (int)(this.m_ClusterMissingCounts[k][var27] / this.m_ClusterSizes[k] * 100.0D);
-                                    percentS = "" + var33 + "%)";
-                                    percentS = this.pad(percentS, " ", 5 - percentS.length(), true);
-                                    var30 = "" + this.m_ClusterMissingCounts[k][var27] + " (" + percentS;
-                                    var30 = this.pad(var30, " ", maxWidth + 1 - var30.length(), true);
-                                    var23.append(var30);
-                                }
-
-                                var23.append("\n");
-                            }
-
-                            var23.append("\n");
-                        } else {
-                            if(Double.isNaN(this.m_FullMeansOrMediansOrModes[var27])) {
-                                var30 = this.pad("--", " ", maxAttWidth + maxWidth + 1 - 2, true);
-                            } else {
-                                var30 = this.pad(strVal = var22 + Utils.doubleToString(this.m_FullStdDevs[var27], maxWidth, 4).trim(), " ", maxWidth + maxAttWidth + 1 - strVal.length(), true);
-                            }
-
-                            var23.append(var30);
-
-                            for(int j = 0; j < this.m_NumClusters; ++j) {
-                                if(this.m_ClusterCentroids.instance(j).isMissing(var27)) {
-                                    var30 = this.pad("--", " ", maxWidth + 1 - 2, true);
-                                } else {
-                                    var30 = this.pad(strVal = var22 + Utils.doubleToString(this.m_ClusterStdDevs.instance(j).value(var27), maxWidth, 4).trim(), " ", maxWidth + 1 - strVal.length(), true);
-                                }
-
-                                var23.append(var30);
-                            }
-
-                            var23.append("\n\n");
-                        }
-                    }
-                }
-
-                var23.append("\n\n");
-                return var23.toString();
-            }
-        }
-
-        private void setUnable(boolean u) {
-            this.m_unable = u;
-        }
-
-        private String pad(String source, String padChar, int length, boolean leftPad) {
-            StringBuffer temp = new StringBuffer();
-            int i;
-            if(leftPad) {
-                for(i = 0; i < length; ++i) {
-                    temp.append(padChar);
-                }
-
-                temp.append(source);
-            } else {
-                temp.append(source);
-
-                for(i = 0; i < length; ++i) {
-                    temp.append(padChar);
-                }
-            }
-
-            return temp.toString();
-        }
-    }
-
     private class FitnessContainer implements Comparable<MyGenClustPlusPlus.FitnessContainer> {
         public void setFitness(double fitness) {
             this.fitness = fitness;
@@ -1927,9 +1281,9 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
 
         double fitness;
         double[] objectives;
-        MyGenClustPlusPlus.MKMeans clustering;
+        KMeans clustering;
 
-        FitnessContainer(double f, MyGenClustPlusPlus.MKMeans c) {
+        FitnessContainer(double f, KMeans c) {
             this.fitness = f;
             this.clustering = c;
         }

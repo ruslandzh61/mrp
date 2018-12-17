@@ -1,5 +1,6 @@
-package PSO;
+package clustering;
 
+import PSO.Solution;
 import utils.NCConstruct;
 import utils.Utils;
 

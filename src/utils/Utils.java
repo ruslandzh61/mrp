@@ -375,6 +375,13 @@ public class Utils {
         return result;
     }
 
+    public static double[][] wekaInstancesToArray(Instances instances) {
+        double[][] result = new double[instances.size()][];
+        for (int i = 0; i < result.length; ++i) {
+            result[i] = instances.get(i).toDoubleArray().clone();
+        }
+        return result;
+    }
 
     public static int[] adjustLabels(int[] labels) {
         HashMap<Integer, Integer> map = new HashMap<>();
@@ -593,7 +600,7 @@ public class Utils {
 
         //System.out.println(doublePrecision(10.3453453455, 5));
 
-        double[] objLow = {-0.5, 20.0};
+        /*double[] objLow = {-0.5, 20.0};
         double[] objHigh = {-0.1, 120};
         double[] utopia = {0.0, 0.0};
         double[][] objs = {{-0.2, 60}, {-0.3, 50}, {-0.3, 40}};
@@ -602,6 +609,11 @@ public class Utils {
             System.out.println(Arrays.toString(obj));
         }
         System.out.println(pickClosestToUtopia(objs, utopia));
-        System.out.println(Arrays.toString(determineParetoSet(objs)));
+        System.out.println(Arrays.toString(determineParetoSet(objs)));*/
+
+        Instances instances = getData("data/p-glass.csv", false, false);
+        for (double[] record: Utils.wekaInstancesToArray(instances)) {
+            System.out.println(Arrays.toString(record));
+        }
     }
 }

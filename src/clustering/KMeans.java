@@ -22,32 +22,31 @@ public class KMeans {
         RANDOM, KMEANS_PLUS_PLUS, HILL_CLIMBER
     }
 
+    private static int default_seed = 10;
+    private static Initialization default_init = Initialization.KMEANS_PLUS_PLUS;
+
     private int[] label;
-    private double[][] data;
-    private int N, D;
     private double[][] centroids;
     private int k;
     private int seed;
-    private static int default_seed = 10;
-    private static Initialization default_init = Initialization.KMEANS_PLUS_PLUS;
-    private double pow = 2;
+    private double pow = 2.0;
     private Random rnd;
     private Initialization initialization;
     private double[][] initialStartPoint;
 
-    public KMeans(double[][] aData, int aK, double aPow) {
-        data = aData;
-        N = aData.length;
-        D = aData[0].length;
-        label = new int[N];
-        this.pow = aPow;
-        if (aK > N) {
-            this.k = N;
-        } else {
-            this.k = aK;
-        }
+    public KMeans(KMeans kMeans) {
+        this.centroids = Utils.deepCopy(kMeans.getCentroids());
+        this.setSeed(kMeans.getSeed());
+        this.k = kMeans.k;
+        this.pow = kMeans.pow;
+        this.initialization = kMeans.initialization;
+    }
 
+    public KMeans(int aK, double aPow) {
+        this.k = aK;
+        this.pow = aPow;
         this.seed = default_seed;
+        this.initialization = default_init;
     }
 
     public void setInitializationMethod(Initialization aInitialization) {
@@ -67,9 +66,10 @@ public class KMeans {
     /**
      * performs complete buildClusterer
      *  */
-    public void buildClusterer() {
-        initialize();
-
+    public void buildClusterer(double[][] data) {
+        double[][] copiedData = Utils.deepCopy(data);
+        initialize(copiedData);
+        int N = copiedData.length;
         if (niter <= 0 || niter > 500)
             niter = 500;
         double [][] c1 = centroids;
@@ -83,11 +83,11 @@ public class KMeans {
             //assign record to the closest centroid
             label = new int[N];
             for (int i = 0; i < N; i++) {
-                label[i] = closest(data[i]);
+                label[i] = closest(copiedData[i]);
             }
 
             // recompute centroids based on the assignments
-            c1 = updateCentroids();
+            c1 = updateCentroids(copiedData);
             round++;
             if (niter > 0 && round >= niter)
                 break;
@@ -117,7 +117,15 @@ public class KMeans {
         }
     }*/
 
-    private void initialize() {
+    public String toString() {
+        return "number of clusters: " + this.k;
+    }
+
+    private void initialize(double[][] data) {
+        int N = data.length;
+        int D = data[0].length;
+        label = new int[N];
+        assert (this.k < N);
         // choose existing data points as initial data points
         centroids = new double[k][D];
 
@@ -222,7 +230,9 @@ public class KMeans {
         Utils.checkClusterLabels(getLabels(), k);
     }
 
-    private double[][] updateCentroids() {
+    private double[][] updateCentroids(double[][] data) {
+        int N = data.length;
+        int D = data[0].length;
         // initialize centroids and set to 0
         double [][] newc = new double [k][]; //new centroids
         int [] counts = new int[k]; // sizes of the clusters

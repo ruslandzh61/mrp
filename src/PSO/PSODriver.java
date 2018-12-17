@@ -1,5 +1,6 @@
 package PSO;
 
+import clustering.Evaluator;
 import clustering.KMeans;
 import utils.NCConstruct;
 import utils.Utils;
@@ -101,10 +102,10 @@ public class PSODriver {
                         labelsPred[i] = kMeans.predict(data[i]);
                     }
                 } else {
-                    KMeans kMeans = new KMeans(data, k, 2.0);
+                    KMeans kMeans = new KMeans(k, 2.0);
                     kMeans.setSeed(rnd.nextInt());
                     kMeans.setInitializationMethod(init);
-                    kMeans.buildClusterer();
+                    kMeans.buildClusterer(data);
                     labelsPred = kMeans.getLabels();
                 }
                 Utils.removeNoise(labelsPred, data, 2, 2.0);
@@ -343,8 +344,8 @@ public class PSODriver {
             // pick file manually or pass a path string
             boolean pickManually = false;
             String filePath, filePathForWeka;
-            filePath = pickManually ? Utils.pickAFile(): "data/yeast.csv";
-            filePathForWeka = pickManually ? Utils.pickAFile(): "data/p-yeast.csv";
+            filePath = pickManually ? Utils.pickAFile(): "data/glass.csv";
+            filePathForWeka = pickManually ? Utils.pickAFile(): "data/p-glass.csv";
             PSOConfiguration configuration = new PSOConfiguration();
             // default configuration
             /*configuration.c1 = 1.42;
@@ -355,7 +356,7 @@ public class PSODriver {
             configuration.maxIterWithoutImprovement = 50;
             configuration.pMax = 150;
             configuration.pickLeaderRandomly = false;*/
-            new PSODriver().run(10, filePath, filePathForWeka, configuration, true, false);
+            new PSODriver().run(10, filePath, filePathForWeka, configuration, false, false);
             //Utils.nominalForm("data/glass.csv");
             /*boolean removeFirst = false;
             boolean normalize = false;

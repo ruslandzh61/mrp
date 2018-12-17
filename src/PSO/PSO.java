@@ -1,5 +1,6 @@
 package PSO;
 
+import clustering.Evaluator;
 import clustering.KMeans;
 import smile.validation.AdjustedRandIndex;
 import utils.NCConstruct;
@@ -217,13 +218,13 @@ public class PSO {
     }
 
     private int[] kMeansAssignments(int k) {
-        KMeans kMeans = new KMeans(problem.getData(), k, 2.0);
+        KMeans kMeans = new KMeans(k, 2.0);
         kMeans.setSeed(generator.nextInt());
         kMeans.setInitializationMethod(KMeans.Initialization.KMEANS_PLUS_PLUS);
         // perform one iteration of k-mean
         //kMeans.oneIter();
         // perform complete k-means buildClusterer
-        kMeans.buildClusterer();
+        kMeans.buildClusterer(problem.getData());
         int[] labelsPred = kMeans.getLabels();
         //Utils.removeNoise(labelsPred, problem.getData(), minSizeOfCluster, 2.0);
         //Utils.adjustAssignments(labelsPred);
