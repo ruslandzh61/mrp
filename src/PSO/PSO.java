@@ -112,7 +112,7 @@ public class PSO {
             }
             curIterationNum++;
         }
-        // update nonDomPSOList to pick a closest to utopia point solution out of non-dominated set
+        // update nonDomPSOList to pick a clusterInstance to utopia point solution out of non-dominated set
         nonDomPSOList = determineParetoSet(psoList);
         /* in case there is no non-dom solution */
         if (nonDomPSOList.size() == 0) {

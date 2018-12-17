@@ -55,7 +55,7 @@ public class PSODriver {
      * main method to run PSO-based buildClusterer
      * */
 
-    public static void runMyKmeans(boolean useSmile, KMeans.Initialization init, int runs, String path, char sep,
+    public static void runMyKmeans(KMeans.Initialization init, int runs, String path, char sep,
                                    boolean removeFirst, boolean normalize) throws Exception {
         double[][] data;
         int[] labelsTrue, labelsPred;
@@ -95,21 +95,21 @@ public class PSODriver {
             int minK = 2;//(int)(0.02 * data.length);
             int maxK = (int) Math.sqrt(data.length); //(int)(0.1 * data.length);
             for (int k = minK; k <= maxK; ++k) {
-                if (useSmile) {
+                /*if (useSmile) {
                     labelsPred = new int[data.length];
                     smile.clustering.KMeans kMeans = new smile.clustering.KMeans(data, k, 500);
                     for (int i = 0; i < data.length; ++i) {
                         labelsPred[i] = kMeans.predict(data[i]);
                     }
-                } else {
-                    KMeans kMeans = new KMeans(k, 2.0);
-                    kMeans.setSeed(rnd.nextInt());
-                    kMeans.setInitializationMethod(init);
-                    kMeans.buildClusterer(data);
-                    labelsPred = kMeans.getLabels();
-                }
-                Utils.removeNoise(labelsPred, data, 2, 2.0);
-                Utils.adjustAssignments(labelsPred);
+                } else {*/
+                KMeans kMeans = new KMeans(k, 2.0);
+                kMeans.setSeed(rnd.nextInt());
+                kMeans.setInitializationMethod(init);
+                kMeans.buildClusterer(data);
+                labelsPred = kMeans.getLabels();
+
+                //Utils.removeNoise(labelsPred, data, 2, 2.0);
+                //Utils.adjustAssignments(labelsPred);
                 HashMap<Integer, double[]> centroids = Utils.centroids(data, labelsPred);
                 double tmpDB = Utils.dbIndexScore(centroids, labelsPred, data);
                 double tmpARI = adjustedRandIndex.measure(labelsTrue, labelsPred);
@@ -119,9 +119,10 @@ public class PSODriver {
                     bestK = Utils.distinctNumberOfItems(labelsPred); //k;
                 }
 
-                /*System.out.println("temp ARI score of kMeans:     " + Utils.doublePrecision(tmpARI, 4));
+                System.out.println("temp ARI score of kMeans:     " + Utils.doublePrecision(tmpARI, 4));
                 System.out.println("temp DB score of kMeans:      " + Utils.doublePrecision(tmpDB, 4));
-                System.out.println("temp # of clusters of kMeans: " + Utils.distinctNumberOfItems(labelsPred));*/
+                System.out.println("temp # of clusters of kMeans: " + k + " : " + Utils.distinctNumberOfItems(labelsPred) + " : " + kMeans.numberOfClusters());
+                System.out.println(Utils.distinctNumberOfItems(labelsPred) == kMeans.numberOfClusters());
             }
             meanARI += bestARI;
             meanDB += bestDB;
@@ -356,17 +357,17 @@ public class PSODriver {
             configuration.maxIterWithoutImprovement = 50;
             configuration.pMax = 150;
             configuration.pickLeaderRandomly = false;*/
-            new PSODriver().run(10, filePath, filePathForWeka, configuration, false, false);
+            //new PSODriver().run(10, filePath, filePathForWeka, configuration, false, false);
             //Utils.nominalForm("data/glass.csv");
-            /*boolean removeFirst = false;
+            boolean removeFirst = false;
             boolean normalize = false;
             System.out.println("remove id: " + removeFirst);
             System.out.println("normalize: " + normalize);
             System.out.println("my k-means: ");
-            PSODriver.runMyKmeans(false, clustering.KMeans.Initialization.RANDOM, 10, filePath, ',', removeFirst, normalize);
+            PSODriver.runMyKmeans(clustering.KMeans.Initialization.RANDOM, 10, filePath, ',', removeFirst, normalize);
             System.out.println("-------");
-            System.out.println("my k-means++: ");
-            PSODriver.runMyKmeans(false, clustering.KMeans.Initialization.KMEANS_PLUS_PLUS, 10, filePath, ',', removeFirst, normalize);
+            /*System.out.println("my k-means++: ");
+            PSODriver.runMyKmeans(clustering.KMeans.Initialization.KMEANS_PLUS_PLUS, 10, filePath, ',', removeFirst, normalize);
             System.out.println("-------");
             System.out.println("WEKA random k-means");
             PSODriver.runKmeans(SimpleKMeans.RANDOM, 10, filePath, filePathForWeka, ',', removeFirst, normalize);

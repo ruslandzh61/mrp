@@ -47,7 +47,7 @@ public class NCConstruct {
     private GabrielGraph gg;
     private double[][] data;
     private PointDistance[][] orderedByDist; // indices ordered according to distance to a point
-    /**CC contains indices of orderedByDist indicating closest indirect point,
+    /**CC contains indices of orderedByDist indicating clusterInstance indirect point,
      * all points before this point form core neighborhood */
     private int[] CC;
     /** BC store break point at which density decreases*/
@@ -81,7 +81,7 @@ public class NCConstruct {
     }
 
     /**
-     * find points closer to given point i than closest indirect point
+     * find points closer to given point i than clusterInstance indirect point
      */
     private void extractCoreNeighbors() {
         sortByDist();

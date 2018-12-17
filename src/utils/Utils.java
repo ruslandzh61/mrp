@@ -4,7 +4,9 @@ import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
+import weka.core.DenseInstance;
 import weka.core.EuclideanDistance;
+import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils;
 import weka.filters.Filter;
@@ -615,5 +617,17 @@ public class Utils {
         for (double[] record: Utils.wekaInstancesToArray(instances)) {
             System.out.println(Arrays.toString(record));
         }
+        double[][] vl = {{5.0, 1.51742, 13.27, 3.62, 1.24, 73.08, 0.55, 8.07, 0.0, 0.0},
+        {6.0, 1.51596, 12.79, 3.61, 1.62, 72.97, 0.64, 8.07, 0.0, 0.26},
+            {7.0, 1.51743, 13.3, 3.6, 1.14, 73.09, 0.58, 8.17, 0.0, 0.0}};
+        new DenseInstance(1.0, vl[0]);
+        Instances centroidIns = new Instances(instances, vl.length);
+        for (double[] v: vl) {
+            centroidIns.add(new DenseInstance(1.0, v));
+        }
+        for (Instance i: centroidIns) {
+            System.out.println(Arrays.toString(i.toDoubleArray()));
+        }
+
     }
 }

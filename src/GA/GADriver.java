@@ -21,7 +21,7 @@ public class GADriver {
     public GADriver(int runs, String filename, String filenameForTrueLabels, char sep,
                     boolean removeFirst,  boolean normalize) throws Exception {
         Instances data;
-        //MyGenClustPlusPlus cl;
+        MyGenClustPlusPlus cl;
         Remove filter;
 
         AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
@@ -90,7 +90,7 @@ public class GADriver {
         Random rnd = new Random(1);
         for (int run = 1; run <= runs; ++run) {
 
-            /*cl = new MyGenClustPlusPlus();
+            cl = new MyGenClustPlusPlus();
             cl.setSeed(rnd.nextInt());
             cl.setNcConstruct(ncConstruct);
             cl.setEvaluator(evaluator);
@@ -120,7 +120,7 @@ public class GADriver {
             System.out.println("RUN: " + run);
             System.out.println("ARI score: " + Utils.doublePrecision(ARI, 4));
             System.out.println("DB score:  " + Utils.doublePrecision(myDBWithMyCentroids, 4));
-            System.out.println("num of clusters: " + k);*/
+            System.out.println("num of clusters: " + k);
         }
 
 
@@ -140,6 +140,6 @@ public class GADriver {
         // weka doesn't work with other separators other than ','
         // (false, false) - first attribute not removed, not normalized
 
-        //GADriver gaDriver = new GADriver(15, "data/p-glass.csv","data/glass.csv", ',', false, false);
+        GADriver gaDriver = new GADriver(15, "data/p-glass.csv","data/glass.csv", ',', false, false);
     }
 }

@@ -2,19 +2,19 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="31ac2908-1b01-48a7-8033-ec2e78d94e2f" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/Project/GA/MyGenClustPlusPlus$FitnessContainer.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/Project/GA/MyGenClustPlusPlus$MKMeans.class" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/Project/GA/MyGenClustPlusPlus.class" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/src/PSO/Evaluator.java" afterPath="$PROJECT_DIR$/src/clustering/Evaluator.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/GA/GADriver.class" afterPath="$PROJECT_DIR$/out/production/Project/GA/GADriver.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/PSO/PSO.class" afterPath="$PROJECT_DIR$/out/production/Project/PSO/PSO.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/PSO/PSODriver.class" afterPath="$PROJECT_DIR$/out/production/Project/PSO/PSODriver.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/clustering/KMeans$Initialization.class" afterPath="$PROJECT_DIR$/out/production/Project/clustering/KMeans$Initialization.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/clustering/KMeans.class" afterPath="$PROJECT_DIR$/out/production/Project/clustering/KMeans.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/utils/Utils.class" afterPath="$PROJECT_DIR$/out/production/Project/utils/Utils.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/GA/GADriver.java" afterPath="$PROJECT_DIR$/src/GA/GADriver.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/GA/MyGenClustPlusPlus.java" afterPath="$PROJECT_DIR$/src/GA/MyGenClustPlusPlus.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/PSO/PSO.java" afterPath="$PROJECT_DIR$/src/PSO/PSO.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/PSO/PSODriver.java" afterPath="$PROJECT_DIR$/src/PSO/PSODriver.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/PSO/Problem.java" afterPath="$PROJECT_DIR$/src/PSO/Problem.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/clustering/KMeans.java" afterPath="$PROJECT_DIR$/src/clustering/KMeans.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/utils/NCConstruct.java" afterPath="$PROJECT_DIR$/src/utils/NCConstruct.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/utils/Utils.java" afterPath="$PROJECT_DIR$/src/utils/Utils.java" />
     </list>
     <ignored path="GA-PSO-Clustering.iws" />
@@ -40,8 +40,8 @@
       <file leaf-file-name="PSODriver.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/PSO/PSODriver.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="386">
-              <caret line="107" column="46" selection-start-line="107" selection-start-column="46" selection-end-line="107" selection-end-column="46" />
+            <state relative-caret-position="414">
+              <caret line="123" column="48" selection-start-line="123" selection-start-column="48" selection-end-line="123" selection-end-column="48" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -49,21 +49,60 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="MyGenClustPlusPlus.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="MyGenClustPlusPlus.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/GA/MyGenClustPlusPlus.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
-              <caret line="719" column="28" selection-start-line="719" selection-start-column="28" selection-end-line="719" selection-end-column="28" />
+            <state relative-caret-position="145">
+              <caret line="760" column="0" selection-start-line="760" selection-start-column="0" selection-end-line="760" selection-end-column="0" />
               <folding>
+                <element signature="e#0#55056#0" expanded="true" />
                 <element signature="imports" expanded="true" />
-                <element signature="e#2480#2481#0" expanded="true" />
-                <element signature="e#2542#2543#0" expanded="true" />
-                <element signature="method#fitness#0;class#MyGenClustPlusPlus#0" expanded="false" />
-                <element signature="method#getTechnicalInformation#0;class#MyGenClustPlusPlus#0" expanded="false" />
-                <element signature="e#54547#54548#0" expanded="true" />
-                <element signature="e#54595#54596#0" expanded="true" />
-                <element signature="e#55729#55730#0" expanded="true" />
-                <element signature="e#55775#55776#0" expanded="true" />
+                <element signature="e#1658#1659#0" expanded="true" />
+                <element signature="e#1704#1705#0" expanded="true" />
+                <element signature="e#2059#2060#0" expanded="true" />
+                <element signature="e#2121#2122#0" expanded="true" />
+                <element signature="e#2172#2173#0" expanded="true" />
+                <element signature="e#2216#2217#0" expanded="true" />
+                <element signature="e#2411#2412#0" expanded="true" />
+                <element signature="e#2447#2448#0" expanded="true" />
+                <element signature="e#2501#2502#0" expanded="true" />
+                <element signature="e#2543#2544#0" expanded="true" />
+                <element signature="e#3095#3096#0" expanded="true" />
+                <element signature="e#3141#3142#0" expanded="true" />
+                <element signature="e#22485#22486#0" expanded="true" />
+                <element signature="e#22540#22541#0" expanded="true" />
+                <element signature="e#52750#52751#0" expanded="true" />
+                <element signature="e#52799#52800#0" expanded="true" />
+                <element signature="e#52857#52858#0" expanded="true" />
+                <element signature="e#52921#52922#0" expanded="true" />
+                <element signature="e#52966#52967#0" expanded="true" />
+                <element signature="e#53017#53018#0" expanded="true" />
+                <element signature="e#53067#53068#0" expanded="true" />
+                <element signature="e#53123#53124#0" expanded="true" />
+                <element signature="e#53171#53172#0" expanded="true" />
+                <element signature="e#53225#53226#0" expanded="true" />
+                <element signature="e#53273#53274#0" expanded="true" />
+                <element signature="e#53327#53328#0" expanded="true" />
+                <element signature="e#53372#53373#0" expanded="true" />
+                <element signature="e#53420#53421#0" expanded="true" />
+                <element signature="e#53466#53467#0" expanded="true" />
+                <element signature="e#53514#53515#0" expanded="true" />
+                <element signature="e#53559#53560#0" expanded="true" />
+                <element signature="e#53627#53628#0" expanded="true" />
+                <element signature="e#53679#53680#0" expanded="true" />
+                <element signature="e#53753#53754#0" expanded="true" />
+                <element signature="e#53810#53811#0" expanded="true" />
+                <element signature="e#53877#53878#0" expanded="true" />
+                <element signature="e#53932#53933#0" expanded="true" />
+                <element signature="e#53997#53998#0" expanded="true" />
+                <element signature="e#54052#54053#0" expanded="true" />
+                <element signature="e#54117#54118#0" expanded="true" />
+                <element signature="e#54166#54167#0" expanded="true" />
+                <element signature="e#54218#54219#0" expanded="true" />
+                <element signature="e#54267#54268#0" expanded="true" />
+                <element signature="e#54339#54340#0" expanded="true" />
+                <element signature="e#54648#54649#0" expanded="true" />
+                <element signature="e#54694#54695#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -72,18 +111,41 @@
       <file leaf-file-name="GenClustPlusPlus.class" pinned="false" current-in-tab="false">
         <entry file="jar://$PROJECT_DIR$/src/utils/GenClustPlusPlus.jar!/weka/clusterers/GenClustPlusPlus.class">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="276">
-              <caret line="1018" column="49" selection-start-line="1018" selection-start-column="49" selection-end-line="1018" selection-end-column="49" />
+            <state relative-caret-position="272">
+              <caret line="361" column="44" selection-start-line="361" selection-start-column="44" selection-end-line="361" selection-end-column="44" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Particle.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/PSO/Particle.java">
+      <file leaf-file-name="SimpleKMeans.class" pinned="false" current-in-tab="false">
+        <entry file="jar://$PROJECT_DIR$/src/utils/weka.jar!/weka/clusterers/SimpleKMeans.class">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="473">
-              <caret line="52" column="17" selection-start-line="52" selection-start-column="17" selection-end-line="52" selection-end-column="17" />
+            <state relative-caret-position="137">
+              <caret line="693" column="30" selection-start-line="693" selection-start-column="17" selection-end-line="693" selection-end-column="30" />
+              <folding>
+                <element signature="e#30158#30159#0" expanded="true" />
+                <element signature="e#30199#30200#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ManhattanDistance.class" pinned="false" current-in-tab="false">
+        <entry file="jar://$PROJECT_DIR$/src/utils/weka.jar!/weka/core/ManhattanDistance.class">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="75">
+              <caret line="24" column="0" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="PSO.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/PSO/PSO.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="167">
+              <caret line="226" column="0" selection-start-line="226" selection-start-column="0" selection-end-line="226" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -92,41 +154,24 @@
       <file leaf-file-name="GADriver.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/GA/GADriver.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="23" column="10" selection-start-line="23" selection-start-column="10" selection-end-line="23" selection-end-column="10" />
+            <state relative-caret-position="352">
+              <caret line="142" column="8" selection-start-line="142" selection-start-column="8" selection-end-line="142" selection-end-column="8" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Solution.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/PSO/Solution.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="473">
-              <caret line="79" column="0" selection-start-line="79" selection-start-column="0" selection-end-line="79" selection-end-column="0" />
-              <folding>
-                <element signature="e#2190#2191#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PSO.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/PSO/PSO.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="197">
-              <caret line="226" column="47" selection-start-line="226" selection-start-column="47" selection-end-line="226" selection-end-column="47" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="KMeans.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="KMeans.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/clustering/KMeans.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
-              <caret line="123" column="17" selection-start-line="123" selection-start-column="17" selection-end-line="123" selection-end-column="17" />
-              <folding />
+            <state relative-caret-position="96">
+              <caret line="100" column="8" selection-start-line="100" selection-start-column="8" selection-end-line="100" selection-end-column="8" />
+              <folding>
+                <element signature="e#1689#1690#0" expanded="true" />
+                <element signature="e#1723#1724#0" expanded="true" />
+                <element signature="e#3623#3624#0" expanded="true" />
+                <element signature="e#3662#3663#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -134,8 +179,8 @@
       <file leaf-file-name="Utils.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/utils/Utils.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="227">
-              <caret line="610" column="16" selection-start-line="610" selection-start-column="16" selection-end-line="610" selection-end-column="16" />
+            <state relative-caret-position="150">
+              <caret line="236" column="0" selection-start-line="236" selection-start-column="0" selection-end-line="236" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -192,12 +237,12 @@
         <option value="$PROJECT_DIR$/src/KMeans.java" />
         <option value="$PROJECT_DIR$/src/clustering/GADriver.java" />
         <option value="$PROJECT_DIR$/src/clustering/Evaluator.java" />
-        <option value="$PROJECT_DIR$/src/GA/GADriver.java" />
-        <option value="$PROJECT_DIR$/src/utils/Utils.java" />
         <option value="$PROJECT_DIR$/src/PSO/PSO.java" />
+        <option value="$PROJECT_DIR$/src/utils/Utils.java" />
+        <option value="$PROJECT_DIR$/src/GA/GADriver.java" />
+        <option value="$PROJECT_DIR$/src/GA/MyGenClustPlusPlus.java" />
         <option value="$PROJECT_DIR$/src/PSO/PSODriver.java" />
         <option value="$PROJECT_DIR$/src/clustering/KMeans.java" />
-        <option value="$PROJECT_DIR$/src/GA/MyGenClustPlusPlus.java" />
       </list>
     </option>
   </component>
@@ -307,6 +352,10 @@
               <option name="myItemId" value="utils" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="weka.jar" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
+            </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -326,7 +375,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="GenClustPlusPlus.jar" />
+              <option name="myItemId" value="weka.jar" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -352,7 +401,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="GenClustPlusPlus.jar" />
+              <option name="myItemId" value="weka.jar" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
@@ -380,10 +429,6 @@
             <PATH_ELEMENT>
               <option name="myItemId" value="utils" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GenClustPlusPlus.jar" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiFileNode" />
             </PATH_ELEMENT>
           </PATH>
           <PATH>
@@ -458,7 +503,7 @@
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="FullScreen" value="true" />
   </component>
-  <component name="RunManager" selected="Application.Utils">
+  <component name="RunManager" selected="Application.GADriver">
     <configuration default="false" name="PSODriver" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
@@ -982,9 +1027,9 @@
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Application.Utils" />
-        <item index="1" class="java.lang.String" itemvalue="Application.GADriver" />
-        <item index="2" class="java.lang.String" itemvalue="Application.PSODriver" />
+        <item index="0" class="java.lang.String" itemvalue="Application.GADriver" />
+        <item index="1" class="java.lang.String" itemvalue="Application.PSODriver" />
+        <item index="2" class="java.lang.String" itemvalue="Application.Utils" />
         <item index="3" class="java.lang.String" itemvalue="Application.PSO" />
         <item index="4" class="java.lang.String" itemvalue="Application.fortest" />
       </list>
@@ -1055,12 +1100,12 @@
       <workItem from="1544627715786" duration="16223000" />
       <workItem from="1544668955462" duration="47461000" />
       <workItem from="1544844239553" duration="30024000" />
-      <workItem from="1544970484888" duration="35594000" />
+      <workItem from="1544970484888" duration="45185000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="601538000" />
+    <option name="totallyTimeSpent" value="611129000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1133,7 +1178,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="120" />
+      <option name="time" value="123" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -1142,20 +1187,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://$PROJECT_DIR$/src/utils/smile-core-1.5.2.jar!/smile/feature/RobustStandardizer.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-59">
-          <caret line="13" column="20" selection-start-line="13" selection-start-column="20" selection-end-line="13" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$PROJECT_DIR$/src/utils/smile-core-1.5.2.jar!/smile/feature/Normalizer.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="301">
-          <caret line="75" column="4" selection-start-line="75" selection-start-column="4" selection-end-line="82" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar://$PROJECT_DIR$/src/utils/smile-core-1.5.2.jar!/smile/feature/Bag.class">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="90">
@@ -1370,22 +1401,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar://$PROJECT_DIR$/src/utils/weka.jar!/weka/clusterers/SimpleKMeans.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="241">
-          <caret line="343" column="32" selection-start-line="343" selection-start-column="22" selection-end-line="343" selection-end-column="32" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$PROJECT_DIR$/src/utils/weka.jar!/weka/core/ManhattanDistance.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="15" column="13" selection-start-line="15" selection-start-column="13" selection-end-line="15" selection-end-column="13" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/clustering/Evaluator.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="105">
@@ -1423,83 +1438,162 @@
         <state relative-caret-position="473">
           <caret line="79" column="0" selection-start-line="79" selection-start-column="0" selection-end-line="79" selection-end-column="0" />
           <folding>
-            <element signature="e#2190#2191#0" expanded="true" />
+            <element signature="e#2190#2191#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/GA/GADriver.java">
+    <entry file="jar://$PROJECT_DIR$/src/utils/weka.jar!/weka/core/Instances.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="23" column="10" selection-start-line="23" selection-start-column="10" selection-end-line="23" selection-end-column="10" />
+        <state relative-caret-position="238">
+          <caret line="80" column="42" selection-start-line="80" selection-start-column="42" selection-end-line="80" selection-end-column="42" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$PROJECT_DIR$/src/utils/weka.jar!/weka/core/ManhattanDistance.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="24" column="0" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$PROJECT_DIR$/src/utils/weka.jar!/weka/core/EuclideanDistance.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="17" column="50" selection-start-line="17" selection-start-column="50" selection-end-line="17" selection-end-column="50" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$PROJECT_DIR$/src/utils/weka.jar!/weka/core/NormalizableDistance.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="98">
+          <caret line="172" column="40" selection-start-line="172" selection-start-column="40" selection-end-line="172" selection-end-column="40" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$PROJECT_DIR$/src/utils/weka.jar!/weka/clusterers/SimpleKMeans.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="137">
+          <caret line="693" column="30" selection-start-line="693" selection-start-column="17" selection-end-line="693" selection-end-column="30" />
+          <folding>
+            <element signature="e#30158#30159#0" expanded="true" />
+            <element signature="e#30199#30200#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$PROJECT_DIR$/src/utils/GenClustPlusPlus.jar!/weka/clusterers/GenClustPlusPlus.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="272">
+          <caret line="361" column="44" selection-start-line="361" selection-start-column="44" selection-end-line="361" selection-end-column="44" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/utils/Utils.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="227">
-          <caret line="610" column="16" selection-start-line="610" selection-start-column="16" selection-end-line="610" selection-end-column="16" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$PROJECT_DIR$/src/utils/GenClustPlusPlus.jar!/weka/clusterers/GenClustPlusPlus.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="276">
-          <caret line="1018" column="49" selection-start-line="1018" selection-start-column="49" selection-end-line="1018" selection-end-column="49" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/PSO/PSO.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="197">
-          <caret line="226" column="47" selection-start-line="226" selection-start-column="47" selection-end-line="226" selection-end-column="47" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/PSO/PSODriver.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="386">
-          <caret line="107" column="46" selection-start-line="107" selection-start-column="46" selection-end-line="107" selection-end-column="46" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/clustering/KMeans.java">
-      <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="150">
-          <caret line="123" column="17" selection-start-line="123" selection-start-column="17" selection-end-line="123" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$PROJECT_DIR$/src/utils/weka.jar!/weka/core/Instances.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2">
-          <caret line="46" column="11" selection-start-line="46" selection-start-column="11" selection-end-line="46" selection-end-column="11" />
+          <caret line="236" column="0" selection-start-line="236" selection-start-column="0" selection-end-line="236" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/GA/MyGenClustPlusPlus.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="719" column="28" selection-start-line="719" selection-start-column="28" selection-end-line="719" selection-end-column="28" />
+        <state relative-caret-position="145">
+          <caret line="760" column="0" selection-start-line="760" selection-start-column="0" selection-end-line="760" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#55056#0" expanded="true" />
+            <element signature="imports" expanded="true" />
+            <element signature="e#1658#1659#0" expanded="true" />
+            <element signature="e#1704#1705#0" expanded="true" />
+            <element signature="e#2059#2060#0" expanded="true" />
+            <element signature="e#2121#2122#0" expanded="true" />
+            <element signature="e#2172#2173#0" expanded="true" />
+            <element signature="e#2216#2217#0" expanded="true" />
+            <element signature="e#2411#2412#0" expanded="true" />
+            <element signature="e#2447#2448#0" expanded="true" />
+            <element signature="e#2501#2502#0" expanded="true" />
+            <element signature="e#2543#2544#0" expanded="true" />
+            <element signature="e#3095#3096#0" expanded="true" />
+            <element signature="e#3141#3142#0" expanded="true" />
+            <element signature="e#22485#22486#0" expanded="true" />
+            <element signature="e#22540#22541#0" expanded="true" />
+            <element signature="e#52750#52751#0" expanded="true" />
+            <element signature="e#52799#52800#0" expanded="true" />
+            <element signature="e#52857#52858#0" expanded="true" />
+            <element signature="e#52921#52922#0" expanded="true" />
+            <element signature="e#52966#52967#0" expanded="true" />
+            <element signature="e#53017#53018#0" expanded="true" />
+            <element signature="e#53067#53068#0" expanded="true" />
+            <element signature="e#53123#53124#0" expanded="true" />
+            <element signature="e#53171#53172#0" expanded="true" />
+            <element signature="e#53225#53226#0" expanded="true" />
+            <element signature="e#53273#53274#0" expanded="true" />
+            <element signature="e#53327#53328#0" expanded="true" />
+            <element signature="e#53372#53373#0" expanded="true" />
+            <element signature="e#53420#53421#0" expanded="true" />
+            <element signature="e#53466#53467#0" expanded="true" />
+            <element signature="e#53514#53515#0" expanded="true" />
+            <element signature="e#53559#53560#0" expanded="true" />
+            <element signature="e#53627#53628#0" expanded="true" />
+            <element signature="e#53679#53680#0" expanded="true" />
+            <element signature="e#53753#53754#0" expanded="true" />
+            <element signature="e#53810#53811#0" expanded="true" />
+            <element signature="e#53877#53878#0" expanded="true" />
+            <element signature="e#53932#53933#0" expanded="true" />
+            <element signature="e#53997#53998#0" expanded="true" />
+            <element signature="e#54052#54053#0" expanded="true" />
+            <element signature="e#54117#54118#0" expanded="true" />
+            <element signature="e#54166#54167#0" expanded="true" />
+            <element signature="e#54218#54219#0" expanded="true" />
+            <element signature="e#54267#54268#0" expanded="true" />
+            <element signature="e#54339#54340#0" expanded="true" />
+            <element signature="e#54648#54649#0" expanded="true" />
+            <element signature="e#54694#54695#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/PSO/PSODriver.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="414">
+          <caret line="123" column="48" selection-start-line="123" selection-start-column="48" selection-end-line="123" selection-end-column="48" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#2480#2481#0" expanded="true" />
-            <element signature="e#2542#2543#0" expanded="true" />
-            <element signature="method#fitness#0;class#MyGenClustPlusPlus#0" expanded="false" />
-            <element signature="method#getTechnicalInformation#0;class#MyGenClustPlusPlus#0" expanded="false" />
-            <element signature="e#54547#54548#0" expanded="true" />
-            <element signature="e#54595#54596#0" expanded="true" />
-            <element signature="e#55729#55730#0" expanded="true" />
-            <element signature="e#55775#55776#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/PSO/PSO.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="167">
+          <caret line="226" column="0" selection-start-line="226" selection-start-column="0" selection-end-line="226" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/GA/GADriver.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="352">
+          <caret line="142" column="8" selection-start-line="142" selection-start-column="8" selection-end-line="142" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/clustering/KMeans.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="96">
+          <caret line="100" column="8" selection-start-line="100" selection-start-column="8" selection-end-line="100" selection-end-column="8" />
+          <folding>
+            <element signature="e#1689#1690#0" expanded="true" />
+            <element signature="e#1723#1724#0" expanded="true" />
+            <element signature="e#3623#3624#0" expanded="true" />
+            <element signature="e#3662#3663#0" expanded="true" />
           </folding>
         </state>
       </provider>

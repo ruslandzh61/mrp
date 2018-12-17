@@ -3,9 +3,7 @@ package clustering;
 import utils.Utils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Created by rusland on 10.11.18.
@@ -17,6 +15,9 @@ public class KMeans {
     private boolean supplied;
 
     private int niter = 500;
+
+    public KMeans() {
+    }
 
     public enum Initialization {
         RANDOM, KMEANS_PLUS_PLUS, HILL_CLIMBER
@@ -37,7 +38,8 @@ public class KMeans {
     public KMeans(KMeans kMeans) {
         this.centroids = Utils.deepCopy(kMeans.getCentroids());
         this.setSeed(kMeans.getSeed());
-        this.k = kMeans.k;
+        this.label = kMeans.getLabels().clone();
+        this.k = kMeans.numberOfClusters();
         this.pow = kMeans.pow;
         this.initialization = kMeans.initialization;
     }
@@ -60,7 +62,7 @@ public class KMeans {
     public void setInitial(double[][] initial) {
         this.supplied = true;
         this.k = initial.length;
-        this.initialStartPoint = initial;
+        this.initialStartPoint = Utils.deepCopy(initial);
     }
 
     /**
@@ -70,8 +72,8 @@ public class KMeans {
         double[][] copiedData = Utils.deepCopy(data);
         initialize(copiedData);
         int N = copiedData.length;
-        if (niter <= 0 || niter > 500)
-            niter = 500;
+        assert (niter >= 1 || niter <= 500);
+
         double [][] c1 = centroids;
         double threshold = 0.000000001;
         int round=0;
@@ -80,10 +82,10 @@ public class KMeans {
             // update _centroids with the last round results
             centroids = c1;
 
-            //assign record to the closest centroid
+            //assign record to the clusterInstance centroid
             label = new int[N];
             for (int i = 0; i < N; i++) {
-                label[i] = closest(copiedData[i]);
+                label[i] = clusterInstance(copiedData[i]);
             }
 
             // recompute centroids based on the assignments
@@ -96,6 +98,27 @@ public class KMeans {
                 break;
             }
         }
+        getRidOfEmptyCentroids();
+    }
+
+    private void getRidOfEmptyCentroids() {
+        double[][] copy = Utils.deepCopy(this.centroids);
+        Set<Integer> distLabels = Utils.distinctItems(this.label);
+        int i = 0;
+        this.centroids = new double[distLabels.size()][];
+        HashMap<Integer, Integer> oldToNewIndex = new HashMap<>();
+        for (int distLabel: distLabels) {
+            this.centroids[i] = copy[distLabel];
+            oldToNewIndex.put(distLabel, i);
+            ++i;
+        }
+        for (i = 0; i < label.length; ++i) {
+            label[i] = oldToNewIndex.get(label[i]);
+        }
+    }
+
+    public int numberOfClusters() {
+        return centroids.length;
     }
 
     public int[] getLabels() {
@@ -111,9 +134,9 @@ public class KMeans {
      * */
     /*void oneIter() {
         centroids = updateCentroids();
-        //assign record to the closest centroid
+        //assign record to the clusterInstance centroid
         for (int i=0; i < N; i++){
-            label[i] = closest(data[i]);
+            label[i] = clusterInstance(data[i]);
         }
     }*/
 
@@ -217,9 +240,9 @@ public class KMeans {
                     copy[rand][j] = copy[N - 1 - i][j];    // ensure sampling without replacement
                 }
             }
-            // assign data points to closest centroids
+            // assign data points to clusterInstance centroids
             for (int i = 0; i < N; i++) {
-                label[i] = closest(data[i]);
+                label[i] = clusterInstance(data[i]);
             }
         } else if (this.initialization == Initialization.HILL_CLIMBER) {
             assert (supplied == true);
@@ -263,9 +286,9 @@ public class KMeans {
     }
 
     /**
-     *  find the closest centroid for the record v
+     *  find the clusterInstance centroid for the record v
      *  */
-    private int closest(double[] v){
+    public int clusterInstance(double[] v){
         double mindist = Utils.dist(v, centroids[0], this.pow);
         int label = 0;
         for (int i = 1; i < k; i++) {
