@@ -102,9 +102,13 @@ public class GADriver {
             cl.setEvaluations(evaluations);
             cl.setMyData(dataArr);
             cl.setTrueLabels(labelsTrue);
+            cl.setNormalizeObjectives(true);
             cl.buildClusterer(dataClusterer);
 
             labelsPred = Utils.adjustLabels(cl.getLabels());
+            //Utils.removeNoise(labelsPred, dataArr, 2, 2.0);
+            //Utils.adjustAssignments(labelsPred);
+
             temp = Arrays.toString(labelsPred);
             output.append(temp.substring(1, temp.length() - 1)).append(System.getProperty("line.separator"));
 
@@ -118,7 +122,7 @@ public class GADriver {
             meanMyDBWithMyCentroids += myDBWithMyCentroids;
             meanK += k;
 
-            //System.out.println("run " + run + ": " + Arrays.toString(labelsPred));
+            System.out.println("RUN: " + run);
             System.out.println("ARI score: " + Utils.doublePrecision(ARI, 4));
             System.out.println("DB score:  " + Utils.doublePrecision(myDBWithMyCentroids, 4));
             System.out.println("num of clusters: " + k);
