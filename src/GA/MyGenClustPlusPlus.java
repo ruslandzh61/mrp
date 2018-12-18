@@ -55,6 +55,24 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
     private double[][] myData;
     private boolean normalizeObjectives;
 
+    public void setDistance(double distance) {
+        this.myDistance = distance;
+    }
+
+    private double myDistance;
+
+    public void setMaximin(boolean maximin) {
+        this.maximin = maximin;
+    }
+
+    private boolean maximin;
+
+    public void setHillClimb(boolean hillClimb) {
+        this.hillClimb = hillClimb;
+    }
+
+    private boolean hillClimb;
+
     public void setNormalizeObjectives(boolean normalizeObjectives) {
         this.normalizeObjectives = normalizeObjectives;
     }
@@ -180,7 +198,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
                         finalRun.buildClusterer(this.myData);
                         if(finalRun.getCentroids().length <= 1) {
                             f = this.m_rand.nextInt((int)(Math.sqrt((double)data.size()) - 2.0D)) + 2;
-                            KMeans t = new KMeans(f, 2.0);
+                            KMeans t = new KMeans(f, this.myDistance);
                             t.setSeed(this.m_rand.nextInt());
                             t.buildClusterer(this.myData);
                             resultingPopulation[newBestIndex] = new KMeans(t);
@@ -240,44 +258,53 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
                     nextPop.add(var19[var21++]);
                 }
 
-                // select non-dominated set to next population
-                double[][] nextPopObjectives = new double[nextPop.size()][];
-                for (i = 0; i < nextPop.size(); ++i) {
-                    nextPopObjectives[i] = evaluate(nextPop.get(i).clustering.getLabels());
-                }
-                // update utopia point
-                updateUtopiaPoint(nextPopObjectives);
-                // MaxiMin strategy
-                double[] fitness = utils.Utils.determineParetoSet(utils.Utils.deepCopy(nextPopObjectives));
-                int mainPopCurIdx = 0;
-                for (i = 0; i < nextPopObjectives.length; ++i) {
-                    nextPop.get(i).setFitness(fitness[i]);
-                    if (fitness[i] < MAXIMIN_THRESHOLD && mainPopCurIdx < mainPopulation.length) {
+                if (maximin) {
+                    // select non-dominated set to next population
+                    double[][] nextPopObjectives = new double[nextPop.size()][];
+                    for (i = 0; i < nextPop.size(); ++i) {
+                        nextPopObjectives[i] = evaluate(nextPop.get(i).clustering.getLabels());
+                    }
+                    // update utopia point
+                    updateUtopiaPoint(nextPopObjectives);
+                    /*if (normalizeObjectives) {
+                        utils.Utils.normalize(nextPopObjectives);
+                    }*/
+                    // MaxiMin strategy
+                    double[] fitness = utils.Utils.determineParetoSet(utils.Utils.deepCopy(nextPopObjectives));
+                    int mainPopCurIdx = 0;
+                    for (i = 0; i < nextPopObjectives.length; ++i) {
+                        nextPop.get(i).setFitness(fitness[i]);
+                        if (fitness[i] < MAXIMIN_THRESHOLD && mainPopCurIdx < mainPopulation.length) {
+                            mainPopulation[mainPopCurIdx++] = new KMeans(nextPop.get(i).clustering);
+                            nextPop.set(i, null);
+                        }
+                    }
+                    nextPop.removeIf(fitnessContainer -> (fitnessContainer == null));
+
+                    // randomly add weakly-dominated or dominated
+                    // solutions from nextPop, until mainPopulation is filled up by population size
+                    int roomToFill = mainPopulation.length - mainPopCurIdx;
+                    // now randomly pick nextPopList
+                    i = 0;
+                    /*while (i < roomToFill) {
+                        int idxPick = m_rand.nextInt(nextPop.size());
+                        assert (nextPop.get(idxPick) != null);
+                        mainPopulation[mainPopCurIdx++] = new KMeans(nextPop.get(idxPick).clustering);
+                        i++;
+                        nextPop.remove(idxPick);
+                    }*/
+                    Collections.sort(nextPop, Collections.reverseOrder());
+                    while (i < roomToFill) {
                         mainPopulation[mainPopCurIdx++] = new KMeans(nextPop.get(i).clustering);
-                        nextPop.set(i, null);
+                        ++i;
+                    }
+                    assert (mainPopCurIdx == mainPopulation.length);
+                } else {
+                    Collections.sort(nextPop, Collections.reverseOrder());
+                    for (i = 0; i < resultingPopulation.length; ++i) {
+                        mainPopulation[i] = new KMeans(nextPop.get(i).clustering);
                     }
                 }
-                nextPop.removeIf(fitnessContainer -> (fitnessContainer == null));
-
-                // randomly add weakly-dominated or dominated
-                // solutions from nextPop, until mainPopulation is filled up by population size
-                int roomToFill = mainPopulation.length - mainPopCurIdx;
-                // now randomly pick nextPopList
-                i = 0;
-                while (i < roomToFill) {
-                    int idxPick  = m_rand.nextInt(nextPop.size());
-                    assert (nextPop.get(idxPick) != null);
-                    mainPopulation[mainPopCurIdx++] = new KMeans(nextPop.get(idxPick).clustering);
-                    i++;
-                    nextPop.remove(idxPick);
-                }
-
-                assert (mainPopCurIdx == mainPopulation.length);
-
-                /*Arrays.sort(var22, Collections.reverseOrder());
-                for(i = 0; i < resultingPopulation.length; ++i) {
-                    mainPopulation[i] = new MyGenClustPlusPlus.MKMeans(var22[i].clustering);
-                }*/
             }
 
             /* update previous population */
@@ -300,82 +327,90 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
 
         // update utopia point
         updateUtopiaPoint(mainPopObjectives);
-        // MaxiMin strategy
-        double[] fitness = utils.Utils.determineParetoSet(utils.Utils.deepCopy(mainPopObjectives));
-        // indices of non-dominated solutions
 
         System.out.println("-- FINAL POP START");
         measureFinalPop(mainPopulation, myData, trueLabels);
         System.out.println("-- FINAL POP END");
-
-        boolean chooseFromNonDom = true;
-        double[][] cloned;
-        if (chooseFromNonDom) {
-            List<Integer> nonDomSetIndices = new ArrayList<>();
-            for (int i = 0; i < mainPopObjectives.length; ++i) {
-                if (fitness[i] < MAXIMIN_THRESHOLD) {
-                    nonDomSetIndices.add(i);
-                }
-            }
-
-            // for printing non-dominated solutions
-            KMeans[] nonDomMKMeans = new KMeans[nonDomSetIndices.size()];
-            for (int i = 0; i < nonDomSetIndices.size(); ++i) {
-                int index = nonDomSetIndices.get(i);
-                nonDomMKMeans[i] = new KMeans(mainPopulation[index]);
-            }
-            measureFinalPop(nonDomMKMeans, myData, trueLabels);
-            System.out.println("--- FINAL NON-DOM END");
-
-            // if there is no non-dominated clustering solution
-            if (nonDomSetIndices.size() == 0) {
-                for (int i = 0; i < fitness.length; ++i) {
-                    if (fitness[i] >= MAXIMIN_THRESHOLD) {
+        if (maximin) {
+            boolean chooseFromNonDom = true;
+            double[][] cloned;
+            if (chooseFromNonDom) {
+                // MaxiMin strategy
+                double[] fitness = utils.Utils.determineParetoSet(utils.Utils.deepCopy(mainPopObjectives));
+                // indices of non-dominated solutions
+                assert (fitness.length == mainPopObjectives.length);
+                List<Integer> nonDomSetIndices = new ArrayList<>();
+                for (int i = 0; i < mainPopObjectives.length; ++i) {
+                    if (fitness[i] < MAXIMIN_THRESHOLD) {
                         nonDomSetIndices.add(i);
-                        break;
                     }
                 }
+                System.out.println(Arrays.toString(fitness));
+
+                // for printing non-dominated solutions
+                KMeans[] nonDomMKMeans = new KMeans[nonDomSetIndices.size()];
+                for (int i = 0; i < nonDomSetIndices.size(); ++i) {
+                    int index = nonDomSetIndices.get(i);
+                    nonDomMKMeans[i] = new KMeans(mainPopulation[index]);
+                }
+
+                System.out.println("size of pops: " + mainPopulation.length + " : " + nonDomMKMeans.length);
+                // if there is no non-dominated clustering solution
+                if (nonDomSetIndices.size() == 0) {
+                    /*for (int i = 0; i < fitness.length; ++i) {
+                        if (fitness[i] >= MAXIMIN_THRESHOLD) {
+                            nonDomSetIndices.add(i);
+                            break;
+                        }
+                    }*/
+                    cloned = utils.Utils.deepCopy(mainPopObjectives);
+                } else {
+                    measureFinalPop(nonDomMKMeans, myData, trueLabels);
+                    System.out.println("--- FINAL NON-DOM END");
+
+                    double[][] nonDomSetObjs = new double[nonDomSetIndices.size()][];
+                    for (int i = 0; i < nonDomSetObjs.length; ++i) {
+                        int index = nonDomSetIndices.get(i);
+                        nonDomSetObjs[i] = mainPopObjectives[index];
+                    }
+                    // choose final cluster solution
+                    cloned = utils.Utils.deepCopy(nonDomSetObjs);
+                }
+            } else {
+                cloned = utils.Utils.deepCopy(mainPopObjectives);
             }
 
-            double[][] nonDomSetObjs = new double[nonDomSetIndices.size()][];
-            for (int i = 0; i < nonDomSetObjs.length; ++i) {
-                int index = nonDomSetIndices.get(i);
-                nonDomSetObjs[i] = mainPopObjectives[index];
+            if (this.normalizeObjectives) {
+                utils.Utils.normalize(cloned, objBestCoordinates, objWorstCoordinates);
+                newBestIndex = utils.Utils.pickClosestToUtopia(cloned, new double[]{0.0, 0.0});
+            } else {
+                newBestIndex = utils.Utils.pickClosestToUtopia(cloned, objBestCoordinates);
             }
-            // choose final cluster solution
-            cloned = utils.Utils.deepCopy(nonDomSetObjs);
+            var17 = this.fitness(mainPopulation[newBestIndex]);
         } else {
-            cloned = utils.Utils.deepCopy(mainPopObjectives);
-        }
-
-        if (this.normalizeObjectives) {
-            utils.Utils.normalize(cloned, objBestCoordinates, objWorstCoordinates);
-            newBestIndex = utils.Utils.pickClosestToUtopia(cloned, new double[]{0.0, 0.0});
-        } else {
-            newBestIndex = utils.Utils.pickClosestToUtopia(cloned, objBestCoordinates);
-        }
-        var17 = this.fitness(mainPopulation[newBestIndex]);
-
-
-        /*for(int var20 = 0; var20 < mainPopulation.length; ++var20) {
-            double var23 = this.fitness(mainPopulation[var20]);
-            if(var23 > var17) {
-                var17 = var23;
-                newBestIndex = var20;
+            for (int var20 = 0; var20 < mainPopulation.length; ++var20) {
+                double var23 = this.fitness(mainPopulation[var20]);
+                if (var23 > var17) {
+                    var17 = var23;
+                    newBestIndex = var20;
+                }
             }
-        }*/
+        }
         assert (newBestIndex >= 0);
         this.m_bestChromosome = new KMeans(mainPopulation[newBestIndex]);
-        finalRun = mainPopulation[newBestIndex];
-        this.m_bestFitness = var17;
-        /*finalRun = new MyGenClustPlusPlus.MKMeans();
-        finalRun.setSeed(this.m_rand.nextInt());
-        finalRun.setInitializationMethod(new SelectedTag(4, TAGS_SELECTION_MK));
-        finalRun.setInitial(this.m_bestChromosome.getClusterCentroids());
-        finalRun.setDontReplaceMissingValues(this.m_dontReplaceMissing);
-        finalRun.setPreserveInstancesOrder(true);
-        finalRun.setMaxIterations(this.m_maxKMeansIterationsFinal);
-        finalRun.buildClusterer(this.m_data, this.m_distFunc);*/
+        if (this.hillClimb) {
+            this.m_bestFitness = var17;
+            finalRun = new KMeans();
+            finalRun.setSeed(this.m_rand.nextInt());
+            finalRun.setInitializationMethod(KMeans.Initialization.HILL_CLIMBER);
+            finalRun.setInitial(this.m_bestChromosome.getCentroids());
+            finalRun.setMaxIterations(this.m_maxKMeansIterationsFinal);
+            finalRun.buildClusterer(this.myData);
+            System.out.println("hill climber used");
+        } else {
+            finalRun = mainPopulation[newBestIndex];
+            System.out.println("no hill climber");
+        }
         this.m_builtClusterer = finalRun;
         this.m_numberOfClusters = this.m_builtClusterer.getCentroids().length;
     }
@@ -410,9 +445,10 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
     }
 
     private KMeans[] generateInitialPopulation() throws Exception {
+        int multiplier = 5;
         /* pre-initial size is 3 * initial size = 90 */
         int maxK = 3 * this.m_initialPopulationSize / 10 + 1;
-        int numberOfChromosomes = 5 * (maxK - 1) * 2;
+        int numberOfChromosomes = multiplier * (maxK - 1) * 2;
         KMeans[] population = new KMeans[numberOfChromosomes];
         int chromosomeCount = 0;
 
@@ -421,8 +457,8 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         /* Initial Population with Probabilistic Selection */
         for(i = 2; i <= maxK; ++i) {
             /* five clusterings for each value of k */
-            for(randomK = 0; randomK < 5; ++randomK) {
-                KMeans j = new KMeans(i, 2.0);
+            for(randomK = 0; randomK < multiplier; ++randomK) {
+                KMeans j = new KMeans(i, this.myDistance);
                 int chromosome = -1;
 
                 // chromosome is built until number of clusters is at least two
@@ -448,8 +484,8 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         for(i = 0; i < maxK - 1; ++i) {
             randomK = this.m_rand.nextInt((int)(Math.sqrt((double)this.myData.length) - 2.0D)) + 2;
 
-            for(int var10 = 0; var10 < 5; ++var10) {
-                KMeans var11 = new KMeans(randomK, 2.0);
+            for(int var10 = 0; var10 < multiplier; ++var10) {
+                KMeans var11 = new KMeans(randomK, this.myDistance);
                 var11.setSeed(this.m_rand.nextInt());
                 var11.setInitializationMethod(KMeans.Initialization.KMEANS_PLUS_PLUS);
 
@@ -582,28 +618,37 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         }
     }
 
+    /*private double[] maximin(KMeans[] population) {
+        double[][] objs = new double[population.length][];
+        for (int i = 0; i < objs.length; ++i) {
+            objs[i] = evaluate(population[i].getLabels());
+        }
+        double[] maximins =
+    }*/
+
     private KMeans[] probabilisticSelection(KMeans[] population) {
+        int multiplier = 5;
         KMeans[] selectedPopulation = new KMeans[this.m_initialPopulationSize];
         int currentSelections = 0;
         double[] fitnessArray = new double[population.length];
         boolean[] usedChromosome = new boolean[population.length];
-        double[] TkArray = new double[population.length / 5];
-        int[] kArray = new int[population.length / 5];
+        double[] TkArray = new double[population.length / multiplier];
+        int[] kArray = new int[population.length / multiplier];
         double sumTk = 0.0D;
 
         /* compute average fitness value for each value of k */
-        for(int p = 0; p < population.length; p += 5) {
-            kArray[p / 5] = population[p].numberOfClusters();
+        for(int p = 0; p < population.length; p += multiplier) {
+            kArray[p / multiplier] = population[p].numberOfClusters();
             double Tk = 0.0D;
 
-            for(int j = 0; j < 5; ++j) {
+            for(int j = 0; j < multiplier; ++j) {
                 double i = this.fitness(population[p + j]);
                 fitnessArray[p + j] = i;
                 Tk += i;
             }
 
             sumTk += Tk;
-            TkArray[p / 5] = Tk;
+            TkArray[p / multiplier] = Tk;
         }
 
         /* choose probabilistically next chromosome to include in initial population */
@@ -621,7 +666,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
 
                     /* 5 clusterings belong to each of the values k
                     *  choose the next one with the best fitness function */
-                    for(int selected = 0; selected < 5; ++selected) {
+                    for(int selected = 0; selected < multiplier; ++selected) {
                         if(fitnessArray[var22 + selected] > max && !usedChromosome[var22 + selected]) {
                             max = fitnessArray[var22 + selected];
                             maxIndex = var22 + selected;
@@ -634,7 +679,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
                          * then we create a new chromosome by running MK-Means/MK-Means++ once more
                          * with input k for the number of clusters. */
                         try {
-                            KMeans ex = new KMeans(kArray[var22], 2.0);
+                            KMeans ex = new KMeans(kArray[var22], this.myDistance);
                             ex.setSeed(this.m_rand.nextInt());
                             ex.buildClusterer(this.myData);
                             var23 = ex;
@@ -725,11 +770,11 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
                 refSecondHalf = 1.7976931348623157E308D;
 
                 for(targetFirstHalf = 0; targetFirstHalf < parentTwoCentroids.numInstances(); ++targetFirstHalf) {
-                    targetSecondHalf = Math.abs(utils.Utils.dist(
-                            var33.get(refRandom).toDoubleArray(), parentTwoCentroids.get(targetFirstHalf).toDoubleArray(), 2.0));
+                    targetSecondHalf = Math.abs(utils.Utils.dist(var33.get(refRandom).toDoubleArray(),
+                            parentTwoCentroids.get(targetFirstHalf).toDoubleArray(), this.myDistance));
                     if(targetSecondHalf == 1.0D / 0.0) {
                         utils.Utils.dist(var33.get(refRandom).toDoubleArray(),
-                                parentTwoCentroids.get(targetFirstHalf).toDoubleArray(), 2.0);
+                                parentTwoCentroids.get(targetFirstHalf).toDoubleArray(), this.myDistance);
                     }
 
                     if(targetSecondHalf < refSecondHalf) {
@@ -751,7 +796,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
 
                     for(targetFirstHalf = 0; targetFirstHalf < target.numInstances(); ++targetFirstHalf) {
                         targetSecondHalf = Math.abs(utils.Utils.dist(parentTwoCentroids.get(refRandom).toDoubleArray(),
-                                target.get(targetFirstHalf).toDoubleArray(), 2.0));
+                                target.get(targetFirstHalf).toDoubleArray(), this.myDistance));
                         if(targetSecondHalf < refSecondHalf) {
                             refSecondHalf = targetSecondHalf;
                             refFirstHalf = targetFirstHalf;
@@ -815,12 +860,12 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
             for(int e = 0; e < offspring[var30].numInstances(); ++e) {
                 for(int var32 = e + 1; var32 < offspring[var30].numInstances(); ++var32) {
                     if(Math.abs(utils.Utils.dist(offspring[var30].get(e).toDoubleArray()
-                            , offspring[var30].get(var32).toDoubleArray(), 2.0)) <= this.m_duplicateThreshold) {
+                            , offspring[var30].get(var32).toDoubleArray(), this.myDistance)) <= this.m_duplicateThreshold) {
                         if(offspring[var30].numInstances() > 2) {
                             offspring[var30].remove(var32);
                         } else {
                             while(Math.abs(utils.Utils.dist(offspring[var30].get(e).toDoubleArray(),
-                                    offspring[var30].get(var32).toDoubleArray(), 2.0)) <= this.m_duplicateThreshold) {
+                                    offspring[var30].get(var32).toDoubleArray(), this.myDistance)) <= this.m_duplicateThreshold) {
                                 int attribute = this.m_rand.nextInt(offspring[var30].numAttributes());
 
                                 double var34;
@@ -966,12 +1011,12 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         for(ex = 0; ex < centroids.numInstances(); ++ex) {
             for(k = ex + 1; k < centroids.numInstances(); ++k) {
                 if(Math.abs(utils.Utils.dist(centroids.get(ex).toDoubleArray(),
-                        centroids.get(k).toDoubleArray(), 2.0)) <= this.m_duplicateThreshold) {
+                        centroids.get(k).toDoubleArray(), this.myDistance)) <= this.m_duplicateThreshold) {
                     if(centroids.numInstances() > 2) {
                         centroids.remove(k);
                     } else {
                         while(Math.abs(utils.Utils.dist(centroids.get(ex).toDoubleArray(),
-                                centroids.get(k).toDoubleArray(), 2.0)) <= this.m_duplicateThreshold) {
+                                centroids.get(k).toDoubleArray(), this.myDistance)) <= this.m_duplicateThreshold) {
                             int var9 = this.m_rand.nextInt(centroids.numAttributes());
 
                             double val;

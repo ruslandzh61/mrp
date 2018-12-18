@@ -345,8 +345,8 @@ public class PSODriver {
             // pick file manually or pass a path string
             boolean pickManually = false;
             String filePath, filePathForWeka;
-            filePath = pickManually ? Utils.pickAFile(): "data/glass.csv";
-            filePathForWeka = pickManually ? Utils.pickAFile(): "data/p-glass.csv";
+            filePath = pickManually ? Utils.pickAFile(): "data/dermatology.csv";
+            filePathForWeka = pickManually ? Utils.pickAFile(): "data/p-dermatology.csv";
             PSOConfiguration configuration = new PSOConfiguration();
             // default configuration
             /*configuration.c1 = 1.42;
@@ -357,16 +357,16 @@ public class PSODriver {
             configuration.maxIterWithoutImprovement = 50;
             configuration.pMax = 150;
             configuration.pickLeaderRandomly = false;*/
-            //new PSODriver().run(10, filePath, filePathForWeka, configuration, false, false);
+            new PSODriver().run(10, filePath, filePathForWeka, configuration, false, true);
             //Utils.nominalForm("data/glass.csv");
-            boolean removeFirst = false;
-            boolean normalize = false;
+            /*boolean removeFirst = false;
+            boolean normalize = true;
             System.out.println("remove id: " + removeFirst);
             System.out.println("normalize: " + normalize);
             System.out.println("my k-means: ");
             PSODriver.runMyKmeans(clustering.KMeans.Initialization.RANDOM, 10, filePath, ',', removeFirst, normalize);
             System.out.println("-------");
-            /*System.out.println("my k-means++: ");
+            System.out.println("my k-means++: ");
             PSODriver.runMyKmeans(clustering.KMeans.Initialization.KMEANS_PLUS_PLUS, 10, filePath, ',', removeFirst, normalize);
             System.out.println("-------");
             System.out.println("WEKA random k-means");
