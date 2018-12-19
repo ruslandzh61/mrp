@@ -51,7 +51,12 @@ public class GADriver {
         } else {
             excludedColumns = new int[]{dataStr.get(0).length - 1};
         }
+
         double[][] dataArr = Utils.extractAttributes(dataStr, excludedColumns);
+
+        if (normalize) {
+            Utils.normalize(dataArr);
+        }
 
         // step 2 - preprocess data
         data = ConverterUtils.DataSource.read(filename);
@@ -90,6 +95,7 @@ public class GADriver {
         Evaluator.Evaluation[] evaluations = {Evaluator.Evaluation.CONNECTIVITY, Evaluator.Evaluation.COHESION};
         Evaluator evaluator = new Evaluator();
 
+        System.out.println(Arrays.toString(labelsTrue));
         Random rnd = new Random(1);
         for (int run = 1; run <= runs; ++run) {
             if (myGenClust) {
@@ -102,13 +108,15 @@ public class GADriver {
                 cl.setTrueLabels(labelsTrue);
                 cl.setNormalizeObjectives(true);
                 cl.setHillClimb(true);
-                cl.setMaximin(false);
+                cl.setMaximin(true);
+                cl.setMultiObjective(true);
                 cl.setDistance(2.0);
                 cl.buildClusterer(dataClusterer);
 
                 labelsPred = Utils.adjustLabels(cl.getLabels());
             } else {
                 gl = new GenClustPlusPlus();
+                gl.setStartChromosomeSelectionGeneration(11);
                 gl.setSeed(rnd.nextInt());
                 gl.buildClusterer(dataClusterer);
                 labelsPred = new int[dataClusterer.size()];
@@ -136,6 +144,7 @@ public class GADriver {
             meanK += k;
 
             System.out.println("RUN: " + run);
+            System.out.println(Arrays.toString(labelsPred));
             System.out.println("ARI score: " + Utils.doublePrecision(ARI, 4));
             System.out.println("DB score:  " + Utils.doublePrecision(myDBWithMyCentroids, 4));
             System.out.println("num of clusters: " + k);
@@ -154,13 +163,13 @@ public class GADriver {
     public static void main(String[] args) throws Exception {
         // weka doesn't work with other separators other than ','
         // (false, false) - first attribute not removed, not normalized
-        String filePath = "data/dermatology.csv";
-        String filePathForWeka = "data/p-dermatology.csv";
+        String filePath = "data/compound.csv";
+        String filePathForWeka = "data/p-compound.csv";
         boolean removeFirst = false;
         boolean normalize = true;
-        System.out.println("MY GENCLUST++");
-        new GADriver(false, 15, filePathForWeka, filePath, removeFirst, normalize);
         //System.out.println("WEKA GENCLUST++");
-        //new GADriver(true, 15, filePathForWeka, filePath,  removeFirst, normalize);
+        //new GADriver(false, 15, filePathForWeka, filePath,  removeFirst, normalize);
+        System.out.println("MY GENCLUST++");
+        new GADriver(true, 15, filePathForWeka, filePath, removeFirst, normalize);
     }
 }

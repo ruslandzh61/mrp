@@ -282,6 +282,28 @@ public class Utils {
         }
     }
 
+    public static void normalize(double[] data) {
+        double low = Double.POSITIVE_INFINITY;
+        double high =Double.NEGATIVE_INFINITY;
+        for (int i = 0; i < data.length; ++i) {
+            if (data[i] > high) {
+                high = data[i];
+            }
+            if (data[i] < low) {
+                low = data[i];
+            }
+        }
+
+
+        for (int i = 0; i < data.length; ++i) {
+            if (high == low) {
+                data[i] = Math.abs(data[i]);
+            } else {
+                data[i] = (data[i] - low) / (high - low);
+            }
+        }
+    }
+
     public static void normalize(double[][] data) {
         double[] dataLow = new double[data[0].length];
         for (int i = 0; i < dataLow.length; ++i) {
@@ -292,6 +314,62 @@ public class Utils {
             dataHigh[i] = Double.NEGATIVE_INFINITY;
         }
         normalize(data, dataLow, dataHigh);
+    }
+
+    public static double silhoutte(HashMap<Integer, double[]> clusters, int[] labels, double[][] data) {
+        double silhouette;
+        double a;
+        double distA = 0;
+        double b;
+        double distB = 0;
+        double cont;
+
+        HashMap<Integer, HashSet<Integer>> labelToClusterPoints = new HashMap<>();
+        Set<Integer> distLabels = Utils.distinctItems(labels);
+
+        for (int label: distLabels) {
+            labelToClusterPoints.put(label, new HashSet<>());
+        }
+        for (int i = 0; i < labels.length; ++i) {
+            labelToClusterPoints.get(labels[i]).add(i);
+        }
+
+        for (int clusterID: labelToClusterPoints.keySet()) {
+            HashSet<Integer> cluster = labelToClusterPoints.get(clusterID);
+            for (int p: cluster) {
+                for (int clusterID2: labelToClusterPoints.keySet()) {
+                    if (clusterID != clusterID2) {
+                        HashSet<Integer> cluster2 = labelToClusterPoints.get(clusterID);
+                        for (int p2: cluster2) {
+                            if (p != p2) {
+                                distB += Utils.dist(data[p], data[p2], 2.0);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        b = distB / clusters.size();
+
+        cont = 0;
+
+        for (int clusterID: labelToClusterPoints.keySet()) {
+            HashSet<Integer> cluster = labelToClusterPoints.get(clusterID);
+            for (int p : cluster) {
+                HashSet<Integer> cluster2 = labelToClusterPoints.get(clusterID);
+                for (int p2 : cluster2) {
+                    if (p != p2) {
+                        distA += Utils.dist(data[p], data[p2], 2.0);
+                        cont++;
+                    }
+                }
+            }
+        }
+
+        a = distA / clusters.size();
+        silhouette = (b - a) / Math.max(a, b);
+        return silhouette;
     }
 
     public static double dbIndexScore(HashMap<Integer, double[]> clusters, int[] labels, double[][] data) {
@@ -566,10 +644,10 @@ public class Utils {
     }
 
     public static void main(String[] args) throws Exception {
-        //replaceInFile("data/winequality-red.csv", ";",",");
+        //replaceInFile("data/output.csv", ",,",",");
         //replaceInFile("data/p-flame.csv", " ","");
-        //Utils.nominalFormToNumber("data/output.csv", ',', -1);
-        //Utils.nominalForm("data/flame.csv");
+        //Utils.nominalFormToNumber("data/compound.csv", ',', -1);
+        //Utils.nominalForm("data/compound.csv");
 
         //test centroids
         /*double[][] data = {{1,1},{5,5},{10,10},{11,11}};
@@ -613,7 +691,7 @@ public class Utils {
         System.out.println(pickClosestToUtopia(objs, utopia));
         System.out.println(Arrays.toString(determineParetoSet(objs)));*/
 
-        Instances instances = getData("data/p-glass.csv", false, false);
+        /*Instances instances = getData("data/p-glass.csv", false, false);
         for (double[] record: Utils.wekaInstancesToArray(instances)) {
             System.out.println(Arrays.toString(record));
         }
@@ -627,7 +705,6 @@ public class Utils {
         }
         for (Instance i: centroidIns) {
             System.out.println(Arrays.toString(i.toDoubleArray()));
-        }
-
+        }*/
     }
 }

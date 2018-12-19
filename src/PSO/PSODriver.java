@@ -74,6 +74,7 @@ public class PSODriver {
 
         // extract labels
         labelsTrue = Utils.extractLabels(dataStr,dataStr.get(0).length-1);
+        System.out.println(Arrays.toString(labelsTrue));
         //System.out.println(Arrays.toString(labelsTrue));
 
         // exclude columns from csv file
@@ -111,18 +112,22 @@ public class PSODriver {
                 //Utils.removeNoise(labelsPred, data, 2, 2.0);
                 //Utils.adjustAssignments(labelsPred);
                 HashMap<Integer, double[]> centroids = Utils.centroids(data, labelsPred);
-                double tmpDB = Utils.dbIndexScore(centroids, labelsPred, data);
                 double tmpARI = adjustedRandIndex.measure(labelsTrue, labelsPred);
+                double tmpDB = Utils.dbIndexScore(centroids, labelsPred, data);
+                double silhScore = Utils.silhoutte(centroids, labelsPred, data);
+
                 if (tmpARI > bestARI) {
                     bestARI = tmpARI;
                     bestDB = tmpDB;
                     bestK = Utils.distinctNumberOfItems(labelsPred); //k;
                 }
 
+                /*System.out.println("solution: " + Arrays.toString(labelsPred));
                 System.out.println("temp ARI score of kMeans:     " + Utils.doublePrecision(tmpARI, 4));
                 System.out.println("temp DB score of kMeans:      " + Utils.doublePrecision(tmpDB, 4));
+                System.out.println("temp Silh score of kMeans:      " + Utils.doublePrecision(silhScore, 4));
                 System.out.println("temp # of clusters of kMeans: " + k + " : " + Utils.distinctNumberOfItems(labelsPred) + " : " + kMeans.numberOfClusters());
-                System.out.println(Utils.distinctNumberOfItems(labelsPred) == kMeans.numberOfClusters());
+                System.out.println(Utils.distinctNumberOfItems(labelsPred) == kMeans.numberOfClusters());*/
             }
             meanARI += bestARI;
             meanDB += bestDB;
@@ -132,9 +137,9 @@ public class PSODriver {
             sdofDB[run-1] = bestDB;
             sdOfNumClusters[run-1] = bestK;
 
-            /*System.out.println("final ARI score of kMeans:     " + Utils.doublePrecision(bestARI, 4));
+            System.out.println("final ARI score of kMeans:     " + Utils.doublePrecision(bestARI, 4));
             System.out.println("final DB score of kMeans:      " + Utils.doublePrecision(bestDB, 4));
-            System.out.println("final # of clusters of kMeans: " + bestK);*/
+            System.out.println("final # of clusters of kMeans: " + bestK);
         }
         System.out.println("mean and std dev of ARI score:          " + Utils.doublePrecision(meanARI/runs, 4) +
                 " +- " + Utils.doublePrecision(Utils.standardDeviation(sdofARI), 4));
@@ -173,6 +178,9 @@ public class PSODriver {
             excludedColumns = new int[]{dataStr.get(0).length - 1};
         }
         data = Utils.extractAttributes(dataStr, excludedColumns);
+        if (normalize) {
+            Utils.normalize(data);
+        }
 
         Instances instances = Utils.getData(filePathForWeka, removeFirst, normalize);
 
@@ -227,9 +235,10 @@ public class PSODriver {
         char sep = ',';
         double[][] data;
         int[] labelsTrue, labelsPred;
-        double meanARI = 0;
-        double meanDB = 0;
-        double meanNumClusters = 0;
+        double meanARI = 0.0;
+        double meanDB = 0.0;
+        double meanSilh = 0.0;
+        double meanNumClusters = 0.0;
         AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
 
         /* process data */
@@ -285,10 +294,12 @@ public class PSODriver {
             HashMap<Integer, double[]> centroids = Utils.centroids(data, labelsPred);
             double aRIScore = adjustedRandIndex.measure(labelsTrue, labelsPred);
             double dbScore = Utils.dbIndexScore(centroids, labelsPred, data);
+            double silhScore = Utils.silhoutte(centroids, labelsPred, data);
             int numClusters = Utils.distinctNumberOfItems(labelsPred);
 
             meanARI += aRIScore;
             meanDB += dbScore;
+            meanSilh += silhScore;
             meanNumClusters += numClusters;
 
             sdofARI[run-1] = aRIScore;
@@ -297,6 +308,7 @@ public class PSODriver {
 
             System.out.println("ARI score of PSO for run:   " + Utils.doublePrecision(aRIScore, 4));
             System.out.println("DB score of PSO for run:    " + Utils.doublePrecision(dbScore, 4));
+            System.out.println("Silhoutte score of PSO run: " + Utils.doublePrecision(silhScore, 4));
             System.out.println("number of clusters for run: " + numClusters);
 
             /* test hill-climber */
@@ -345,8 +357,8 @@ public class PSODriver {
             // pick file manually or pass a path string
             boolean pickManually = false;
             String filePath, filePathForWeka;
-            filePath = pickManually ? Utils.pickAFile(): "data/dermatology.csv";
-            filePathForWeka = pickManually ? Utils.pickAFile(): "data/p-dermatology.csv";
+            filePath = pickManually ? Utils.pickAFile(): "data/compound.csv";
+            filePathForWeka = pickManually ? Utils.pickAFile(): "data/p-compound.csv";
             PSOConfiguration configuration = new PSOConfiguration();
             // default configuration
             /*configuration.c1 = 1.42;
@@ -357,17 +369,17 @@ public class PSODriver {
             configuration.maxIterWithoutImprovement = 50;
             configuration.pMax = 150;
             configuration.pickLeaderRandomly = false;*/
-            new PSODriver().run(10, filePath, filePathForWeka, configuration, false, true);
+            //new PSODriver().run(10, filePath, filePathForWeka, configuration, false, false);
             //Utils.nominalForm("data/glass.csv");
-            /*boolean removeFirst = false;
+            boolean removeFirst = false;
             boolean normalize = true;
             System.out.println("remove id: " + removeFirst);
             System.out.println("normalize: " + normalize);
-            System.out.println("my k-means: ");
-            PSODriver.runMyKmeans(clustering.KMeans.Initialization.RANDOM, 10, filePath, ',', removeFirst, normalize);
-            System.out.println("-------");
             System.out.println("my k-means++: ");
-            PSODriver.runMyKmeans(clustering.KMeans.Initialization.KMEANS_PLUS_PLUS, 10, filePath, ',', removeFirst, normalize);
+            PSODriver.runMyKmeans(clustering.KMeans.Initialization.KMEANS_PLUS_PLUS, 40, filePath, ',', removeFirst, normalize);
+            System.out.println("-------");
+            /*System.out.println("my k-means: ");
+            PSODriver.runMyKmeans(clustering.KMeans.Initialization.RANDOM, 10, filePath, ',', removeFirst, normalize);
             System.out.println("-------");
             System.out.println("WEKA random k-means");
             PSODriver.runKmeans(SimpleKMeans.RANDOM, 10, filePath, filePathForWeka, ',', removeFirst, normalize);

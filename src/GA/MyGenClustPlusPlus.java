@@ -55,6 +55,12 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
     private double[][] myData;
     private boolean normalizeObjectives;
 
+    public void setMultiObjective(boolean multiObjective) {
+        this.multiObjective = multiObjective;
+    }
+
+    private boolean multiObjective;
+
     public void setDistance(double distance) {
         this.myDistance = distance;
     }
@@ -129,7 +135,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         for (int i = 0; i < initialPopulation.length; ++i) {
             tmpObjectives[i] = evaluate(initialPopulation[i].getLabels());
         }
-        updateUtopiaPoint(tmpObjectives);
+        updateUtopiaDystopia(tmpObjectives);
 
         assert (initialPopulation != null);
 
@@ -156,6 +162,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         /* select initial population out of pre-initial population probabilistically
          * When a value of k is chosen, the next available solution in order of descending fitness
          * is added to initial population. */
+
         KMeans[] mainPopulation = this.probabilisticSelection(initialPopulation);
         KMeans[] prevPopulation = new KMeans[mainPopulation.length];
 
@@ -265,7 +272,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
                         nextPopObjectives[i] = evaluate(nextPop.get(i).clustering.getLabels());
                     }
                     // update utopia point
-                    updateUtopiaPoint(nextPopObjectives);
+                    updateUtopiaDystopia(nextPopObjectives);
                     /*if (normalizeObjectives) {
                         utils.Utils.normalize(nextPopObjectives);
                     }*/
@@ -326,7 +333,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         }
 
         // update utopia point
-        updateUtopiaPoint(mainPopObjectives);
+        updateUtopiaDystopia(mainPopObjectives);
 
         System.out.println("-- FINAL POP START");
         measureFinalPop(mainPopulation, myData, trueLabels);
@@ -505,17 +512,21 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         return m_builtClusterer.getLabels();
     }
 
-    private void updateUtopiaPoint(double[][] objectives) {
+    private void updateUtopiaDystopia(double[][] objectives) {
         // update utopia point
         for (int i = 0; i < objectives.length; ++i) {
-            for (int iO = 0; iO < evaluations.length; ++iO) {
-                double obj = objectives[i][iO];
-                if (obj < objBestCoordinates[iO]) {
-                    objBestCoordinates[iO] = obj;
-                }
-                if (obj > objWorstCoordinates[iO]) {
-                    objWorstCoordinates[iO] = obj;
-                }
+            updateUtopiaDystopia(objectives[i]);
+        }
+    }
+
+    private void updateUtopiaDystopia(double[] objs) {
+        for (int iO = 0; iO < evaluations.length; ++iO) {
+            double obj = objs[iO];
+            if (obj < objBestCoordinates[iO]) {
+                objBestCoordinates[iO] = obj;
+            }
+            if (obj > objWorstCoordinates[iO]) {
+                objWorstCoordinates[iO] = obj;
             }
         }
     }
@@ -528,26 +539,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         return result;
     }
 
-    public double dbScore() {
-        return 1.0D / fitness(m_bestChromosome);
-    }
-
-    private double fitness(KMeans chromosome) {
-        /*int[] labelsPred = null;
-        try {
-            labelsPred = chromosome.getAssignments();
-        } catch (Exception var19) {
-            var19.printStackTrace();
-        }
-
-        HashMap<Integer, double[]> centroids = utils.Utils.centroids(myData, labelsPred);
-        if (centroids.size() < 2) {
-            return 0.0;
-        }
-
-        double dbScore = utils.Utils.dbIndexScore(centroids, labelsPred, myData);
-
-        return 1.0D / dbScore;*/
+    private double mDBIndex(KMeans chromosome) {
         double[][] centroids = chromosome.getCentroids();
 
         int numClust = centroids.length;
@@ -555,7 +547,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         int[] Ti = new int[numClust];
         int[] clustSize = new int[numClust];
         if(numClust == 1) {
-            return 0.0D;
+            return Double.POSITIVE_INFINITY;
         } else {
             int[] assignments = null;
 
@@ -614,8 +606,41 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
             }
 
             var20 /= (double)numClust;
-            return 1.0D / var20;
+            return var20;
         }
+    }
+
+    private double myDBIndex(KMeans chromosome) {
+        int[] labelsPred = null;
+        try {
+            labelsPred = chromosome.getLabels();
+        } catch (Exception var19) {
+            var19.printStackTrace();
+        }
+
+        HashMap<Integer, double[]> centroids = utils.Utils.centroids(myData, labelsPred);
+        if (centroids.size() < 2) {
+            return 0.0;
+        }
+
+        double dbScore = utils.Utils.dbIndexScore(centroids, labelsPred, myData);
+
+        return dbScore;
+    }
+
+    private double fitness(KMeans chromosome) {
+        if (multiObjective) {
+            double[] objs = evaluate(chromosome.getLabels());
+            updateUtopiaDystopia(objs);
+
+            if (normalizeObjectives) {
+                utils.Utils.normalize(objs, objBestCoordinates, objWorstCoordinates);
+            }
+
+            return 1.0D / utils.Utils.sum(objs);
+        }
+
+        return 1.0D/mDBIndex(chromosome);
     }
 
     /*private double[] maximin(KMeans[] population) {
@@ -637,13 +662,18 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         double sumTk = 0.0D;
 
         /* compute average fitness value for each value of k */
+        fitnessArray = fitness(population);
+
+        // normalize to allow prob selection
+        if (this.normalizeObjectives) {
+            utils.Utils.normalize(fitnessArray);
+        }
         for(int p = 0; p < population.length; p += multiplier) {
             kArray[p / multiplier] = population[p].numberOfClusters();
             double Tk = 0.0D;
 
             for(int j = 0; j < multiplier; ++j) {
-                double i = this.fitness(population[p + j]);
-                fitnessArray[p + j] = i;
+                double i = fitnessArray[p + j];
                 Tk += i;
             }
 
@@ -724,16 +754,27 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         return instances;
     }
 
+    private double[] fitness(KMeans[] pop) {
+        double[] res = new double[pop.length];
+        for (int i = 0; i < res.length; ++i) {
+            res[i] = fitness(pop[i]);
+        }
+        return res;
+    }
+
     private KMeans[] crossover(KMeans[] selectedPopulation) throws Exception {
         Instances[] offspring = new Instances[selectedPopulation.length];
         int offspringCounter = 0;
         MyGenClustPlusPlus.FitnessContainer[] sorted = new MyGenClustPlusPlus.FitnessContainer[selectedPopulation.length];
         double fitnessSum = 0.0D;
+        double[] fitness = fitness(selectedPopulation);
+        if (this.normalizeObjectives) {
+            utils.Utils.normalize(fitness);
+        }
 
         for(int offspringMK = 0; offspringMK < sorted.length; ++offspringMK) {
-            double i = this.fitness(selectedPopulation[offspringMK]);
-            fitnessSum += i;
-            sorted[offspringMK] = new MyGenClustPlusPlus.FitnessContainer(i, selectedPopulation[offspringMK]);
+            fitnessSum += fitness[offspringMK];
+            sorted[offspringMK] = new MyGenClustPlusPlus.FitnessContainer(fitness[offspringMK], selectedPopulation[offspringMK]);
         }
 
         Arrays.sort(sorted, Collections.reverseOrder());
@@ -901,11 +942,11 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
             }
         }
 
-        double[][] tmpObjs = new double[var28.length][];
+        /*double[][] tmpObjs = new double[var28.length][];
         for (int i = 0; i < var28.length; ++i) {
             tmpObjs[i] = evaluate(var28[i].getLabels());
         }
-        //updateUtopiaPoint(utils.Utils.deepCopy(tmpObjs));
+        updateUtopiaDystopia(utils.Utils.deepCopy(tmpObjs));*/
 
         return var28;
     }
@@ -917,10 +958,16 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
 
         int newCount;
         double i;
+
+        double[] fitness = fitness(selectedPopulation);
+        /* normalize to allow prob cloning */
+        if (this.normalizeObjectives) {
+            utils.Utils.normalize(fitness);
+        }
+
         for(newCount = 0; newCount < selectedPopulation.length; ++newCount) {
-            i = this.fitness(selectedPopulation[newCount]);
-            fitnessSum += i;
-            fArray[newCount] = new MyGenClustPlusPlus.FitnessContainer(i, selectedPopulation[newCount]);
+            fitnessSum += fitness[newCount];
+            fArray[newCount] = new MyGenClustPlusPlus.FitnessContainer(fitness[newCount], selectedPopulation[newCount]);
         }
 
         newCount = 0;
@@ -979,11 +1026,11 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
             }
         }
 
-        double[][] tmpObjs = new double[crossoverPopulation.length][];
+        /*double[][] tmpObjs = new double[crossoverPopulation.length][];
         for (i = 0; i < crossoverPopulation.length; ++i) {
             tmpObjs[i] = evaluate(crossoverPopulation[i].getLabels());
         }
-        //updateUtopiaPoint(tmpObjs);
+        updateUtopiaDystopia(tmpObjs);*/
 
         return crossoverPopulation;
     }
@@ -1333,4 +1380,3 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         }
     }
 }
-
