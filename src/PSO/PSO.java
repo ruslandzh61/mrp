@@ -138,8 +138,9 @@ public class PSO {
         System.out.println("Solution found at iteration " + curIterationNum);
         double[] objs = problem.evaluate(leader.getSolution().getSolution(), evaluation, ncc);
         System.out.println("value of objectives: " + Arrays.toString(objs));
-        System.out.println("norm value of objectives: " + Arrays.toString(
-                Utils.normalize(objs.clone(), this.objBestCoordinates, this.objWorstCoordinates)));
+        double[] objCloned = objs.clone();
+        Utils.normalize(objCloned, this.objBestCoordinates, this.objWorstCoordinates);
+        System.out.println("norm value of objectives: " + Arrays.toString(objCloned));
         System.out.println("utopia point: " + Arrays.toString(objBestCoordinates));
         System.out.println("dystopia point: " + Arrays.toString(objWorstCoordinates));
 
@@ -165,8 +166,9 @@ public class PSO {
             if (printIndividual) {
                 System.out.println("ARI score: " + ari);
                 System.out.println("value of objectives: " + Arrays.toString(s.getSolution().getObjectives()));
-                System.out.println("norm value of objectives: " + Arrays.toString(Utils.normalize(
-                        s.getSolution().getObjectives().clone(), objBestCoordinates, objWorstCoordinates)));
+                double[] objCloned = s.getSolution().getObjectives().clone();
+                Utils.normalize(objCloned, objBestCoordinates, objWorstCoordinates);
+                System.out.println("norm value of objectives: " + Arrays.toString(objCloned));
             }
             /*System.out.println(" -- ARI: " + ari + " -- DB: " + db + " -- distToUtopia: " +
                     Utils.dist(s.getSolution().getObjectives(), objBestCoordinates));

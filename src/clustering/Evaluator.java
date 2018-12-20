@@ -58,7 +58,7 @@ public class Evaluator {
             con[i++] = conI/N;
         }
         // i is a number of clusters in solution at this point
-        return Utils.sum(con)/clustersHp.size();
+        return Utils.sum(con, 1.0)/clustersHp.size();
     }
 
     /**
@@ -79,7 +79,7 @@ public class Evaluator {
             }
             coh[i++] = cohI/entry.getValue().size();
         }
-        return Utils.sum(coh)/clustersHp.size();
+        return Utils.sum(coh, 1.0)/clustersHp.size();
     }
 
     private double cohesionDistance(double[][] data, int p, Set<Integer> neighbors) {

@@ -31,6 +31,9 @@ public class GADriver {
         double meanMyDBWithMyCentroids = 0.0;
         double meanARI = 0.0;
         double meanK = 0.0;
+        double[] sdofARI = new double[runs];
+        double[] sdofDB = new double[runs];
+        double[] sdOfNumClusters = new double[runs];
         int[] labelsTrue, labelsPred;
         StringBuffer output= new StringBuffer();
         String temp;
@@ -106,10 +109,11 @@ public class GADriver {
                 cl.setEvaluations(evaluations);
                 cl.setMyData(dataArr);
                 cl.setTrueLabels(labelsTrue);
+                cl.setFitnessNormalize(true);
                 cl.setNormalizeObjectives(true);
                 cl.setHillClimb(true);
                 cl.setMaximin(true);
-                cl.setMultiObjective(true);
+                cl.setFitnessType(MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM);
                 cl.setDistance(2.0);
                 cl.buildClusterer(dataClusterer);
 
@@ -142,6 +146,9 @@ public class GADriver {
             meanARI += ARI;
             meanMyDBWithMyCentroids += myDBWithMyCentroids;
             meanK += k;
+            sdofARI[run-1] = ARI;
+            sdofDB[run-1] = myDBWithMyCentroids;
+            sdOfNumClusters[run-1] = k;
 
             System.out.println("RUN: " + run);
             System.out.println(Arrays.toString(labelsPred));
@@ -150,26 +157,39 @@ public class GADriver {
             System.out.println("num of clusters: " + k);
         }
 
-        System.out.println("mean ARI score: " + Utils.doublePrecision(meanARI/runs, 4));
-        System.out.println("mean DB score:  " + Utils.doublePrecision(meanMyDBWithMyCentroids/runs, 4));
-        System.out.println("mean num of clusters: " + meanK/runs);
+        System.out.println("ARI: " + Utils.doublePrecision(meanARI/runs, 4) + "+-" +
+                Utils.doublePrecision(Utils.standardDeviation(sdofARI), 4));
+        System.out.println("DB: " + Utils.doublePrecision(meanMyDBWithMyCentroids/runs, 4) + "+-" +
+                Utils.doublePrecision(Utils.standardDeviation(sdofDB), 4));
+        System.out.println("K: " + Utils.doublePrecision(meanK/runs, 4) + "+-" +
+                Utils.doublePrecision(Utils.standardDeviation(sdOfNumClusters), 4));
 
         //System.out.println(Arrays.toString(labelsTrue));
         //System.out.println(Arrays.toString(cl.getLabels()));
-        Utils.whenWriteStringUsingBufferedWritter_thenCorrect(output.toString() +
-                System.getProperty("line.separator"), "../datasets/output.csv");
+        //Utils.whenWriteStringUsingBufferedWritter_thenCorrect(output.toString() +
+          //      System.getProperty("line.separator"), "../datasets/output.csv");
     }
 
     public static void main(String[] args) throws Exception {
         // weka doesn't work with other separators other than ','
         // (false, false) - first attribute not removed, not normalized
-        String filePath = "data/compound.csv";
-        String filePathForWeka = "data/p-compound.csv";
-        boolean removeFirst = false;
-        boolean normalize = true;
-        //System.out.println("WEKA GENCLUST++");
-        //new GADriver(false, 15, filePathForWeka, filePath,  removeFirst, normalize);
-        System.out.println("MY GENCLUST++");
-        new GADriver(true, 15, filePathForWeka, filePath, removeFirst, normalize);
+        String[][] datasetPaths = {
+                {"data/glass.csv", "data/p-glass.csv"},
+                {"data/dermatology.csv", "data/p-dermatology.csv"},
+                {"data/flame.csv", "data/p-flame.csv"},
+                {"data/compound.csv", "data/p-compound.csv"},
+        };
+        int[] datasetIDs = {3};
+        for (int dID: datasetIDs) {
+            System.out.println("dataset: " + datasetPaths[dID][0]);
+            String filePath = datasetPaths[dID][0];
+            String filePathForWeka = datasetPaths[dID][1];
+            boolean removeFirst = false;
+            boolean normalize = true;
+            //System.out.println("WEKA GENCLUST++");
+            //new GADriver(false, 15, filePathForWeka, filePath, removeFirst, normalize);
+            System.out.println("MY GENCLUST++");
+            new GADriver(true, 15, filePathForWeka, filePath, removeFirst, normalize);
+        }
     }
 }

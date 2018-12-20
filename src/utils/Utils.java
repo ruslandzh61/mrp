@@ -107,10 +107,10 @@ public class Utils {
         return intersect;
     }
 
-    public static double sum(double[] arr) {
+    public static double sum(double[] arr, double pow) {
         double res = 0;
         for (double el: arr) {
-            res += el;
+            res += Math.pow(el, pow);
         }
         return res;
     }
@@ -263,21 +263,19 @@ public class Utils {
     }
 
     public static void normalize(double[][] data, double[] dataLow, double[] dataHigh) {
+        assert (dataLow.length == dataHigh.length);
+        assert (data[0].length == dataHigh.length);
+
         for (int i = 0; i < data.length; ++i) {
             for (int j = 0; j < data[0].length; ++j) {
-                double tmp = data[i][j];
-                if (tmp < dataLow[j]) {
-                    dataLow[j] = tmp;
+                assert (dataLow[j] <= data[i][j]);
+                assert (dataHigh[j] >= data[i][j]);
+                if (dataHigh[j] == dataLow[j]) {
+                    data[i][j] = 0.0;
+                } else {
+                    data[i][j] = (data[i][j] - dataLow[j])
+                            / (dataHigh[j] - dataLow[j]);
                 }
-                if (tmp > dataHigh[j]) {
-                    dataHigh[j] = tmp;
-                }
-            }
-        }
-        for (int i = 0; i < data.length; ++i) {
-            for (int j = 0; j < data[0].length; ++j) {
-                data[i][j] = (data[i][j] - dataLow[j])
-                        / (dataHigh[j] - dataLow[j]);
             }
         }
     }
@@ -294,11 +292,12 @@ public class Utils {
             }
         }
 
-
-        for (int i = 0; i < data.length; ++i) {
-            if (high == low) {
-                data[i] = Math.abs(data[i]);
-            } else {
+        if (high == low) {
+            for (int i = 0; i < data.length; ++i) {
+                data[i] = 0.0;
+            }
+        } else {
+            for (int i = 0; i < data.length; ++i) {
                 data[i] = (data[i] - low) / (high - low);
             }
         }
@@ -313,6 +312,19 @@ public class Utils {
         for (int i = 0; i < dataLow.length; ++i) {
             dataHigh[i] = Double.NEGATIVE_INFINITY;
         }
+
+        for (int i = 0; i < data.length; ++i) {
+            for (int j = 0; j < data[0].length; ++j) {
+                double tmp = data[i][j];
+                if (tmp < dataLow[j]) {
+                    dataLow[j] = tmp;
+                }
+                if (tmp > dataHigh[j]) {
+                    dataHigh[j] = tmp;
+                }
+            }
+        }
+
         normalize(data, dataLow, dataHigh);
     }
 
@@ -585,13 +597,20 @@ public class Utils {
         return leader;
     }
 
-    public static double[] normalize(double[] cur, double[] low, double[] high) {
+    public static void normalize(double[] cur, double[] low, double[] high) {
         assert (low.length == cur.length);
-        double[] normCur = cur.clone();
-        for (int i = 0; i < normCur.length; ++i) {
-            normCur[i] = (cur[i] - low[i]) / (high[i] - low[i]);
+        for (int i = 0; i < cur.length; ++i) {
+            assert (low[i]<=cur[i]);
+            assert (high[i]>=cur[i]);
         }
-        return normCur;
+
+        for (int i = 0; i < cur.length; ++i) {
+            if (low[i] == high[i]) {
+                cur[i] = 0.0;
+            } else {
+                cur[i] = (cur[i] - low[i]) / (high[i] - low[i]);
+            }
+        }
     }
 
     public static void removeNoise(int[] labels, double[][] data, int minSizeOfCluster, double pow) {
@@ -706,5 +725,21 @@ public class Utils {
         for (Instance i: centroidIns) {
             System.out.println(Arrays.toString(i.toDoubleArray()));
         }*/
+
+        /*double[][] data = {{1.0, 0, -0.5},
+                {-1.0, 20, -0.5},
+                {0.0, 100, -0.5}};
+        double[] low = {-2.0, 0, -0.4};
+        double[] high = {2.0, 100, -0.5};
+        Utils.normalize(data, low, high);
+        for (int i = 0; i < data.length; ++i) {
+            System.out.println(Arrays.toString(data[i]));
+        }*/
+
+        /*double[] data = {0.0, -40, -0.5};
+        double[] low = {-2.0, 0, -0.6};
+        double[] high = {2.0, 50, -0.4};
+        Utils.normalize(data, low, high);
+        System.out.println(Arrays.toString(data));*/
     }
 }
