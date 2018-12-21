@@ -1,7 +1,6 @@
 package PSO;
 
-import clustering.Evaluator;
-import clustering.KMeans;
+import clustering.*;
 import utils.NCConstruct;
 import utils.Utils;
 import java.io.IOException;
@@ -23,309 +22,108 @@ import weka.core.SelectedTag;
  * PROBLEM: Solutions don't improve after initialization step in the next iterations of PSO
  */
 public class PSODriver {
+    private double[][] dataAttrs;
+    private int[] labelsTrue;
+    AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
 
-    /** simple test using artificial two-dimensional data sets
-     *  similar to the one used in (Inkaya, 2014) depicted on Fig. 3:
-     *      'Adaptive neighbourhood construction algorithm based on density and connectivity'
-     * */
-    /*public void runDummy() {
-        double[][] data;
-        int[] labels;
-        labels = new int[]{0,0,0,0,0,0,1,1,1,2};
-        data = new double[][]{
-                {2,2}, {3,3}, {3,1}, {4,2}, {1.6,-0.5},
-                {3.01, -1.5}, {-4, 2}, {-2, 2}, {-3, 3},{7,7}
-        };
-        NCConstruct ncConstruct = new NCConstruct(data);
-        int maxK = 6;
+    private void processData(Dataset dataset) throws IOException {
+        // read file
+        char sep = ',';
+        List<String[]> dataStr = Utils.readFile(dataset.getPath(), sep);
+        if (dataset.getHeader() >= 0 && dataset.getHeader() < dataStr.size()) {
+            dataStr.remove(dataset.getHeader());
+        }
+        assert (dataStr.size()>0);
+        assert (dataStr.get(0).length>0);
 
-        Evaluator.Evaluation[] evaluation = {Evaluator.Evaluation.CONNECTIVITY, Evaluator.Evaluation.COHESION};
-        Evaluator evaluator = new Evaluator();
-        Problem problem = new Problem(data, evaluator);
+        // extract true labels
+        int D = dataStr.get(0).length;
+        int labelCol = D - 1;
+        labelsTrue = Utils.extractLabels(dataStr, labelCol);
+        //System.out.println(Arrays.toString(labelsTrue));
 
-        PSOConfiguration configuration = new PSOConfiguration();
-        configuration.maxK = maxK;
-        PSO pso = new PSO(problem, ncConstruct, evaluation, configuration);
-        int[] labelsPred = pso.execute();
+        // extract attributes
+        int[] excludedColumns;
+        if (dataset.isRemoveFirst()) {
+            excludedColumns = new int[]{0, dataStr.get(0).length - 1};
+        } else {
+            excludedColumns = new int[]{dataStr.get(0).length - 1};
+        }
 
-        System.out.println(new AdjustedRandIndex().measure(labels, labelsPred));
-    }*/
+        dataAttrs = Utils.extractAttributes(dataStr, excludedColumns);
+        /*for (double[] record: dataAttrs) {
+            System.out.println(Arrays.toString(record));
+        }*/
+
+        /* normalize data */
+        if (dataset.isNormalize()) {
+            Utils.normalize(dataAttrs);
+        }
+    }
 
     /**
      * main method to run PSO-based buildClusterer
      * */
-
-    public static void runMyKmeans(KMeans.Initialization init, int runs, String path, char sep,
-                                   boolean removeFirst, boolean normalize) throws Exception {
-        double[][] data;
-        int[] labelsTrue, labelsPred;
-        double meanARI = 0, meanDB = 0, meanNumClusters = 0;
-        AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
-        Random rnd = new Random(1);
-        double[] sdofARI = new double[runs];
-        double[] sdofDB = new double[runs];
-        double[] sdOfNumClusters = new double[runs];
-
+    private void run(int runs, Dataset dataset, PSOConfiguration configuration) throws Exception {
         /* process data */
-        // step 1 - read data from file
-        List<String[]> dataStr = Utils.readDataFromCustomSeperator(path, sep);
-        assert (dataStr.size()>0);
-        assert (dataStr.get(0).length>0);
-
-        // extract labels
-        labelsTrue = Utils.extractLabels(dataStr,dataStr.get(0).length-1);
-        System.out.println(Arrays.toString(labelsTrue));
-        //System.out.println(Arrays.toString(labelsTrue));
-
-        // exclude columns from csv file
-        int[] excludedColumns;
-        if (removeFirst) {
-            excludedColumns = new int[]{0, dataStr.get(0).length - 1};
-        } else {
-            excludedColumns = new int[]{dataStr.get(0).length - 1};
-        }
-        data = Utils.extractAttributes(dataStr, excludedColumns);
-        if (normalize) {
-            Utils.normalize(data);
-        }
-
-        for (int run = 1; run <= runs; ++run) {
-            int bestK = -1;
-            double bestARI = -1;
-            double bestDB = -1;
-            int minK = 2;//(int)(0.02 * data.length);
-            int maxK = (int) Math.sqrt(data.length); //(int)(0.1 * data.length);
-            for (int k = minK; k <= maxK; ++k) {
-                /*if (useSmile) {
-                    labelsPred = new int[data.length];
-                    smile.clustering.KMeans kMeans = new smile.clustering.KMeans(data, k, 500);
-                    for (int i = 0; i < data.length; ++i) {
-                        labelsPred[i] = kMeans.predict(data[i]);
-                    }
-                } else {*/
-                KMeans kMeans = new KMeans(k, 2.0);
-                kMeans.setSeed(rnd.nextInt());
-                kMeans.setInitializationMethod(init);
-                kMeans.buildClusterer(data);
-                labelsPred = kMeans.getLabels();
-
-                //Utils.removeNoise(labelsPred, data, 2, 2.0);
-                //Utils.adjustAssignments(labelsPred);
-                HashMap<Integer, double[]> centroids = Utils.centroids(data, labelsPred);
-                double tmpARI = adjustedRandIndex.measure(labelsTrue, labelsPred);
-                double tmpDB = Utils.dbIndexScore(centroids, labelsPred, data);
-                double silhScore = Utils.silhoutte(centroids, labelsPred, data);
-
-                if (tmpARI > bestARI) {
-                    bestARI = tmpARI;
-                    bestDB = tmpDB;
-                    bestK = Utils.distinctNumberOfItems(labelsPred); //k;
-                }
-
-                /*System.out.println("solution: " + Arrays.toString(labelsPred));
-                System.out.println("temp ARI score of kMeans:     " + Utils.doublePrecision(tmpARI, 4));
-                System.out.println("temp DB score of kMeans:      " + Utils.doublePrecision(tmpDB, 4));
-                System.out.println("temp Silh score of kMeans:      " + Utils.doublePrecision(silhScore, 4));
-                System.out.println("temp # of clusters of kMeans: " + k + " : " + Utils.distinctNumberOfItems(labelsPred) + " : " + kMeans.numberOfClusters());
-                System.out.println(Utils.distinctNumberOfItems(labelsPred) == kMeans.numberOfClusters());*/
-            }
-            meanARI += bestARI;
-            meanDB += bestDB;
-            meanNumClusters += bestK;
-
-            sdofARI[run-1] = bestARI;
-            sdofDB[run-1] = bestDB;
-            sdOfNumClusters[run-1] = bestK;
-
-            System.out.println("final ARI score of kMeans:     " + Utils.doublePrecision(bestARI, 4));
-            System.out.println("final DB score of kMeans:      " + Utils.doublePrecision(bestDB, 4));
-            System.out.println("final # of clusters of kMeans: " + bestK);
-        }
-        System.out.println("mean and std dev of ARI score:          " + Utils.doublePrecision(meanARI/runs, 4) +
-                " +- " + Utils.doublePrecision(Utils.standardDeviation(sdofARI), 4));
-        System.out.println("mean and std dev of DB Index score:     " + Utils.doublePrecision(meanDB/runs, 4) +
-                " +- " + Utils.doublePrecision(Utils.standardDeviation(sdofDB), 4));
-        System.out.println("mean and std dev of number of clusters: " + Utils.doublePrecision(meanNumClusters/runs, 4) +
-                " +- " + Utils.doublePrecision(Utils.standardDeviation(sdOfNumClusters), 4));
-    }
-
-    public static void runKmeans(int KMEANS, int runs, String path, String filePathForWeka,
-                     char sep, boolean removeFirst, boolean normalize) throws Exception {
-        double[][] data;
-        int[] labelsTrue, labelsPred;
-        double meanARI = 0, meanDB = 0, meanNumClusters = 0;
-        double[] sdofARI = new double[runs];
-        double[] sdofDB = new double[runs];
-        double[] sdOfNumClusters = new double[runs];
-        Random rnd = new Random(1);
-        AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
-
-        /* process data */
-        // step 1 - read data from file
-        List<String[]> dataStr = Utils.readDataFromCustomSeperator(path, sep);
-        assert (dataStr.size()>0);
-        assert (dataStr.get(0).length>0);
-
-        // extract labels
-        labelsTrue = Utils.extractLabels(dataStr,dataStr.get(0).length-1);
-        //System.out.println(Arrays.toString(labelsTrue));
-
-        // exclude columns from csv file
-        int[] excludedColumns;
-        if (removeFirst) {
-            excludedColumns = new int[]{0, dataStr.get(0).length - 1};
-        } else {
-            excludedColumns = new int[]{dataStr.get(0).length - 1};
-        }
-        data = Utils.extractAttributes(dataStr, excludedColumns);
-        if (normalize) {
-            Utils.normalize(data);
-        }
-
-        Instances instances = Utils.getData(filePathForWeka, removeFirst, normalize);
-
-        for (int run = 1; run <= runs; ++run) {
-            int bestK = -1;
-            double bestARI = -1;
-            double bestDB = -1;
-            int minK = 2;//(int)(0.02 * data.length);
-            int maxK = (int) Math.sqrt(data.length); //(int)(0.1 * data.length);
-            for (int k = minK; k <= maxK; ++k) {
-                SimpleKMeans kMeans = new SimpleKMeans();
-                kMeans.setPreserveInstancesOrder(true);
-                SelectedTag selectedTag = new SelectedTag(KMEANS, SimpleKMeans.TAGS_SELECTION);
-                kMeans.setInitializationMethod(selectedTag);
-                kMeans.setSeed(rnd.nextInt());
-                kMeans.setNumClusters(k);
-                kMeans.buildClusterer(instances);
-                labelsPred = kMeans.getAssignments();
-                Utils.removeNoise(labelsPred, data, 2, 2.0);
-                Utils.adjustAssignments(labelsPred);
-                HashMap<Integer, double[]> centroids = Utils.centroids(data, labelsPred);
-                double tmpDB = Utils.dbIndexScore(centroids, kMeans.getAssignments(), data);
-                double tmpARI = adjustedRandIndex.measure(labelsTrue, kMeans.getAssignments());
-                if (tmpARI > bestARI) {
-                    bestARI = tmpARI;
-                    bestDB = tmpDB;
-                    bestK = Utils.distinctNumberOfItems(labelsPred);
-                }
-            }
-            meanARI += bestARI;
-            meanDB += bestDB;
-            meanNumClusters += bestK;
-
-
-            sdofARI[run-1] = bestARI;
-            sdofDB[run-1] = bestDB;
-            sdOfNumClusters[run-1] = bestK;
-
-            /*System.out.println("DB score of kMeans:      " + Utils.doublePrecision(bestDB, 4));
-            System.out.println("ARI score of kMeans:     " + Utils.doublePrecision(bestARI, 4));
-            System.out.println("# of clusters of kMeans: " + bestK);*/
-        }
-        System.out.println("mean and std dev of ARI score:          " + Utils.doublePrecision(meanARI/runs, 4) +
-                " +- " + Utils.doublePrecision(Utils.standardDeviation(sdofARI), 4));
-        System.out.println("mean and std dev of DB Index score:     " + Utils.doublePrecision(meanDB/runs, 4) +
-                " +- " + Utils.doublePrecision(Utils.standardDeviation(sdofDB), 4));
-        System.out.println("mean and std dev of number of clusters: " + Utils.doublePrecision(meanNumClusters/runs, 4) +
-                " +- " + Utils.doublePrecision(Utils.standardDeviation(sdOfNumClusters), 4));
-    }
-    public void run(int runs, String path, String filePathForWeka, PSOConfiguration configuration,
-                    boolean removeFirst, boolean normalize) throws Exception {
-        char sep = ',';
-        double[][] data;
-        int[] labelsTrue, labelsPred;
-        double meanARI = 0.0;
-        double meanDB = 0.0;
-        double meanSilh = 0.0;
-        double meanNumClusters = 0.0;
-        AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
-
-        /* process data */
-        // step 1 - read data from file
-        List<String[]> dataStr = Utils.readDataFromCustomSeperator(path, sep);
-        assert (dataStr.size()>0);
-        assert (dataStr.get(0).length>0);
-
-        // extract labels
-        labelsTrue = Utils.extractLabels(dataStr,dataStr.get(0).length-1);
-        //System.out.println(Arrays.toString(labelsTrue));
-
-        // exclude columns from csv file
-        int[] excludedColumns;
-        if (removeFirst) {
-            excludedColumns = new int[]{0, dataStr.get(0).length - 1};
-        } else {
-            excludedColumns = new int[]{dataStr.get(0).length - 1};
-        }
-        data = Utils.extractAttributes(dataStr, excludedColumns);
-        if (normalize) {
-            Utils.normalize(data);
-        }
-        Instances instances = Utils.getData(filePathForWeka, removeFirst, normalize);
+        processData(dataset);
+        Instances instances = Utils.getData(dataset);
 
         // step 2 - pick objectives
-        NCConstruct ncConstruct = new NCConstruct(data);
+        NCConstruct ncConstruct = new NCConstruct(dataAttrs);
         Evaluator.Evaluation[] evaluation = {Evaluator.Evaluation.CONNECTIVITY, Evaluator.Evaluation.COHESION};
         Evaluator evaluator = new Evaluator();
-        Problem problem = new Problem(data, evaluator);
+        Problem problem = new Problem(this.dataAttrs, evaluator);
         configuration.maxK = (int) (Math.sqrt(problem.getData().length));
         boolean normObjectives = true;
 
         Random rnd = new Random(1);
-        double[] sdofARI = new double[runs];
-        double[] sdofDB = new double[runs];
-        double[] sdOfNumClusters = new double[runs];
+        Reporter reporter = new Reporter(runs);
 
         for (int run = 1; run <= runs; ++run) {
+            Experiment e;
+
             System.out.println("run: " + run);
             // step 3 - run PSO algorithm
-            //maxK = (int)Math.sqrt(data.length);
-            //configuration.maxK = maxK;
             PSO pso = new PSO(problem, ncConstruct, evaluation, configuration, instances, labelsTrue, normObjectives);
             pso.setSeed(rnd.nextInt());
             // constructed clusters
-            labelsPred = Utils.adjustLabels(pso.execute());
+            int[] labelsPred = Utils.adjustLabels(pso.execute());
             //int[] labelsPredCloned = labelsPred.clone();
-            Utils.removeNoise(labelsPred, data, 2, 2.0);
-            Utils.adjustAssignments(labelsPred);
+            //Utils.removeNoise(labelsPred, this.dataAttrs, 2, 2.0);
+            //Utils.adjustAssignments(labelsPred);
 
             // step 4 - measure comparing to true labels
-            HashMap<Integer, double[]> centroids = Utils.centroids(data, labelsPred);
-            double aRIScore = adjustedRandIndex.measure(labelsTrue, labelsPred);
-            double dbScore = Utils.dbIndexScore(centroids, labelsPred, data);
-            double silhScore = Utils.silhoutte(centroids, labelsPred, data);
+            HashMap<Integer, double[]> centroids = Utils.centroids(this.dataAttrs, labelsPred);
+            double aRIScore = this.adjustedRandIndex.measure(this.labelsTrue, labelsPred);
+            double dbScore = Utils.dbIndexScore(centroids, labelsPred, this.dataAttrs);
+            double silhScore = Utils.silhoutte(centroids, labelsPred, this.dataAttrs);
             int numClusters = Utils.distinctNumberOfItems(labelsPred);
 
-            meanARI += aRIScore;
-            meanDB += dbScore;
-            meanSilh += silhScore;
-            meanNumClusters += numClusters;
-
-            sdofARI[run-1] = aRIScore;
-            sdofDB[run-1] = dbScore;
-            sdOfNumClusters[run-1] = numClusters;
+            e = new Experiment(labelsPred, aRIScore, dbScore, silhScore, numClusters);
+            reporter.set(run-1, e);
 
             System.out.println("ARI score of PSO for run:   " + Utils.doublePrecision(aRIScore, 4));
             System.out.println("DB score of PSO for run:    " + Utils.doublePrecision(dbScore, 4));
             System.out.println("Silhoutte score of PSO run: " + Utils.doublePrecision(silhScore, 4));
             System.out.println("number of clusters for run: " + numClusters);
 
-            /* test hill-climber */
-            /*centroids = Utils.centroids(data, labelsPredCloned);
+            // test hill-climber
+            /*int[] labelsPredCloned = labelsPred.clone();
+            centroids = Utils.centroids(this.dataAttrs, labelsPredCloned);
             double[][] initialCentroids = new double[centroids.size()][];
             initialCentroids = centroids.values().toArray(initialCentroids);
-            clustering.KMeans kMeans = new clustering.KMeans(data, initialCentroids.length, 2.0);
+            clustering.KMeans kMeans = new clustering.KMeans(initialCentroids.length, 2.0);
             kMeans.setInitializationMethod(clustering.KMeans.Initialization.HILL_CLIMBER);
             kMeans.setInitial(initialCentroids);
-            kMeans.buildClusterer(500);
+            kMeans.buildClusterer(this.dataAttrs);
             labelsPred = Utils.adjustLabels(kMeans.getLabels());
-            Utils.removeNoise(labelsPred, data, 2, 2.0);
+            Utils.removeNoise(labelsPred, this.dataAttrs, 2, 2.0);
             Utils.adjustAssignments(labelsPred);
 
-            centroids = Utils.centroids(data, labelsPred);
+            centroids = Utils.centroids(this.dataAttrs, labelsPred);
             aRIScore = adjustedRandIndex.measure(labelsTrue, labelsPred);
-            dbScore = Utils.dbIndexScore(centroids, labelsPred, data);
+            dbScore = Utils.dbIndexScore(centroids, labelsPred, this.dataAttrs);
             numClusters = Utils.distinctNumberOfItems(labelsPred);
 
             System.out.println("ARI score of PSO with hill-climber for run:   " + Utils.doublePrecision(aRIScore, 4));
@@ -341,12 +139,18 @@ public class PSODriver {
                 new Solution(labelsTrue, Utils.distinctNumberOfItems(labelsTrue)), evaluation, new NCConstruct(data))));*/
         }
 
-        System.out.println("mean and std dev of ARI score:          " + Utils.doublePrecision(meanARI/runs, 4) +
-                " +- " + Utils.doublePrecision(Utils.standardDeviation(sdofARI), 4));
-        System.out.println("mean and std dev of DB Index score:     " + Utils.doublePrecision(meanDB/runs, 4) +
-                " +- " + Utils.doublePrecision(Utils.standardDeviation(sdofDB), 4));
-        System.out.println("mean and std dev of number of clusters: " + Utils.doublePrecision(meanNumClusters/runs, 4) +
-                " +- " + Utils.doublePrecision(Utils.standardDeviation(sdOfNumClusters), 4));
+        reporter.compute();
+        Experiment mean = reporter.getMean();
+        Experiment stdDev = reporter.getStdDev();
+
+        System.out.println("mean and std dev of ARI score:          " + Utils.doublePrecision(mean.getAri(), 4) +
+                " +- " + Utils.doublePrecision(stdDev.getAri(), 4));
+        System.out.println("mean and std dev of DB Index score:     " + Utils.doublePrecision(mean.getDb(), 4) +
+                " +- " + Utils.doublePrecision(stdDev.getDb(), 4));
+        System.out.println("mean and std dev of Silhouette score:   " + Utils.doublePrecision(mean.getSilh(), 4) +
+                " +- " + Utils.doublePrecision(stdDev.getSilh(), 4));
+        System.out.println("mean and std dev of number of clusters: " + Utils.doublePrecision(mean.getK(), 4) +
+                " +- " + Utils.doublePrecision(stdDev.getK(), 4));
         System.out.println("--------------------------");
     }
 
@@ -355,37 +159,10 @@ public class PSODriver {
         try {
             // test using UCI 'glass' public data set - https://archive.ics.uci.edu/ml/datasets/glass+identification
             // pick file manually or pass a path string
-            boolean pickManually = false;
-            String filePath, filePathForWeka;
-            filePath = pickManually ? Utils.pickAFile(): "data/flame.csv";
-            filePathForWeka = pickManually ? Utils.pickAFile(): "data/p-flame.csv";
+            int runs = 15;
+            Dataset dataset = Dataset.GLASS;
             PSOConfiguration configuration = new PSOConfiguration();
-            // default configuration
-            /*configuration.c1 = 1.42;
-            configuration.c2 = 1.63;
-            configuration.maxW = 0.9;
-            configuration.minW = 0.4;
-            configuration.maxIteration = 1000;
-            configuration.maxIterWithoutImprovement = 50;
-            configuration.pMax = 150;
-            configuration.pickLeaderRandomly = false;*/
-            new PSODriver().run(10, filePath, filePathForWeka, configuration, false, true);
-            //Utils.nominalForm("data/glass.csv");
-            /*boolean removeFirst = false;
-            boolean normalize = true;
-            System.out.println("remove id: " + removeFirst);
-            System.out.println("normalize: " + normalize);
-            System.out.println("my k-means++: ");
-            PSODriver.runMyKmeans(clustering.KMeans.Initialization.KMEANS_PLUS_PLUS, 40, filePath, ',', removeFirst, normalize);
-            System.out.println("-------");*/
-            /*System.out.println("my k-means: ");
-            PSODriver.runMyKmeans(clustering.KMeans.Initialization.RANDOM, 10, filePath, ',', removeFirst, normalize);
-            System.out.println("-------");
-            System.out.println("WEKA random k-means");
-            PSODriver.runKmeans(SimpleKMeans.RANDOM, 10, filePath, filePathForWeka, ',', removeFirst, normalize);
-            System.out.println("-------");
-            System.out.println("WEKA kmeans++ k-means");
-            PSODriver.runKmeans(SimpleKMeans.KMEANS_PLUS_PLUS, 10, filePath, filePathForWeka, ',', removeFirst, normalize);*/
+            new PSODriver().run(runs, dataset, configuration);
         } catch (IOException e) {
             e.printStackTrace();
         }

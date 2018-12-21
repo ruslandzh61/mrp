@@ -1,12 +1,10 @@
 package utils;
 
+import clustering.Dataset;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
-import weka.core.DenseInstance;
-import weka.core.EuclideanDistance;
-import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ConverterUtils;
 import weka.filters.Filter;
@@ -48,7 +46,7 @@ public class Utils {
     /**
     * taken from https://www.geeksforgeeks.org/reading-csv-file-java-using-opencv/
     * */
-    public static List<String[]> readDataFromCustomSeperator(String file, char sep) throws IOException
+    public static List<String[]> readFile(String file, char sep) throws IOException
     {
         // Create object of filereader
         // class with csv file as parameter.
@@ -64,18 +62,7 @@ public class Utils {
                 .withCSVParser(parser)
                 .build();
 
-        // Read all data at once
-        List<String[]> allData = csvReader.readAll();
-        /*
-        // print Data
-        for (String[] row : allData) {
-            for (String cell : row) {
-                System.out.print(cell + "\t");
-            }
-            System.out.println();
-        }*/
-
-        return allData;
+        return csvReader.readAll();
     }
 
     public static double dist(double[] v,double[] w, double pow) {
@@ -166,7 +153,7 @@ public class Utils {
     }
 
     public static void nominalForm(String file) throws IOException {
-        List<String[]> data = readDataFromCustomSeperator(file, ',');
+        List<String[]> data = readFile(file, ',');
         String res = "";
         for (String[] record: data) {
             record[record.length-1] = "class"+record[record.length-1];
@@ -189,7 +176,7 @@ public class Utils {
     public static void nominalFormToNumber(String file, char sep, int attrIdx) throws IOException {
         HashMap<String, Integer> map = new HashMap<>();
 
-        List<String[]> data = readDataFromCustomSeperator(file, sep);
+        List<String[]> data = readFile(file, sep);
         if (attrIdx == -1)
             attrIdx = data.get(0).length-1;
         String res = "";
@@ -208,15 +195,26 @@ public class Utils {
     }
 
     public static int[] extractLabels(List<String[]> dataStr, int col) {
-        int[] labels = new int[dataStr.size()];
-        for (int i = 0; i < dataStr.size(); ++i) {
-            try {
-                labels[i] = Integer.parseInt(dataStr.get(i)[col]);
-            } catch (NumberFormatException e) {
-                System.out.println(dataStr.get(i)[0]);
-            }
+        assert (dataStr.size() > 0);
+        int D = dataStr.get(0).length;
+        assert (D > 0);
+        assert (col >= 0 && col < D);
+        for (String[] record: dataStr) {
+            assert (record.length == D);
         }
-        //System.out.println(Arrays.toString(labels));
+
+        HashMap<String, Integer> mapNominalToNumeric = new HashMap<>();
+        int[] labels = new int[dataStr.size()];
+        int labelID = 1;
+        for (int i = 0; i < dataStr.size(); ++i) {
+            String label = dataStr.get(i)[col];
+            if (!mapNominalToNumeric.containsKey(label)) {
+                mapNominalToNumeric.put(label, labelID); //Integer.parseInt(dataStr.get(i)[col]);
+                ++labelID;
+            }
+            labels[i] = mapNominalToNumeric.get(label);
+        }
+
         return labels;
     }
 
@@ -441,7 +439,7 @@ public class Utils {
     }
 
     /*public static void measureFromFile(String filePath, char sep, double[][] data,) throws IOException {
-        List<String[]> dataStr = Utils.readDataFromCustomSeperator(filePath, sep);
+        List<String[]> dataStr = Utils.readFile(filePath, sep);
         String[] labelsStr = dataStr.get(0);
         int[] labelsTrue = new int[labelsStr.length];
         for (int i = 0; i < labelsTrue.length; ++i) {
@@ -489,11 +487,13 @@ public class Utils {
         return result;
     }
 
-    public static Instances getData(String filePath, boolean removeFirst, boolean normalize) throws Exception {
+    public static Instances getData(Dataset dataset) throws Exception {
         Remove filter;
-        Instances data = ConverterUtils.DataSource.read(filePath);
+        Instances data = ConverterUtils.DataSource.read(dataset.getPath());
         data.setClassIndex(data.numAttributes() - 1);
-        if (removeFirst) {
+
+        /* remove first attribute */
+        if (dataset.isRemoveFirst()) {
             filter = new Remove();
             filter.setAttributeIndices("1");
             filter.setInputFormat(data);
@@ -501,12 +501,14 @@ public class Utils {
             data.setClassIndex(data.numAttributes() - 1);
         }
 
-        if (normalize) {
+        /* normalize data if specified */
+        if (dataset.isNormalize()) {
             Normalize normFilter = new Normalize();
             normFilter.setInputFormat(data);
             data = Filter.useFilter(data, normFilter);
             data.setClassIndex(data.numAttributes() - 1);
         }
+        /* remove class attribute */
         filter = new Remove();
         filter.setAttributeIndices("" + data.numAttributes());
         filter.setInputFormat(data);
