@@ -41,7 +41,6 @@ public class PSO {
     private VelocityCalculator velocityCalculator;
     private int prevParetoSize = 0;
     private static int seed_default = 10;
-    private Instances instances;
     private int[] labelsTrue;
     private int minSizeOfCluster;
     private boolean normObjectives;
@@ -49,12 +48,11 @@ public class PSO {
     private AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
 
     public PSO(Problem aProblem, NCConstruct aNCconstruct, Evaluator.Evaluation[] aEvaluation,
-               PSOConfiguration configuration, Instances aInstances, int[] aLabelsTrue, boolean aNormObjectives) {
+               PSOConfiguration configuration, int[] aLabelsTrue, boolean aNormObjectives) {
         this.problem = aProblem;
         this.ncc = aNCconstruct;
         this.evaluation = aEvaluation;
         this.conf = configuration;
-        this.instances = aInstances;
         this.labelsTrue = aLabelsTrue;
         this.normObjectives = aNormObjectives;
         minSizeOfCluster = 2;//(int) (Math.sqrt(problem.getN())/2);
