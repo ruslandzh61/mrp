@@ -3,12 +3,7 @@ package PSO;
 import clustering.*;
 import utils.NCConstruct;
 import utils.Utils;
-import java.io.IOException;
 import java.util.*;
-import smile.validation.AdjustedRandIndex;
-import weka.clusterers.SimpleKMeans;
-import weka.core.Instances;
-import weka.core.SelectedTag;
 
 /**
  * Created by rusland on 27.10.18.
@@ -43,9 +38,8 @@ public class PSODriver extends Analyzer {
         Problem problem = new Problem(this.dataAttrs, evaluator);
         configuration.maxK = (int) (Math.sqrt(problem.getData().length));
         boolean normObjectives = true;
-
         Random rnd = new Random(1);
-        Reporter reporter = new Reporter(runs);
+        this.reporter = new Reporter(runs);
 
         for (int run = 1; run <= runs; ++run) {
             System.out.println("RUN: " + run);
@@ -55,8 +49,8 @@ public class PSODriver extends Analyzer {
             // constructed clusters
             int[] labelsPred = Utils.adjustLabels(pso.execute());
             //int[] labelsPredCloned = labelsPred.clone();
-            //Utils.removeNoise(labelsPred, this.dataAttrs, 2, 2.0);
-            //Utils.adjustAssignments(labelsPred);
+            Utils.removeNoise(labelsPred, this.dataAttrs, 2, 2.0);
+            Utils.adjustAssignments(labelsPred);
 
             // step 4 - measure comparing to true labels
             Experiment e = measure(labelsPred);
@@ -100,10 +94,11 @@ public class PSODriver extends Analyzer {
 
     public static void main(String[] args) throws Exception {
         int runs = 15;
-        Dataset dataset = Dataset.GLASS;
+        Dataset dataset = Dataset.PATHBASED;
         PSOConfiguration configuration = new PSOConfiguration();
 
         PSODriver psoDriver = new PSODriver(configuration);
         psoDriver.run(runs, dataset);
+        psoDriver.analyze();
     }
 }

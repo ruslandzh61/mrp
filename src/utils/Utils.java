@@ -665,10 +665,10 @@ public class Utils {
     }
 
     public static void main(String[] args) throws Exception {
-        //replaceInFile("data/output.csv", ",,",",");
-        //replaceInFile("data/p-flame.csv", " ","");
+        //replaceInFile("data/output.csv", " ","");
+        //replaceInFile("data/dim064.csv", "   ", ",");
         //Utils.nominalFormToNumber("data/compound.csv", ',', -1);
-        //Utils.nominalForm("data/compound.csv");
+        //Utils.nominalForm("data/dim064.csv");
 
         //test centroids
         /*double[][] data = {{1,1},{5,5},{10,10},{11,11}};
@@ -743,5 +743,17 @@ public class Utils {
         double[] high = {2.0, 50, -0.4};
         Utils.normalize(data, low, high);
         System.out.println(Arrays.toString(data));*/
+        /*Dataset dataset = Dataset.COMPOUND;
+        System.out.println(dataset.getD());
+        dataset.setD(5);
+        System.out.println(dataset.getD());
+        Dataset newD = Dataset.COMPOUND;
+        System.out.println("new: " + newD.getD());*/
+
+        /*String[] arr = new String[64];
+        for (int i = 1; i <= 64; ++i) {
+            arr[i-1] = "a".concat(Integer.toString(i));
+        }
+        System.out.println(Arrays.toString(arr));*/
     }
 }

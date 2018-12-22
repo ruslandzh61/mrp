@@ -1,19 +1,10 @@
 package GA;
 
-import PSO.Problem;
 import clustering.*;
-import smile.validation.AdjustedRandIndex;
 import utils.NCConstruct;
 import utils.Utils;
-//import weka.core.*;
 import weka.clusterers.GenClustPlusPlus;
 import weka.core.*;
-import weka.core.converters.ConverterUtils;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Normalize;
-import weka.filters.unsupervised.attribute.Remove;
-
-import java.io.IOException;
 import java.util.*;
 
 /**

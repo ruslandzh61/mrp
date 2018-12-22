@@ -64,6 +64,7 @@ public abstract class Analyzer {
     public abstract void run(int runs, Dataset dataset) throws Exception;
 
     public void analyze() {
+        System.out.println("------- ANALYSIS --------");
         this.reporter.compute();
         Experiment mean = this.reporter.getMean();
         Experiment stdDev = this.reporter.getStdDev();
