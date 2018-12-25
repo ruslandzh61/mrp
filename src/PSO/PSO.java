@@ -1,7 +1,6 @@
 package PSO;
 
-import clustering.Evaluator;
-import clustering.KMeans;
+import clustering.*;
 import smile.validation.AdjustedRandIndex;
 import utils.NCConstruct;
 import utils.Pareto;
@@ -39,7 +38,7 @@ public class PSO {
     private double[] objBestCoordinates, objWorstCoordinates;
     private Random generator;
     private VelocityCalculator velocityCalculator;
-    private int prevParetoSize = 0;
+    private Solution prevBest;
     private static int seed_default = 10;
     private int[] labelsTrue;
     private int minSizeOfCluster;
@@ -101,13 +100,13 @@ public class PSO {
         numOfIterWithoutImprov = 0;
 
         while(curIterationNum < conf.maxIteration && numOfIterWithoutImprov < conf.maxIterWithoutImprovement) {
-            if (this.curIterationNum % 20 == 0) {
-                System.out.println("ITERATION " + curIterationNum + ": ");
-            }
+            //if (this.curIterationNum % 20 == 0) {
+            System.out.println("ITERATION " + curIterationNum + ": ");
+            //}
             update();
-            if (this.curIterationNum % 20 == 0) {
+            /*if (this.curIterationNum % 20 == 0) {
                 System.out.println("without improv: " + numOfIterWithoutImprov);
-            }
+            }*/
             curIterationNum++;
         }
         // update nonDomPSOList to pick a clusterInstance to utopia point solution out of non-dominated set
@@ -123,60 +122,53 @@ public class PSO {
         }
         assert (nonDomPSOList.size()>0);
         Particle leader = pickALeader(false);
-        //Utils.removeNoise(leader.getSolution().getSolution(), problem.getData(), minSizeOfCluster, 2.0);
-        //Utils.adjustAssignments(leader.getSolution().getSolution());
+        Utils.removeNoise(leader.getSolution().getSolution(), problem.getData(), minSizeOfCluster, 2.0);
+        Utils.adjustAssignments(leader.getSolution().getSolution());
 
-        System.out.println("--- PSO list start ---");
+        /*System.out.println("--- PSO list start ---");
         printParticlesPerformace(psoList, true);
         System.out.println("--- PSO list end -----");
         System.out.println("NON-DOMINATED SET");
-        printParticlesPerformace(nonDomPSOList, true);
+        printParticlesPerformace(nonDomPSOList, true);*/
         System.out.println("------------------");
 
-        System.out.println("Solution found at iteration " + curIterationNum);
+        /*System.out.println("Solution found at iteration " + curIterationNum);
         double[] objs = problem.evaluate(leader.getSolution().getSolution(), evaluation, ncc);
         System.out.println("value of objectives: " + Arrays.toString(objs));
         double[] objCloned = objs.clone();
         Utils.normalize(objCloned, this.objBestCoordinates, this.objWorstCoordinates);
         System.out.println("norm value of objectives: " + Arrays.toString(objCloned));
         System.out.println("utopia point: " + Arrays.toString(objBestCoordinates));
-        System.out.println("dystopia point: " + Arrays.toString(objWorstCoordinates));
+        System.out.println("dystopia point: " + Arrays.toString(objWorstCoordinates));*/
 
         return leader.getSolution().getSolution();
     }
 
-    private void printParticlesPerformace(List<Particle> particles, boolean printIndividual) {
-        double meanARI = 0.0;
-        double meanDB = 0.0;
-        double meanK = 0.0;
-        double meanKWithout = 0.0;
-        for (Particle s: particles) {
-            //System.out.println("normalized: " + Arrays.toString(normalize(s.getSolution().getObjectives())));
-            //System.out.print(Arrays.toString(s.getSolution().getObjectives()));
-            //System.out.print(" -- Fintess: " + s.getSolution().getFitness());
-            double ari = adjustedRandIndex.measure(labelsTrue, s.getSolution().getSolution());
-            double db = Utils.dbIndexScore(Utils.centroids(problem.getData(), s.getSolution().getSolution()),
-                    s.getSolution().getSolution(), problem.getData());
-            meanARI += ari;
-            meanDB += db;
-            meanK += s.getSolution().getK(false);
-            meanKWithout += s.getSolution().getK(true);
-            if (printIndividual) {
-                System.out.println("ARI score: " + ari);
-                System.out.println("value of objectives: " + Arrays.toString(s.getSolution().getObjectives()));
-                double[] objCloned = s.getSolution().getObjectives().clone();
-                Utils.normalize(objCloned, objBestCoordinates, objWorstCoordinates);
-                System.out.println("norm value of objectives: " + Arrays.toString(objCloned));
+    private void printParticlesPerformace(List<Particle> particles) {
+        Analyzer analyzer = new Analyzer() {
+            @Override
+            public void run() throws Exception {
+                this.reporter = new Reporter(particles.size());
+                this.labelsTrue = PSO.this.labelsTrue;
+                this.dataAttrs = PSO.this.problem.getData();
+                int i = 0;
+                for (Particle s: particles) {
+                    Experiment e = measure(s.getSolution().getSolution());
+                    this.reporter.set(i, e);
+                    ++i;
+                }
             }
-            /*System.out.println(" -- ARI: " + ari + " -- DB: " + db + " -- distToUtopia: " +
-                    Utils.dist(s.getSolution().getObjectives(), objBestCoordinates));
-                    //Utils.dist(normalize(s.getSolution().getObjectives()), new double[]{1.0, 1.0}));*/
-        }
 
-        System.out.println("mean ARI for iter: " + meanARI / particles.size());
-        System.out.println("mean DB for iter: " + meanDB / particles.size());
-        System.out.println("mean k: " + meanK / particles.size());
-        System.out.println("mean k without: " + meanKWithout / particles.size());
+        };
+        try {
+            analyzer.run();
+            analyzer.analyze();
+        } catch (Exception e) {
+            System.out.println("failed to analyze solution at iteration:" + this.curIterationNum);
+        }
+        /*System.out.println(" -- ARI: " + ari + " -- DB: " + db + " -- distToUtopia: " +
+                Utils.dist(s.getSolution().getObjectives(), objBestCoordinates));
+                //Utils.dist(normalize(s.getSolution().getObjectives()), new double[]{1.0, 1.0}));*/
     }
 
     public void initializeSwarm() throws Exception {
@@ -350,18 +342,26 @@ public class PSO {
         /* recompute non-dom set to compare with previous one */
         this.nonDomPSOList = determineParetoSet(psoList);
         // naive method to identify whether pareto set changed
-        if (this.nonDomPSOList.size() == prevParetoSize) {
+        //if (this.nonDomPSOList.size() == prevParetoSize) {
+        Solution curBest = pickALeader(false).getSolution();
+        if (prevBest != null && curBest.equals(prevBest)) {
             numOfIterWithoutImprov++;
         } else {
             numOfIterWithoutImprov = 0;
         }
-        prevParetoSize = this.nonDomPSOList.size();
+        prevBest = new Solution(curBest);
+        //prevParetoSize = this.nonDomPSOList.size();
 
-        if (this.curIterationNum % 20 == 0) {
+        List<Particle> listToAnalyze = new ArrayList<>();
+        listToAnalyze.add(pickALeader(false));
+        printParticlesPerformace(listToAnalyze);
+        //printParticlesPerformace(nonDomPSOList, false);
+
+        /*if (this.curIterationNum % 20 == 0) {
             printParticlesPerformace(nonDomPSOList, false);
             //System.out.println("utopia:   " + Arrays.toString(objBestCoordinates));
             //System.out.println("dystopia: " + Arrays.toString(objWorstCoordinates));
-        }
+        }*/
     }
 
     private List<Particle> determineParetoSet(List<Particle> particleList) {

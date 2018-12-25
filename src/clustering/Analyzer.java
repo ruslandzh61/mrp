@@ -1,10 +1,12 @@
 package clustering;
 
 import smile.validation.AdjustedRandIndex;
+import utils.Silh;
 import utils.Utils;
 import weka.core.Instances;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -13,18 +15,36 @@ import java.util.List;
  */
 
 public abstract class Analyzer {
+    protected Dataset dataset;
     protected double[][] dataAttrs;
     protected Instances wekaData;
     protected int[] labelsTrue;
     protected AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
-    Experiment[] experiments;
+    protected Silh silhoutte = new Silh();
     protected Reporter reporter;
 
     enum Algorithm {
         KMEANS, GENCLUST, MGENCLUST, MCPSO;
     }
 
-    protected void processData(Dataset dataset) throws Exception {
+    protected void setRuns(int runs) {
+        reporter = new Reporter(runs);
+    }
+
+    protected void setDataAttrs(double[][] aDataAttrs) {
+        this.dataAttrs = aDataAttrs;
+    }
+
+    protected void setLabelsTrue(int[] labelsTrue) {
+        this.labelsTrue = labelsTrue;
+    }
+
+    protected void setDataset(Dataset aDataset) {
+        this.dataset = aDataset;
+    }
+
+    protected void processData() throws Exception {
+        assert (dataset != null);
         // read file
         char sep = ',';
         List<String[]> dataStr = Utils.readFile(dataset.getPath(), sep);
@@ -38,7 +58,7 @@ public abstract class Analyzer {
         int D = dataStr.get(0).length;
         int labelCol = D - 1;
         labelsTrue = Utils.extractLabels(dataStr, labelCol);
-        //System.out.println(Arrays.toString(labelsTrue));
+        System.out.println(Arrays.toString(labelsTrue));
 
         // extract attributes
         int[] excludedColumns;
@@ -61,36 +81,43 @@ public abstract class Analyzer {
         this.wekaData = Utils.getData(dataset);
     }
 
-    public abstract void run(int runs, Dataset dataset) throws Exception;
+    public abstract void run() throws Exception;
 
     public void analyze() {
         System.out.println("------- ANALYSIS --------");
+        Experiment mean, stdDev;
         this.reporter.compute();
-        Experiment mean = this.reporter.getMean();
-        Experiment stdDev = this.reporter.getStdDev();
+        mean = this.reporter.getMean();
+        stdDev = this.reporter.getStdDev();
 
-        System.out.println("mean and std dev of ARI score:          " + Utils.doublePrecision(mean.getAri(), 4) +
+        if (this.reporter.size() == 1) {
+            System.out.println("C: " + Arrays.toString(this.reporter.get(0).getSolution()));
+        }
+        System.out.println("A: " + Utils.doublePrecision(mean.getAri(), 4) +
                 " +- " + Utils.doublePrecision(stdDev.getAri(), 4));
-        System.out.println("mean and std dev of DB Index score:     " + Utils.doublePrecision(mean.getDb(), 4) +
+        System.out.println("D: " + Utils.doublePrecision(mean.getDb(), 4) +
                 " +- " + Utils.doublePrecision(stdDev.getDb(), 4));
-        System.out.println("mean and std dev of Silhouette score:   " + Utils.doublePrecision(mean.getSilh(), 4) +
+        System.out.println("S: " + Utils.doublePrecision(mean.getSilh(), 4) +
                 " +- " + Utils.doublePrecision(stdDev.getSilh(), 4));
-        System.out.println("mean and std dev of number of clusters: " + Utils.doublePrecision(mean.getK(), 4) +
+        System.out.println("K: " + Utils.doublePrecision(mean.getK(), 4) +
                 " +- " + Utils.doublePrecision(stdDev.getK(), 4));
-        System.out.println("--------------------------");
     }
 
     protected Experiment measure(int[] labelsPred) {
         HashMap<Integer, double[]> centroids = Utils.centroids(this.dataAttrs, labelsPred);
         double aRIScore = this.adjustedRandIndex.measure(this.labelsTrue, labelsPred);
         double dbScore = Utils.dbIndexScore(centroids, labelsPred, this.dataAttrs);
-        double silhScore = Utils.silhoutte(centroids, labelsPred, this.dataAttrs);
+        double silhScore = silhoutte.compute(centroids, labelsPred, this.dataAttrs);
         int numClusters = Utils.distinctNumberOfItems(labelsPred);
 
-        System.out.println("ARI score of PSO for run:   " + Utils.doublePrecision(aRIScore, 4));
-        System.out.println("DB score of PSO for run:    " + Utils.doublePrecision(dbScore, 4));
+        /*for (int i: centroids.keySet()) {
+            System.out.println(Arrays.toString(centroids.get(i)));
+        }*/
+        /*System.out.println("solution: " + Arrays.toString(labelsPred));
+        System.out.println("ARI score of PSO for run: " + Utils.doublePrecision(aRIScore, 4));
+        System.out.println("DB score of PSO for run: " + Utils.doublePrecision(dbScore, 4));
         System.out.println("Silhoutte score of PSO run: " + Utils.doublePrecision(silhScore, 4));
-        System.out.println("number of clusters for run: " + numClusters);
+        System.out.println("number of clusters for run: " + numClusters);*/
 
         return new Experiment(labelsPred, aRIScore, dbScore, silhScore, numClusters);
     }

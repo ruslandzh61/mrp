@@ -27,9 +27,11 @@ public class PSODriver extends Analyzer {
     /**
      * main method to run PSO-based buildClusterer
      * */
-    public void run(int runs, Dataset dataset) throws Exception {
+    public void run() throws Exception {
+        assert (reporter != null);
+        assert (dataset != null);
         /* process data */
-        processData(dataset);
+        processData();
 
         // step 2 - pick objectives
         NCConstruct ncConstruct = new NCConstruct(dataAttrs);
@@ -39,9 +41,8 @@ public class PSODriver extends Analyzer {
         configuration.maxK = (int) (Math.sqrt(problem.getData().length));
         boolean normObjectives = true;
         Random rnd = new Random(1);
-        this.reporter = new Reporter(runs);
 
-        for (int run = 1; run <= runs; ++run) {
+        for (int run = 1; run <= reporter.size(); ++run) {
             System.out.println("RUN: " + run);
             // step 3 - run PSO algorithm
             PSO pso = new PSO(problem, ncConstruct, evaluations, configuration, labelsTrue, normObjectives);
@@ -49,8 +50,6 @@ public class PSODriver extends Analyzer {
             // constructed clusters
             int[] labelsPred = Utils.adjustLabels(pso.execute());
             //int[] labelsPredCloned = labelsPred.clone();
-            Utils.removeNoise(labelsPred, this.dataAttrs, 2, 2.0);
-            Utils.adjustAssignments(labelsPred);
 
             // step 4 - measure comparing to true labels
             Experiment e = measure(labelsPred);
@@ -94,11 +93,14 @@ public class PSODriver extends Analyzer {
 
     public static void main(String[] args) throws Exception {
         int runs = 15;
-        Dataset dataset = Dataset.PATHBASED;
+        Dataset dataset = Dataset.FLAME;
         PSOConfiguration configuration = new PSOConfiguration();
 
         PSODriver psoDriver = new PSODriver(configuration);
-        psoDriver.run(runs, dataset);
+        psoDriver.setDataset(dataset);
+        psoDriver.setRuns(runs);
+        psoDriver.run();
+        System.out.println("AVERAGE OVER RUNS");
         psoDriver.analyze();
     }
 }

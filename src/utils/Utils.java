@@ -1,5 +1,6 @@
 package utils;
 
+import PSO.Solution;
 import clustering.Dataset;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
@@ -13,10 +14,7 @@ import weka.filters.unsupervised.attribute.Remove;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.Charset;
@@ -152,7 +150,7 @@ public class Utils {
         writer.close();
     }
 
-    public static void nominalForm(String file) throws IOException {
+    public static void nominalForm(String file, String output) throws IOException {
         List<String[]> data = readFile(file, ',');
         String res = "";
         for (String[] record: data) {
@@ -161,7 +159,7 @@ public class Utils {
             res = res.concat(s.substring(1,s.length()-1)+System.getProperty("line.separator"));
         }
 
-        whenWriteStringUsingBufferedWritter_thenCorrect(res, "data/output.csv");
+        whenWriteStringUsingBufferedWritter_thenCorrect(res, output);
     }
 
     public static void replaceInFile(String p, String repl, String with) throws IOException {
@@ -229,9 +227,9 @@ public class Utils {
      * @label - label of len N
      * return centroids: dimensionality: k x D
      */
-    public static HashMap<Integer, double[]> centroids(double[][] clusters, int[] labels) {
-        int N = clusters.length;
-        int D = clusters[0].length;
+    public static HashMap<Integer, double[]> centroids(double[][] dataset, int[] labels) {
+        int N = dataset.length;
+        int D = dataset[0].length;
         assert (labels.length==N);
 
         HashMap<Integer,double[]> newc = new HashMap<>(); //new centroids
@@ -242,7 +240,7 @@ public class Utils {
 
         for (int i=0; i<N; i++){
             for (int j=0; j<D; j++){
-                newc.get(labels[i])[j] += clusters[i][j]; // update that centroid by adding the member data record
+                newc.get(labels[i])[j] += dataset[i][j]; // update that centroid by adding the member data record
             }
             if (counts.containsKey(labels[i])) {
                 counts.put(labels[i],counts.get(labels[i])+1);
@@ -324,62 +322,6 @@ public class Utils {
         }
 
         normalize(data, dataLow, dataHigh);
-    }
-
-    public static double silhoutte(HashMap<Integer, double[]> clusters, int[] labels, double[][] data) {
-        double silhouette;
-        double a;
-        double distA = 0;
-        double b;
-        double distB = 0;
-        double cont;
-
-        HashMap<Integer, HashSet<Integer>> labelToClusterPoints = new HashMap<>();
-        Set<Integer> distLabels = Utils.distinctItems(labels);
-
-        for (int label: distLabels) {
-            labelToClusterPoints.put(label, new HashSet<>());
-        }
-        for (int i = 0; i < labels.length; ++i) {
-            labelToClusterPoints.get(labels[i]).add(i);
-        }
-
-        for (int clusterID: labelToClusterPoints.keySet()) {
-            HashSet<Integer> cluster = labelToClusterPoints.get(clusterID);
-            for (int p: cluster) {
-                for (int clusterID2: labelToClusterPoints.keySet()) {
-                    if (clusterID != clusterID2) {
-                        HashSet<Integer> cluster2 = labelToClusterPoints.get(clusterID);
-                        for (int p2: cluster2) {
-                            if (p != p2) {
-                                distB += Utils.dist(data[p], data[p2], 2.0);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        b = distB / clusters.size();
-
-        cont = 0;
-
-        for (int clusterID: labelToClusterPoints.keySet()) {
-            HashSet<Integer> cluster = labelToClusterPoints.get(clusterID);
-            for (int p : cluster) {
-                HashSet<Integer> cluster2 = labelToClusterPoints.get(clusterID);
-                for (int p2 : cluster2) {
-                    if (p != p2) {
-                        distA += Utils.dist(data[p], data[p2], 2.0);
-                        cont++;
-                    }
-                }
-            }
-        }
-
-        a = distA / clusters.size();
-        silhouette = (b - a) / Math.max(a, b);
-        return silhouette;
     }
 
     public static double dbIndexScore(HashMap<Integer, double[]> clusters, int[] labels, double[][] data) {
@@ -666,9 +608,10 @@ public class Utils {
 
     public static void main(String[] args) throws Exception {
         //replaceInFile("data/output.csv", " ","");
-        //replaceInFile("data/dim064.csv", "   ", ",");
+        //replaceInFile("data/s1.csv", " ", "");
         //Utils.nominalFormToNumber("data/compound.csv", ',', -1);
-        //Utils.nominalForm("data/dim064.csv");
+        //Utils.nominalForm("data/s1.csv", "data/o1.csv");
+
 
         //test centroids
         /*double[][] data = {{1,1},{5,5},{10,10},{11,11}};

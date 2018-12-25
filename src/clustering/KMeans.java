@@ -26,7 +26,7 @@ public class KMeans {
     private static int default_seed = 10;
     private static Initialization default_init = Initialization.KMEANS_PLUS_PLUS;
 
-    private int[] label;
+    private int[] labels;
     private double[][] centroids;
     private int k;
     private int seed;
@@ -38,7 +38,7 @@ public class KMeans {
     public KMeans(KMeans kMeans) {
         this.centroids = Utils.deepCopy(kMeans.getCentroids());
         this.setSeed(kMeans.getSeed());
-        this.label = kMeans.getLabels().clone();
+        this.labels = kMeans.getLabels().clone();
         this.k = kMeans.numberOfClusters();
         this.pow = kMeans.pow;
         this.initialization = kMeans.initialization;
@@ -74,36 +74,36 @@ public class KMeans {
         int N = copiedData.length;
         assert (niter >= 1 || niter <= 500);
 
-        double [][] c1 = centroids;
-        double threshold = 0.000000001;
+        int[] l1;
         int round=0;
 
         while (true) {
-            // update _centroids with the last round results
-            centroids = c1;
-
+            l1 = labels.clone();
             //assign record to the clusterInstance centroid
-            label = new int[N];
+            labels = new int[N];
             for (int i = 0; i < N; i++) {
-                label[i] = clusterInstance(copiedData[i]);
+                labels[i] = clusterInstance(copiedData[i]);
             }
 
             // recompute centroids based on the assignments
-            c1 = updateCentroids(copiedData);
+            centroids = updateCentroids(copiedData);
             round++;
-            if (niter > 0 && round >= niter)
+            if (niter > 0 && round >= niter) {
+                //System.out.println("didn't converge: " + round);
                 break;
-            if (converge(centroids, c1, threshold)) {
+            }
+            if (converge(labels, l1)) {
                 //System.out.println("converged at: " + round);
                 break;
             }
         }
+        // in case of preset centroids or random initialization
         getRidOfEmptyCentroids();
     }
 
     private void getRidOfEmptyCentroids() {
         double[][] copy = Utils.deepCopy(this.centroids);
-        Set<Integer> distLabels = Utils.distinctItems(this.label);
+        Set<Integer> distLabels = Utils.distinctItems(this.labels);
         int i = 0;
         this.centroids = new double[distLabels.size()][];
         HashMap<Integer, Integer> oldToNewIndex = new HashMap<>();
@@ -112,8 +112,8 @@ public class KMeans {
             oldToNewIndex.put(distLabel, i);
             ++i;
         }
-        for (i = 0; i < label.length; ++i) {
-            label[i] = oldToNewIndex.get(label[i]);
+        for (i = 0; i < labels.length; ++i) {
+            labels[i] = oldToNewIndex.get(labels[i]);
         }
     }
 
@@ -122,7 +122,7 @@ public class KMeans {
     }
 
     public int[] getLabels() {
-        return label;
+        return labels;
     }
 
     public double[][] getCentroids() {
@@ -136,7 +136,7 @@ public class KMeans {
         centroids = updateCentroids();
         //assign record to the clusterInstance centroid
         for (int i=0; i < N; i++){
-            label[i] = clusterInstance(data[i]);
+            labels[i] = clusterInstance(data[i]);
         }
     }*/
 
@@ -147,7 +147,7 @@ public class KMeans {
     private void initialize(double[][] data) {
         int N = data.length;
         int D = data[0].length;
-        label = new int[N];
+        labels = new int[N];
         assert (this.k < N);
         // choose existing data points as initial data points
         centroids = new double[k][D];
@@ -242,7 +242,7 @@ public class KMeans {
             }
             // assign data points to clusterInstance centroids
             for (int i = 0; i < N; i++) {
-                label[i] = clusterInstance(data[i]);
+                labels[i] = clusterInstance(data[i]);
             }
         } else if (this.initialization == Initialization.HILL_CLIMBER) {
             assert (supplied == true);
@@ -257,22 +257,23 @@ public class KMeans {
         int N = data.length;
         int D = data[0].length;
         // initialize centroids and set to 0
-        double [][] newc = new double [k][]; //new centroids
-        int [] counts = new int[k]; // sizes of the clusters
+        double[][] newc = new double [k][]; //new centroids
+        int[] counts = new int[k]; // sizes of the clusters
 
         // intialize
         for (int i=0; i<k; i++) {
             counts[i] =0;
             newc[i] = new double[D];
-            for (int j=0; j<D; j++)
-                newc[i][j] =0;
+            for (int j=0; j<D; j++) {
+                newc[i][j] = 0;
+            }
         }
 
         for (int i=0; i<N; i++){
             for (int j=0; j<D; j++){
-                newc[label[i]][j] += data[i][j]; // update that centroid by adding the member data record
+                newc[labels[i]][j] += data[i][j]; // update that centroid by adding the member data record
             }
-            counts[label[i]]++;
+            counts[labels[i]]++;
         }
 
         // finally get the average
@@ -305,19 +306,15 @@ public class KMeans {
      * check convergence condition
      * max{dist(c1[i], c2[i]), i=1..numClusters < threshold
      * */
-    private boolean converge(double [][] c1, double [][] c2, double threshold){
+    private boolean converge(int[] c1, int[] c2) {
         // c1 and c2 are two sets of centroids
-        double maxv = 0;
         for (int i = 0; i < k; i++){
-            double d = Utils.dist(c1[i], c2[i], this.pow);
-            if (maxv < d)
-                maxv = d;
+            if (c1[i] != c2[i]) {
+                return false;
+            }
         }
 
-        if (maxv < threshold)
-            return true;
-        else
-            return false;
+        return true;
     }
 
     public static void main(String[] args) throws IOException {

@@ -1,8 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by Fernflower decompiler)
-//
-
 package GA;
 
 import java.util.*;
@@ -12,6 +7,7 @@ import clustering.KMeans;
 import smile.validation.AdjustedRandIndex;
 import utils.NCConstruct;
 
+import utils.Silh;
 import weka.clusterers.RandomizableClusterer;
 import weka.core.Capabilities;
 import weka.core.DenseInstance;
@@ -31,7 +27,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
 
     private boolean fitnessNormalize;
 
-    public enum FITNESS {DBINDEX, MULTIOBJECTIVE_SUM, MULTIOBJECTIVE_MAXIMIN};
+    public enum FITNESS {DBINDEX, SILHOUETTE, MULTIOBJECTIVE_SUM, MULTIOBJECTIVE_MAXIMIN};
 
     private static final long serialVersionUID = -7247404718496233612L;
     private static final double MAXIMIN_THRESHOLD = -0.0001;
@@ -58,6 +54,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
 
     private NCConstruct ncConstruct;
     private AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
+    private Silh silhouette = new Silh();
     private Evaluator evaluator = new Evaluator();
     private Evaluator.Evaluation[] evaluations;
     private double[][] myData;
@@ -563,7 +560,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         return result;
     }
 
-    private double mDBIndex(KMeans chromosome) {
+    private double modifiedDBIndex(KMeans chromosome) {
         double[][] centroids = chromosome.getCentroids();
 
         int numClust = centroids.length;
@@ -684,11 +681,13 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
             if (normalizeObjectives) {
                 utils.Utils.normalize(objs, objBestCoordinates, objWorstCoordinates);
             }
-
             return 1.0D / utils.Utils.sum(objs, 1.0);
-        } else {
-            return 1.0D / mDBIndex(chromosome);
+        } else if (this.fitnessType == FITNESS.SILHOUETTE) {
+            return this.silhouette.compute(chromosome.getLabels(), this.myData);
+        } else if (fitnessType == FITNESS.DBINDEX) {
+            return 1.0D / modifiedDBIndex(chromosome);
         }
+        return 1.0D / modifiedDBIndex(chromosome);
     }
 
     private double[] fitness(KMeans[] pop) {

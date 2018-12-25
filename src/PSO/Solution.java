@@ -2,6 +2,8 @@ package PSO;
 
 import utils.*;
 
+import java.util.Arrays;
+
 /**
  * Created by rusland on 06.10.18.
  * locus-based solution representation
@@ -97,5 +99,13 @@ public class Solution implements Comparable<Solution> {
     @Override
     public int compareTo(Solution other) {
         return Double.compare(this.fitness, other.fitness);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        Solution other = (Solution) o;
+        int[] otherSol = Utils.adjustLabels(other.getSolution());
+        int[] thisSol = Utils.adjustLabels(this.getSolution());
+        return Arrays.equals(thisSol, otherSol);
     }
 }

@@ -17,19 +17,20 @@ public class KMeansDriver extends Analyzer {
         this.isUseWekaVersion = weka;
     }
 
-    public void run(int runs, Dataset dataset) throws Exception {
-        processData(dataset);
+    public void run() throws Exception {
+        assert (dataset != null);
+        assert (reporter != null);
+        processData();
 
         Random rnd = new Random(1);
-        this.reporter = new Reporter(runs);
 
-        for (int run = 1; run <= runs; ++run) {
+        for (int run = 1; run <= reporter.size(); ++run) {
             System.out.println("RESULTS FOR RUN: " + run);
             int[] labelsPred;
             Experiment bestE = new Experiment();
             bestE.setAri(Double.NEGATIVE_INFINITY);
-            int minK = 2;//(int)(0.02 * data.length);
-            int maxK = (int) Math.sqrt(this.dataAttrs.length); //(int)(0.1 * data.length);
+            int minK = (int)(0.02 * dataAttrs.length);
+            int maxK = (int)(0.1 * dataAttrs.length); //(int) Math.sqrt(this.dataAttrs.length);
             for (int k = minK; k <= maxK; ++k) {
                 if (this.isUseWekaVersion) {
                     SimpleKMeans kMeans = new SimpleKMeans();
@@ -57,8 +58,8 @@ public class KMeansDriver extends Analyzer {
                     labelsPred = kMeans.getLabels();
                 }
 
-                //Utils.removeNoise(labelsPred, this.dataAttrs, 2, 2.0);
-                //Utils.adjustAssignments(labelsPred);
+                Utils.removeNoise(labelsPred, this.dataAttrs, 2, 2.0);
+                Utils.adjustAssignments(labelsPred);
 
                 Experiment e = measure(labelsPred);
                 if (e.getAri() > bestE.getAri()) {
@@ -85,8 +86,7 @@ public class KMeansDriver extends Analyzer {
     }
 
     public static void main(String[] args) throws Exception {
-        Dataset yeast = Dataset.PATHBASED;
-        Dataset[] datasets = {yeast};
+        Dataset[] datasets = {Dataset.GLASS};
         int runs = 10;
         boolean usePlusPlus = true;
         boolean useWeka = false;
@@ -110,7 +110,9 @@ public class KMeansDriver extends Analyzer {
             System.out.println("normalize: " + dataset.isNormalize());
             System.out.println("N=" + dataset.getN() + "; D=" + dataset.getD() + "; K=" + dataset.getK());
             KMeansDriver kMeansDriver = new KMeansDriver(usePlusPlus, useWeka);
-            kMeansDriver.run(runs, dataset);
+            kMeansDriver.setDataset(dataset);
+            kMeansDriver.setRuns(runs);
+            kMeansDriver.run();
             kMeansDriver.analyze();
             System.out.println("real number of clusters: " + dataset.getK());
         /*System.out.println("my k-means: ");

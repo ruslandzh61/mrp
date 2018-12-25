@@ -17,21 +17,22 @@ public class GADriver extends Analyzer {
         this.myGenClust = myGenClust;
     }
 
-    public void run(int runs, Dataset dataset) throws Exception {
+    public void run() throws Exception {
+        assert (reporter != null);
+        assert (dataset != null);
+
+        processData();
+
         MyGenClustPlusPlus cl;
         GenClustPlusPlus gl;
-
-        processData(dataset);
-
         Random rnd = new Random(1);
-        this.reporter = new Reporter(runs);
 
         // step 2 - pick objectives
         NCConstruct ncConstruct = new NCConstruct(dataAttrs);
         Evaluator.Evaluation[] evaluations = {Evaluator.Evaluation.CONNECTIVITY, Evaluator.Evaluation.COHESION};
         Evaluator evaluator = new Evaluator();
 
-        for (int run = 1; run <= runs; ++run) {
+        for (int run = 1; run <= reporter.size(); ++run) {
             System.out.println("RUN: " + run);
             Experiment e;
             int[] labelsPred;
@@ -64,8 +65,8 @@ public class GADriver extends Analyzer {
                 labelsPred = Utils.adjustLabels(labelsPred);
             }
 
-            //Utils.removeNoise(labelsPred, dataArr, 2, 2.0);
-            //Utils.adjustAssignments(labelsPred);
+            Utils.removeNoise(labelsPred, dataAttrs, 2, 2.0);
+            Utils.adjustAssignments(labelsPred);
 
             //temp = Arrays.toString(labelsPred);
             //output.append(temp.substring(1, temp.length() - 1)).append(System.getProperty("line.separator"));
@@ -97,7 +98,9 @@ public class GADriver extends Analyzer {
         for (Dataset dataset: datasets) {
             System.out.println("DATASET: " + dataset.getPath());
             GADriver gaDriver = new GADriver(mGenClust);
-            gaDriver.run(runs, dataset);
+            gaDriver.setDataset(dataset);
+            gaDriver.setRuns(runs);
+            gaDriver.run();
             gaDriver.analyze();
         }
     }

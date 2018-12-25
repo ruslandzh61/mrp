@@ -28,6 +28,10 @@ public class Reporter {
         this.computed = false;
     }
 
+    public Experiment get(int idx) {
+        return experiments[idx];
+    }
+
     public void compute() {
         double[] aris = new double[experiments.length];
         double[] dbs = new double[experiments.length];
@@ -56,6 +60,9 @@ public class Reporter {
         this.computed = true;
     }
 
+    public int size() {
+        return this.experiments.length;
+    }
 
     public Experiment getMean() {
         assert (this.computed == true);
