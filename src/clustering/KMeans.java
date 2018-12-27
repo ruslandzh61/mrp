@@ -14,8 +14,9 @@ import java.util.*;
 public class KMeans {
     private boolean supplied;
 
-    private int niter = 500;
-
+    private int niter = 50;
+    private int maxIters = 500;
+    private double threshold = 0.005;
     public KMeans() {
     }
 
@@ -65,45 +66,79 @@ public class KMeans {
         this.initialStartPoint = Utils.deepCopy(initial);
     }
 
-    /**
-     * performs complete buildClusterer
-     *  */
-    public void buildClusterer(double[][] data) {
+    public void buildClusterer(double[][] data) throws Exception {
         double[][] copiedData = Utils.deepCopy(data);
         initialize(copiedData);
         int N = copiedData.length;
-        assert (niter >= 1 || niter <= 500);
+        assert (niter >= 1 && niter <= maxIters);
 
-        int[] l1;
-        int round=0;
+        double [][] prevCentroids = Utils.deepCopy(centroids);
+        int[] prevLabels = this.labels.clone();
+        int round = 0;
 
-        while (true) {
-            l1 = labels.clone();
+        while (round < niter) {
+            // recompute centroids based on the assignments
+            centroids = updateCentroids(copiedData);
             //assign record to the clusterInstance centroid
             labels = new int[N];
             for (int i = 0; i < N; i++) {
                 labels[i] = clusterInstance(copiedData[i]);
             }
 
-            // recompute centroids based on the assignments
-            centroids = updateCentroids(copiedData);
-            round++;
-            if (niter > 0 && round >= niter) {
-                //System.out.println("didn't converge: " + round);
-                break;
-            }
-            if (converge(labels, l1)) {
+            double curSSE = sse(centroids, labels, data);
+            double prevSSE = sse(prevCentroids, prevLabels, data);
+            double diff = Math.abs(curSSE - prevSSE);
+            if (initialization == Initialization.HILL_CLIMBER && diff < threshold) {
                 //System.out.println("converged at: " + round);
                 break;
             }
+            round++;
+            prevCentroids = Utils.deepCopy(centroids);
+            prevLabels = labels.clone();
         }
-        // in case of preset centroids or random initialization
         getRidOfEmptyCentroids();
+    }
+
+    private double sse(double[][] centroidList, int[] labelList, double[][] data) {
+        HashMap<Integer, double[]> mapC = new HashMap<>();
+        for (int i = 0; i < centroidList.length; ++i) {
+            mapC.put(i, centroidList[i]);
+        }
+        List<Cluster> clusters = transform(mapC, labelList, data);
+        double sum = 0;
+        for (Cluster cluster : clusters) {
+            for (double[] point: cluster.getPoints()) {
+                double dist = Utils.dist(cluster.getCentroid(), point, 2.0);
+                sum += dist;
+            }
+        }
+        return sum;
+    }
+
+    private List<Cluster> transform(HashMap<Integer, double[]> aClusters, int[] aLabels, double[][] aData) {
+        List<Cluster> clusters = new ArrayList<>(aClusters.size());
+        HashMap<Integer, Integer> mapIDToArr = new HashMap<>();
+        int idx = 0;
+        for (int id: aClusters.keySet()) {
+            clusters.add(new Cluster(id, aClusters.get(id)));
+            mapIDToArr.put(id, idx);
+            ++idx;
+        }
+
+        for (int i = 0; i < aData.length; ++i) {
+            int label = aLabels[i];
+            int indexToPut = mapIDToArr.get(label);
+            clusters.get(indexToPut).add(aData[i]);
+        }
+        clusters.removeIf(cluster -> cluster.size() < 1);
+
+        return clusters;
     }
 
     private void getRidOfEmptyCentroids() {
         double[][] copy = Utils.deepCopy(this.centroids);
         Set<Integer> distLabels = Utils.distinctItems(this.labels);
+        this.k = distLabels.size();
         int i = 0;
         this.centroids = new double[distLabels.size()][];
         HashMap<Integer, Integer> oldToNewIndex = new HashMap<>();
@@ -144,11 +179,13 @@ public class KMeans {
         return "number of clusters: " + this.k;
     }
 
-    private void initialize(double[][] data) {
+    private void initialize(double[][] data) throws Exception {
         int N = data.length;
         int D = data[0].length;
         labels = new int[N];
-        assert (this.k < N);
+        if (this.k > Math.sqrt(N)) {
+            throw new Exception("too many clusters");
+        }
         // choose existing data points as initial data points
         centroids = new double[k][D];
 
@@ -240,14 +277,15 @@ public class KMeans {
                     copy[rand][j] = copy[N - 1 - i][j];    // ensure sampling without replacement
                 }
             }
-            // assign data points to clusterInstance centroids
-            for (int i = 0; i < N; i++) {
-                labels[i] = clusterInstance(data[i]);
-            }
         } else if (this.initialization == Initialization.HILL_CLIMBER) {
-            assert (supplied == true);
+            assert (supplied);
             this.centroids = this.initialStartPoint;
             this.k = this.initialStartPoint.length;
+        }
+
+        // assign data points to clusterInstance centroids
+        for (int i = 0; i < N; i++) {
+            labels[i] = clusterInstance(data[i]);
         }
 
         Utils.checkClusterLabels(getLabels(), k);
@@ -306,16 +344,24 @@ public class KMeans {
      * check convergence condition
      * max{dist(c1[i], c2[i]), i=1..numClusters < threshold
      * */
-    private boolean converge(int[] c1, int[] c2) {
+    /**
+     * check convergence condition
+     * max{dist(c1[i], c2[i]), i=1..numClusters < threshold
+     * */
+    /*private boolean converge(double [][] c1, double [][] c2, double threshold){
         // c1 and c2 are two sets of centroids
+        double maxv = 0;
         for (int i = 0; i < k; i++){
-            if (c1[i] != c2[i]) {
-                return false;
-            }
+            double d = Utils.dist(c1[i], c2[i], this.pow);
+            if (maxv < d)
+                maxv = d;
         }
 
-        return true;
-    }
+        if (maxv < threshold)
+            return true;
+        else
+            return false;
+    }*/
 
     public static void main(String[] args) throws IOException {
         /*double[][] data;

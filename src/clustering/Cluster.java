@@ -8,6 +8,11 @@ import java.util.List;
  */
 public class Cluster {
     private int id;
+
+    public double[] getCentroid() {
+        return centroid;
+    }
+
     private double[] centroid;
     private List<double[]> points;
 

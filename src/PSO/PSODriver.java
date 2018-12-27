@@ -19,9 +19,16 @@ import java.util.*;
 public class PSODriver extends Analyzer {
 
     private PSOConfiguration configuration;
+    List<List<Experiment>> iterations;
 
     public PSODriver(PSOConfiguration aConf) {
         this.configuration = aConf;
+    }
+
+    @Override
+    protected void setRuns(int runs) {
+        super.setRuns(runs);
+        iterations = new ArrayList<>(runs);
     }
 
     /**
@@ -53,8 +60,12 @@ public class PSODriver extends Analyzer {
 
             // step 4 - measure comparing to true labels
             Experiment e = measure(labelsPred);
+            System.out.println("A:" + e.getAri());
+            System.out.println("D:" + e.getDb());
+            System.out.println("S:" + e.getSilh());
+            System.out.println("K:" + e.getK());
             reporter.set(run-1, e);
-
+            iterations.add(pso.iterationsBest);
             // test hill-climber
             /*int[] labelsPredCloned = labelsPred.clone();
             centroids = Utils.centroids(this.dataAttrs, labelsPredCloned);
@@ -92,8 +103,8 @@ public class PSODriver extends Analyzer {
     }
 
     public static void main(String[] args) throws Exception {
-        int runs = 15;
-        Dataset dataset = Dataset.FLAME;
+        int runs = 10;
+        Dataset dataset = Dataset.DERMATOLOGY;
         PSOConfiguration configuration = new PSOConfiguration();
 
         PSODriver psoDriver = new PSODriver(configuration);
@@ -101,6 +112,6 @@ public class PSODriver extends Analyzer {
         psoDriver.setRuns(runs);
         psoDriver.run();
         System.out.println("AVERAGE OVER RUNS");
-        psoDriver.analyze();
+        psoDriver.analyze(true);
     }
 }

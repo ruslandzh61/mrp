@@ -45,6 +45,7 @@ public class PSO {
     private boolean normObjectives;
 
     private AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
+    List<Experiment> iterationsBest;
 
     public PSO(Problem aProblem, NCConstruct aNCconstruct, Evaluator.Evaluation[] aEvaluation,
                PSOConfiguration configuration, int[] aLabelsTrue, boolean aNormObjectives) {
@@ -81,6 +82,8 @@ public class PSO {
         for (int iO = 0; iO < numOfObj; ++iO) {
             objWorstCoordinates[iO] = Double.NEGATIVE_INFINITY;
         }
+
+        iterationsBest = new ArrayList<>(this.conf.maxIteration);
     }
 
     public int[] execute() throws Exception {
@@ -158,11 +161,11 @@ public class PSO {
                     ++i;
                 }
             }
-
         };
         try {
             analyzer.run();
-            analyzer.analyze();
+            analyzer.analyze(false);
+            iterationsBest.add(analyzer.getMean());
         } catch (Exception e) {
             System.out.println("failed to analyze solution at iteration:" + this.curIterationNum);
         }
@@ -209,7 +212,10 @@ public class PSO {
         System.out.println("--------------------");
     }
 
-    private int[] kMeansAssignments(int k) {
+    private int[] kMeansAssignments(int k) throws Exception {
+        if (k > Math.sqrt(problem.getN())) {
+            throw new Exception("too many clusters");
+        }
         KMeans kMeans = new KMeans(k, 2.0);
         kMeans.setSeed(generator.nextInt());
         kMeans.setInitializationMethod(KMeans.Initialization.KMEANS_PLUS_PLUS);
@@ -341,6 +347,20 @@ public class PSO {
 
         /* recompute non-dom set to compare with previous one */
         this.nonDomPSOList = determineParetoSet(psoList);
+        if (nonDomPSOList.size() == 0) {
+            for (Particle p: psoList) {
+                System.out.print(p.getSolution().getFitness() +" ");
+            }
+            System.out.println(System.lineSeparator());
+        }
+        if (nonDomPSOList.size() == 0) {
+            for (Particle particle: psoList) {
+                if (particle.getSolution().getFitness() >= THRESHOLD) {
+                    nonDomPSOList.add(new Particle(particle));
+                    break;
+                }
+            }
+        }
         // naive method to identify whether pareto set changed
         //if (this.nonDomPSOList.size() == prevParetoSize) {
         Solution curBest = pickALeader(false).getSolution();
@@ -355,6 +375,7 @@ public class PSO {
         List<Particle> listToAnalyze = new ArrayList<>();
         listToAnalyze.add(pickALeader(false));
         printParticlesPerformace(listToAnalyze);
+        System.out.println("A:"+iterationsBest.get(curIterationNum).getAri());
         //printParticlesPerformace(nonDomPSOList, false);
 
         /*if (this.curIterationNum % 20 == 0) {
@@ -366,9 +387,6 @@ public class PSO {
 
     private List<Particle> determineParetoSet(List<Particle> particleList) {
         double[][] objList = objectivesFromParticles(particleList);
-        /*if (this.normObjectives) {
-            Utils.normalize(objList, objBestCoordinates, objWorstCoordinates);
-        }*/
 
         double[] fitness = Utils.determineParetoSet(objList);
         List<Particle> result = new ArrayList<>();
@@ -382,10 +400,13 @@ public class PSO {
         return result;
     }
 
-    private static double[][] objectivesFromParticles(List<Particle> particles) {
+    private double[][] objectivesFromParticles(List<Particle> particles) {
         double[][] objsResult = new double[particles.size()][];
         for (int i = 0; i < particles.size(); ++i) {
             objsResult[i] = particles.get(i).getSolution().getObjectives().clone();
+        }
+        if (this.normObjectives) {
+            utils.Utils.normalize(objsResult, objBestCoordinates, objWorstCoordinates);
         }
         return objsResult;
     }
@@ -414,7 +435,6 @@ public class PSO {
             assert (objs.length > 0);
             int leaderIdx = -1;
             if (this.normObjectives) {
-                Utils.normalize(objs, objBestCoordinates, objWorstCoordinates);
                 leaderIdx = Utils.pickClosestToUtopia(objs, new double[]{0.0, 0.0});
             } else {
                 leaderIdx = Utils.pickClosestToUtopia(objs, objBestCoordinates);

@@ -29,8 +29,8 @@ public class KMeansDriver extends Analyzer {
             int[] labelsPred;
             Experiment bestE = new Experiment();
             bestE.setAri(Double.NEGATIVE_INFINITY);
-            int minK = (int)(0.02 * dataAttrs.length);
-            int maxK = (int)(0.1 * dataAttrs.length); //(int) Math.sqrt(this.dataAttrs.length);
+            int minK = 2; //(int)(0.02 * dataAttrs.length);
+            int maxK = (int) Math.sqrt(this.dataAttrs.length); //(int)(0.1 * dataAttrs.length);
             for (int k = minK; k <= maxK; ++k) {
                 if (this.isUseWekaVersion) {
                     SimpleKMeans kMeans = new SimpleKMeans();
@@ -86,7 +86,7 @@ public class KMeansDriver extends Analyzer {
     }
 
     public static void main(String[] args) throws Exception {
-        Dataset[] datasets = {Dataset.GLASS};
+        Dataset[] datasets = {Dataset.DERMATOLOGY};
         int runs = 10;
         boolean usePlusPlus = true;
         boolean useWeka = false;
@@ -113,7 +113,7 @@ public class KMeansDriver extends Analyzer {
             kMeansDriver.setDataset(dataset);
             kMeansDriver.setRuns(runs);
             kMeansDriver.run();
-            kMeansDriver.analyze();
+            kMeansDriver.analyze(true);
             System.out.println("real number of clusters: " + dataset.getK());
         /*System.out.println("my k-means: ");
         PSODriver.runMyKmeans(clustering.KMeans.Initialization.RANDOM, 10, filePath, removeFirst, normalize);

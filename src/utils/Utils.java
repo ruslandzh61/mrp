@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+
 /**
  * Created by rusland on 28.10.18.
  */
@@ -142,11 +143,12 @@ public class Utils {
         return result;
     }
 
-    public static void whenWriteStringUsingBufferedWritter_thenCorrect(String str, String fileName)
-            throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
-        writer.write(str);
 
+    public static void whenWriteStringUsingBufferedWritter_thenCorrect(String str, String fileName, boolean append)
+            throws IOException {
+        FileWriter fstream = new FileWriter(fileName, append);
+        BufferedWriter writer = new BufferedWriter(fstream);
+        writer.write(str);
         writer.close();
     }
 
@@ -159,7 +161,7 @@ public class Utils {
             res = res.concat(s.substring(1,s.length()-1)+System.getProperty("line.separator"));
         }
 
-        whenWriteStringUsingBufferedWritter_thenCorrect(res, output);
+        whenWriteStringUsingBufferedWritter_thenCorrect(res, output, false);
     }
 
     public static void replaceInFile(String p, String repl, String with) throws IOException {
@@ -189,7 +191,7 @@ public class Utils {
             res = res.concat(s.substring(1,s.length()-1)+System.getProperty("line.separator"));
         }
 
-        whenWriteStringUsingBufferedWritter_thenCorrect(res, "data/output.csv");
+        whenWriteStringUsingBufferedWritter_thenCorrect(res, "data/output.csv", false);
     }
 
     public static int[] extractLabels(List<String[]> dataStr, int col) {

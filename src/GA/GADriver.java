@@ -44,11 +44,10 @@ public class GADriver extends Analyzer {
                 cl.setEvaluations(evaluations);
                 cl.setMyData(this.dataAttrs);
                 cl.setTrueLabels(labelsTrue);
-                cl.setFitnessNormalize(true);
-                cl.setNormalizeObjectives(true);
+                cl.setNormalizeObjectives(false);
                 cl.setHillClimb(true);
                 cl.setMaximin(true);
-                cl.setFitnessType(MyGenClustPlusPlus.FITNESS.DBINDEX);
+                cl.setFitnessType(MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM);
                 cl.setDistance(2.0);
                 cl.buildClusterer(this.wekaData);
                 labelsPred = Utils.adjustLabels(cl.getLabels());
@@ -72,6 +71,10 @@ public class GADriver extends Analyzer {
             //output.append(temp.substring(1, temp.length() - 1)).append(System.getProperty("line.separator"));
 
             e = this.measure(labelsPred);
+            System.out.println("A:" + e.getAri());
+            System.out.println("D:" + e.getDb());
+            System.out.println("S:" + e.getSilh());
+            System.out.println("K:" + e.getK());
             reporter.set(run-1, e);
         }
 
@@ -86,9 +89,9 @@ public class GADriver extends Analyzer {
     }
 
     public static void main(String[] args) throws Exception {
-        Dataset[] datasets = {Dataset.GLASS};
+        Dataset[] datasets = {Dataset.DERMATOLOGY};
         boolean mGenClust = true;
-        int runs = 15;
+        int runs = 10;
         if (mGenClust) {
             System.out.println("MODIFIED GENCLUST++");
         } else {
@@ -101,7 +104,7 @@ public class GADriver extends Analyzer {
             gaDriver.setDataset(dataset);
             gaDriver.setRuns(runs);
             gaDriver.run();
-            gaDriver.analyze();
+            gaDriver.analyze(true);
         }
     }
 }
