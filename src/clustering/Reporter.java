@@ -73,4 +73,8 @@ public class Reporter {
         assert (this.computed == true);
         return stdDev;
     }
+
+    public Experiment[] getExperiments() {
+        return experiments;
+    }
 }

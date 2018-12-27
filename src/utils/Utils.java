@@ -610,10 +610,9 @@ public class Utils {
 
     public static void main(String[] args) throws Exception {
         //replaceInFile("data/output.csv", " ","");
-        //replaceInFile("data/s1.csv", " ", "");
+        //replaceInFile("data/o1.csv", " ", "");
         //Utils.nominalFormToNumber("data/compound.csv", ',', -1);
-        //Utils.nominalForm("data/s1.csv", "data/o1.csv");
-
+        //Utils.nominalForm("data/a1.csv", "data/o1.csv");
 
         //test centroids
         /*double[][] data = {{1,1},{5,5},{10,10},{11,11}};

@@ -46,7 +46,7 @@ public class PSODriver extends Analyzer {
         Evaluator evaluator = new Evaluator();
         Problem problem = new Problem(this.dataAttrs, evaluator);
         configuration.maxK = (int) (Math.sqrt(problem.getData().length));
-        boolean normObjectives = true;
+        boolean normObjectives = false;
         Random rnd = new Random(1);
 
         for (int run = 1; run <= reporter.size(); ++run) {

@@ -33,7 +33,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
     private int m_maxKMeansIterationsQuick = 15;
     private int m_maxKMeansIterationsFinal = 50;
     private double m_duplicateThreshold = 0.0D;
-    private int m_startChromosomeSelectionGeneration = 11;
+    private int m_startChromosomeSelectionGeneration = 50;
     private KMeans m_bestChromosome;
     private double m_bestFitness;
     private int m_bestFitnessIndex;
@@ -363,7 +363,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
                         nonDomSetIndices.add(i);
                     }
                 }
-                System.out.println(Arrays.toString(fitness));
+                //System.out.println(Arrays.toString(fitness));
 
                 // for printing non-dominated solutions
                 KMeans[] nonDomMKMeans = new KMeans[nonDomSetIndices.size()];
@@ -372,7 +372,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
                     nonDomMKMeans[i] = new KMeans(population[index]);
                 }
 
-                System.out.println("size of pops: " + population.length + " : " + nonDomMKMeans.length);
+                //System.out.println("size of pops: " + population.length + " : " + nonDomMKMeans.length);
                 // if there is no non-dominated clustering solution
                 if (nonDomSetIndices.size() == 0) {
                     /*for (int i = 0; i < fitness.length; ++i) {

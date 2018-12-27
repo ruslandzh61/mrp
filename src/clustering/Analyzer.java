@@ -1,11 +1,13 @@
 package clustering;
 
 import smile.validation.AdjustedRandIndex;
+import utils.ExcelRW;
 import utils.Silh;
 import utils.Utils;
 import weka.core.Instances;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -105,6 +107,19 @@ public abstract class Analyzer {
             System.out.println("K: " + Utils.doublePrecision(mean.getK(), 4) +
                     " +- " + Utils.doublePrecision(stdDev.getK(), 4));
         }
+    }
+
+    protected void saveResults(String resultFilePath, String solutionsFilePath) throws Exception {
+        StringBuilder solutionsLog = new StringBuilder();
+
+        solutionsLog.append(dataset.name() + System.lineSeparator() +
+                Arrays.toString(labelsTrue) + System.lineSeparator());
+        for (int j = 0; j < reporter.size(); ++j) {
+            solutionsLog.append(Arrays.toString(reporter.get(j).getSolution()) + System.lineSeparator());
+        }
+
+        Utils.whenWriteStringUsingBufferedWritter_thenCorrect(solutionsLog.toString(), solutionsFilePath, true);
+        ExcelRW.write(resultFilePath, reporter.getExperiments(), this.dataset);
     }
 
     public Experiment getMean() {

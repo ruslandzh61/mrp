@@ -86,8 +86,11 @@ public class KMeansDriver extends Analyzer {
     }
 
     public static void main(String[] args) throws Exception {
-        Dataset[] datasets = {Dataset.DERMATOLOGY};
-        int runs = 10;
+        String resultFilePath = "results/my-kmeans++.xls";
+        String solutionsFilePath = "results/my-kmeans++.txt";
+
+        Dataset[] datasets = {Dataset.A1, Dataset.A2, Dataset.A3};//Dataset.values();
+        int runs = 5;
         boolean usePlusPlus = true;
         boolean useWeka = false;
 
@@ -114,6 +117,7 @@ public class KMeansDriver extends Analyzer {
             kMeansDriver.setRuns(runs);
             kMeansDriver.run();
             kMeansDriver.analyze(true);
+            kMeansDriver.saveResults(resultFilePath, solutionsFilePath);
             System.out.println("real number of clusters: " + dataset.getK());
         /*System.out.println("my k-means: ");
         PSODriver.runMyKmeans(clustering.KMeans.Initialization.RANDOM, 10, filePath, removeFirst, normalize);
