@@ -2,6 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="31ac2908-1b01-48a7-8033-ec2e78d94e2f" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/results/tuning/tunepsoCONF1.xls" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/results/tuning/tunepsoCONF2.xls" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/data/s2r.csv" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/data/s2r2.csv" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/data/s2r3.csv" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/results/tuning/tunepsoCONF1.txt" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/results/tuning/tunepsoCONF2.txt" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/GA/GADriver$GaConfiguration.class" afterPath="$PROJECT_DIR$/out/production/Project/GA/GADriver$GaConfiguration.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/GA/GADriver.class" afterPath="$PROJECT_DIR$/out/production/Project/GA/GADriver.class" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/PSO/PSO$1.class" afterPath="$PROJECT_DIR$/out/production/Project/PSO/PSO$1.class" />
@@ -1012,12 +1019,12 @@
       <workItem from="1545669539268" duration="7241000" />
       <workItem from="1545700652855" duration="92816000" />
       <workItem from="1545963475446" duration="13796000" />
-      <workItem from="1545980530466" duration="17288000" />
+      <workItem from="1545980530466" duration="17311000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="884953000" />
+    <option name="totallyTimeSpent" value="884976000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
