@@ -74,6 +74,11 @@ public class KMeansDriver extends Analyzer {
                 System.out.println(Utils.distinctNumberOfItems(labelsPred) == kMeans.numberOfClusters());*/
             }
             reporter.set(run-1, bestE);
+
+            System.out.println("A:" + Utils.doublePrecision(bestE.getAri(), 4));
+            System.out.println("D:" + Utils.doublePrecision(bestE.getDb(), 4));
+            System.out.println("S:" + Utils.doublePrecision(bestE.getSilh(), 4));
+            System.out.println("K:" + bestE.getK());
         }
     }
 
@@ -86,10 +91,10 @@ public class KMeansDriver extends Analyzer {
     }
 
     public static void main(String[] args) throws Exception {
-        String resultFilePath = "results/my-kmeans++.xls";
+        int counter = 1; // write counter before writing results to .txt;
         String solutionsFilePath = "results/my-kmeans++.txt";
 
-        Dataset[] datasets = {Dataset.A1, Dataset.A2, Dataset.A3};//Dataset.values();
+        Dataset[] datasets = {Dataset.S2};//Dataset.values();
         int runs = 5;
         boolean usePlusPlus = true;
         boolean useWeka = false;
@@ -117,7 +122,7 @@ public class KMeansDriver extends Analyzer {
             kMeansDriver.setRuns(runs);
             kMeansDriver.run();
             kMeansDriver.analyze(true);
-            kMeansDriver.saveResults(resultFilePath, solutionsFilePath);
+            kMeansDriver.saveResults(solutionsFilePath);
             System.out.println("real number of clusters: " + dataset.getK());
         /*System.out.println("my k-means: ");
         PSODriver.runMyKmeans(clustering.KMeans.Initialization.RANDOM, 10, filePath, removeFirst, normalize);

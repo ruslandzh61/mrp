@@ -3,6 +3,8 @@ package PSO;
 import clustering.*;
 import utils.NCConstruct;
 import utils.Utils;
+
+import javax.security.auth.login.Configuration;
 import java.util.*;
 
 /**
@@ -41,18 +43,23 @@ public class PSODriver extends Analyzer {
         processData();
 
         // step 2 - pick objectives
+        long startTime = System.currentTimeMillis();
         NCConstruct ncConstruct = new NCConstruct(dataAttrs);
+        long endTime = System.currentTimeMillis();
+        System.out.println("TIME:" + ((endTime - startTime) / 1000.0)  / 60);
+
         Evaluator.Evaluation[] evaluations = {Evaluator.Evaluation.CONNECTIVITY, Evaluator.Evaluation.COHESION};
         Evaluator evaluator = new Evaluator();
         Problem problem = new Problem(this.dataAttrs, evaluator);
         configuration.maxK = (int) (Math.sqrt(problem.getData().length));
-        boolean normObjectives = false;
         Random rnd = new Random(1);
 
         for (int run = 1; run <= reporter.size(); ++run) {
             System.out.println("RUN: " + run);
+            startTime = System.currentTimeMillis();
+
             // step 3 - run PSO algorithm
-            PSO pso = new PSO(problem, ncConstruct, evaluations, configuration, labelsTrue, normObjectives);
+            PSO pso = new PSO(problem, ncConstruct, evaluations, configuration, labelsTrue);
             pso.setSeed(rnd.nextInt());
             // constructed clusters
             int[] labelsPred = Utils.adjustLabels(pso.execute());
@@ -60,6 +67,8 @@ public class PSODriver extends Analyzer {
 
             // step 4 - measure comparing to true labels
             Experiment e = measure(labelsPred);
+            endTime = System.currentTimeMillis();
+            System.out.println("TIME:" + ((endTime - startTime) / 1000.0)  / 60);
             System.out.println("A:" + e.getAri());
             System.out.println("D:" + e.getDb());
             System.out.println("S:" + e.getSilh());
@@ -104,14 +113,22 @@ public class PSODriver extends Analyzer {
 
     public static void main(String[] args) throws Exception {
         int runs = 10;
-        Dataset dataset = Dataset.DERMATOLOGY;
-        PSOConfiguration configuration = new PSOConfiguration();
+        String solutionsFilePath;
+        Dataset[] datasets = {Dataset.S2};
 
-        PSODriver psoDriver = new PSODriver(configuration);
-        psoDriver.setDataset(dataset);
-        psoDriver.setRuns(runs);
-        psoDriver.run();
-        System.out.println("AVERAGE OVER RUNS");
-        psoDriver.analyze(true);
+        PSOConfiguration conf = PSOConfiguration.CONF1;
+        System.out.println("CONFIGURATION: " + conf.name());
+        solutionsFilePath = "results/pso" + conf.name() + ".txt";
+        for (Dataset dataset : datasets) {
+            System.out.println("DATASET: " + dataset.name());
+            PSODriver psoDriver = new PSODriver(conf);
+            psoDriver.setDataset(dataset);
+            psoDriver.setRuns(runs);
+            psoDriver.setConfiguration(conf);
+            psoDriver.run();
+            System.out.println("AVERAGE OVER RUNS");
+            psoDriver.analyze(true);
+            psoDriver.saveResults(solutionsFilePath);
+        }
     }
 }

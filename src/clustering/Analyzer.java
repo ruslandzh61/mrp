@@ -109,7 +109,7 @@ public abstract class Analyzer {
         }
     }
 
-    protected void saveResults(String resultFilePath, String solutionsFilePath) throws Exception {
+    protected void saveResults(String solutionsFilePath) throws Exception {
         StringBuilder solutionsLog = new StringBuilder();
 
         solutionsLog.append(dataset.name() + System.lineSeparator() +
@@ -119,7 +119,7 @@ public abstract class Analyzer {
         }
 
         Utils.whenWriteStringUsingBufferedWritter_thenCorrect(solutionsLog.toString(), solutionsFilePath, true);
-        ExcelRW.write(resultFilePath, reporter.getExperiments(), this.dataset);
+        //ExcelRW.write(resultFilePath, reporter.getExperiments(), this.dataset);
     }
 
     public Experiment getMean() {
