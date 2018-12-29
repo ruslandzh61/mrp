@@ -6,6 +6,7 @@ import clustering.Experiment;
 import clustering.Reporter;
 import smile.validation.AdjustedRandIndex;
 
+import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,22 +17,23 @@ import java.util.List;
  * Created by rusland on 2018-12-29.
  */
 public class ResultsGenerator {
-    List<Dataset> datasets;
+    Dataset[] datasets;
     List<double[][]> dataAttrsList;
-    List<int[]> labelsTrueList;
-    AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
-    Silh silhoutte = new Silh();
     String[] configurations;
 
-    public ResultsGenerator(List<Dataset> aDatasets, String[] aConfigurations) throws IOException {
+    AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
+    Silh silhoutte = new Silh();
+
+    public ResultsGenerator(Dataset[] aDatasets, String[] aConfigurations) throws IOException {
         datasets = aDatasets;
+        this.dataAttrsList = new ArrayList<>(datasets.length);
         this.configurations = aConfigurations;
         processDatasetData();
     }
 
     private void processDatasetData() throws IOException {
-        for (int i = 0; i < datasets.size(); ++i) {
-            Dataset dataset = datasets.get(i);
+        for (int i = 0; i < datasets.length; ++i) {
+            Dataset dataset = datasets[i];
             char sep = ',';
             List<String[]> dataStr = Utils.readFile(dataset.getPath(), sep);
             if (dataset.getHeader() >= 0 && dataset.getHeader() < dataStr.size()) {
@@ -65,7 +67,7 @@ public class ResultsGenerator {
       */
     protected Experiment measure(int i, int[] labelsPred) {
         HashMap<Integer, double[]> centroids = Utils.centroids(this.dataAttrsList.get(i), labelsPred);
-        double aRIScore = this.adjustedRandIndex.measure(this.datasets.get(i).getLabels(), labelsPred);
+        double aRIScore = this.adjustedRandIndex.measure(this.datasets[i].getLabels(), labelsPred);
         double dbScore = Utils.dbIndexScore(centroids, labelsPred, this.dataAttrsList.get(i));
         double silhScore = silhoutte.compute(centroids, labelsPred, this.dataAttrsList.get(i));
         int numClusters = Utils.distinctNumberOfItems(labelsPred);
@@ -85,37 +87,56 @@ public class ResultsGenerator {
     // String[] confs = {GADriver.GaConfiguration.mgaC1.name()};//GADriver.GaConfiguration.values();
     public void generate(String folderPath, int runs) throws Exception { // folder "results/mGA/tuning"
         Experiment[] experiments;
+        Experiment[][] confMeans = new Experiment[datasets.length][configurations.length];
+        Experiment[][] confStdDevs = new Experiment[datasets.length][configurations.length];
+        int confIdx = 0;
+        String confMeansPath = folderPath + "mgaTuningMeans" + ".xls";
+        String confStdDevPath = folderPath + "mgaTuningStdDev" + ".xls";
         for (String conf: configurations) {
-            experiments = new Experiment[runs];
+            System.out.println(conf);
+            experiments = new Experiment[runs+2];
             String filePath = folderPath + conf + ".txt";
             HashMap<String, int[][]> datasetTosolutions = Utils.readSolutionFromFile(filePath, runs, true);
-            for (String dataset: datasetTosolutions.keySet()) {
+
+            int datasetIdx = 0;
+            for (Dataset dataset: datasets) {
                 System.out.println(dataset);
-                int[][] expSols = datasetTosolutions.get(dataset);
+                int[][] expSols = datasetTosolutions.get(dataset.name());
+                Reporter reporter = new Reporter(expSols.length);
                 int expSolIdx = 0;
                 for (int[] expSol: expSols) {
-                    System.out.println(Arrays.toString(expSol));
-                    int datasetIdx = indexOfDataset(dataset);
+                    //System.out.println(Arrays.toString(expSol));
                     experiments[expSolIdx] = measure(datasetIdx, expSol);
+                    reporter.set(expSolIdx, experiments[expSolIdx]);
+                    ++expSolIdx;
                 }
                 String excelFilePath = folderPath + conf + ".xls";
-                int datasetIdx = indexOfDataset(dataset);
-                ExcelRW.write(excelFilePath, experiments, datasets.get(datasetIdx));
+                reporter.compute();
+                experiments[expSolIdx++] = reporter.getMean();
+                experiments[expSolIdx] = reporter.getStdDev();
+                ExcelRW.write(excelFilePath, experiments, datasets[datasetIdx]);
+
+                confMeans[datasetIdx][confIdx] = reporter.getMean();
+                confMeans[datasetIdx][confIdx].setConfiguration(conf);
+                confStdDevs[datasetIdx][confIdx] = reporter.getStdDev();
+                confStdDevs[datasetIdx][confIdx].setConfiguration(conf);
+
+                ++datasetIdx;
             }
+            ++confIdx;
+        }
+
+        int datasetIdx = 0;
+        for (Dataset dataset: datasets) {
+            ExcelRW.write(confMeansPath, confMeans[datasetIdx], dataset);
+            ExcelRW.write(confStdDevPath, confStdDevs[datasetIdx], dataset);
+            ++datasetIdx;
         }
     }
 
-    private int indexOfDataset(String d) {
-        for (int i = 0; i < this.datasets.size(); ++i) {
-            if (d.equals(this.datasets.get(i).name())) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    public static void main(String[] args) {
-        //datasets.add(Dataset.GLASS)
-        //ResultsGenerator resultsGenerator = new ResultsGenerator(datasets, GADriver.confValuesStr())
+    public static void main(String[] args) throws Exception {
+        Dataset[] datasets = {Dataset.GLASS, Dataset.FLAME, Dataset.DERMATOLOGY, Dataset.COMPOUND, Dataset.WDBC, Dataset.PATHBASED};
+        ResultsGenerator resultsGenerator = new ResultsGenerator(datasets, GADriver.confValuesStr());
+        resultsGenerator.generate("results/mGA/tuning/", 10);
     }
 }

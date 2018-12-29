@@ -670,7 +670,7 @@ public class Utils {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String datasetStr;
             while ((datasetStr = br.readLine()) != null) {
-                if (runs < 0) {
+                if (runs <= 0) {
                     runs = Integer.parseInt(datasetStr.split(" ")[1]);
                 }
                 if (includesTrueLabels) {
@@ -699,7 +699,21 @@ public class Utils {
         }
     }
 
+    private void printLabels(Dataset dataset) throws IOException {
+        List<String[]> dataStr = Utils.readFile(dataset.getPath(), ',');
+        if (dataset.getHeader() >= 0 && dataset.getHeader() < dataStr.size()) {
+            dataStr.remove(dataset.getHeader());
+        }
+
+        // extract true labels
+        int D = dataStr.get(0).length;
+        int labelCol = D - 1;
+        int[] labelsTrue = Utils.extractLabels(dataStr, labelCol);
+        System.out.println(Arrays.toString(labelsTrue));
+    }
+
     public static void main(String[] args) throws Exception {
+
         /*HashMap<String, int[][]> datasetTosolutions = readSolutionFromFile("results/mGA/tuning/mgaC1.txt", 10);
         for (String dataset: datasetTosolutions.keySet()) {
             System.out.println(dataset);

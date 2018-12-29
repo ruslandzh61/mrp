@@ -7,6 +7,16 @@ public class Experiment {
     private int[] solution;
     private double ari, db, silh, k;
 
+    public String getConfiguration() {
+        return configuration;
+    }
+
+    public void setConfiguration(String configuration) {
+        this.configuration = configuration;
+    }
+
+    private String configuration;
+
     public Experiment() {}
 
     public Experiment(int[] aSolution, double aAri, double aDb, double aSilh, double aK) {

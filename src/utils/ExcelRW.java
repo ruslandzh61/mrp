@@ -24,11 +24,19 @@ public class ExcelRW {
 
     public static void write(String path, Experiment[] experiments, Dataset dataset) throws Exception {
         File file = new File(path);
+        FileOutputStream fileOut;
         Workbook workbook;
         if (file.exists()) {
-            workbook = HSSFWorkbookFactory.create(file);
+            try {
+                workbook = HSSFWorkbookFactory.create(file);
+            } catch (Exception e) {
+                file = new File(path.replace(".xls", "New.xls"));
+                workbook = HSSFWorkbookFactory.create(file);
+            }
+            fileOut = new FileOutputStream(file);
         } else {
             workbook = new HSSFWorkbook();
+            fileOut = new FileOutputStream(path);
         }
         // if sheet with this name exists
         int sheetIdx = workbook.getSheetIndex(dataset.name());
@@ -36,6 +44,9 @@ public class ExcelRW {
             workbook.removeSheetAt(sheetIdx);
         }
         Sheet sheet = workbook.createSheet(dataset.name());
+        if (experiments[0].getConfiguration() != null) {
+            columns = new String[]{"config", "ari", "db", "silh", "k"};
+        }
         Row headerRow = sheet.createRow(0);
         for (int i = 0; i < columns.length; ++i) {
             Cell cell = headerRow.createCell(i);
@@ -44,10 +55,18 @@ public class ExcelRW {
         int rowIdx = 1;
         for (Experiment e: experiments) {
             Row row = sheet.createRow(rowIdx++);
-            row.createCell(0).setCellValue(e.getAri());
-            row.createCell(1).setCellValue(e.getDb());
-            row.createCell(2).setCellValue(e.getSilh());
-            row.createCell(3).setCellValue(e.getK());
+            if (e.getConfiguration() == null) {
+                row.createCell(0).setCellValue(e.getAri());
+                row.createCell(1).setCellValue(e.getDb());
+                row.createCell(2).setCellValue(e.getSilh());
+                row.createCell(3).setCellValue(e.getK());
+            } else {
+                row.createCell(0).setCellValue(e.getConfiguration());
+                row.createCell(1).setCellValue(e.getAri());
+                row.createCell(2).setCellValue(e.getDb());
+                row.createCell(3).setCellValue(e.getSilh());
+                row.createCell(4).setCellValue(e.getK());
+            }
         }
 
         // Resize all columns to fit the content size
@@ -56,13 +75,12 @@ public class ExcelRW {
         }
 
         // Write the output to a file
-        FileOutputStream fileOut = new FileOutputStream(path);
         workbook.write(fileOut);
         fileOut.close();
     }
 
     public static void main(String[] args) throws Exception {
-        /*Experiment[] experiments1 = {
+        Experiment[] experiments1 = {
                 new Experiment(new int[]{1,1,2,4}, 3.2, 2.3, 0.5, 6),
                 new Experiment(new int[]{2,1,4,2}, 3.4, 3, 0.6, 4)
         };
@@ -91,6 +109,6 @@ public class ExcelRW {
         Utils.whenWriteStringUsingBufferedWritter_thenCorrect(solutionsLog.toString(), solutionsFilePath, true);
         for (int i = 0; i < datasets.length; ++i) {
             ExcelRW.write(resultFilePath, datasetExperiments[i], datasets[i]);
-        }*/
+        }
     }
 }
