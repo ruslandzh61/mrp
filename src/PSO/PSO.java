@@ -16,7 +16,6 @@ import java.util.*;
 public class PSO {
     private static final double THRESHOLD = -0.0001;
     private static final double MIN_VEL = -1.0, MAX_VEL = 1.0;
-    private static final int MIN_SWARM_SIZE = 20;
     private static final int SWARM_SIZE_MULTIPLIER = 2;
     PSOConfiguration conf;
     private int swarmSize;
@@ -42,28 +41,24 @@ public class PSO {
     private static int seed_default = 10;
     private int[] labelsTrue;
     private int minSizeOfCluster;
-    private boolean normObjectives;
 
     private AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
     List<Experiment> iterationsBest;
 
     public PSO(Problem aProblem, NCConstruct aNCconstruct, Evaluator.Evaluation[] aEvaluation,
-               PSOConfiguration configuration, int[] aLabelsTrue, boolean aNormObjectives) {
+               PSOConfiguration configuration, int[] aLabelsTrue) {
         this.problem = aProblem;
         this.ncc = aNCconstruct;
         this.evaluation = aEvaluation;
         this.conf = configuration;
         this.labelsTrue = aLabelsTrue;
-        this.normObjectives = aNormObjectives;
         minSizeOfCluster = 2;//(int) (Math.sqrt(problem.getN())/2);
         setSeed(seed_default);
 
         this.velocityCalculator = new VelocityCalculator(conf.c1, conf.c2);
         velocityCalculator.setSeed(generator.nextInt());
         this.swarmSize = SWARM_SIZE_MULTIPLIER * (conf.maxK - 2 + 1);
-        if (swarmSize < MIN_SWARM_SIZE) {
-            swarmSize = MIN_SWARM_SIZE;
-        }
+
         this.psoList = new ArrayList<>();
 
         int numOfObj = evaluation.length;
@@ -104,7 +99,7 @@ public class PSO {
 
         while(curIterationNum < conf.maxIteration && numOfIterWithoutImprov < conf.maxIterWithoutImprovement) {
             //if (this.curIterationNum % 20 == 0) {
-            System.out.println("ITERATION " + curIterationNum + ": ");
+            //System.out.println("ITERATION " + curIterationNum + ": ");
             //}
             update();
             /*if (this.curIterationNum % 20 == 0) {
@@ -176,11 +171,35 @@ public class PSO {
 
     public void initializeSwarm() throws Exception {
         Particle p;
-        for(int i = 2; i <= this.conf.maxK; i++) {
-            for (int j = 0; j < SWARM_SIZE_MULTIPLIER; ++j) {
+        if (conf.equalClusterNumDistribution) {
+            for(int i = 2; i <= this.conf.maxK; i++) {
+                for (int j = 0; j < SWARM_SIZE_MULTIPLIER; ++j) {
+                    // step 1 - randomize particle location using k-means
+                    int clusterNum = i; //generator.nextInt(conf.maxK - 2 + 1) + 2;
+                    // k-means centroids are initialized and point are assigned to a particular centroid
+                    Solution solution = new Solution(kMeansAssignments(clusterNum), clusterNum);
+
+                    // step 2 -randomize velocity in the defined range
+                    double[] vel = new double[problem.getN()];
+                    for (int dimIdx = 0; dimIdx < problem.getN(); ++dimIdx) {
+                        vel[dimIdx] = MIN_VEL + generator.nextDouble() * (
+                                MAX_VEL - MIN_VEL);
+                    }
+                    p = new Particle(solution, vel);
+                    p.setSeed(generator.nextInt());
+                    psoList.add(p);
+                }
+            }
+        } else {
+            for (int i = 0; i < this.swarmSize; i++) {
                 // step 1 - randomize particle location using k-means
-                int clusterNum = i; //generator.nextInt(conf.maxK - 2 + 1) + 2;
-                        // k-means centroids are initialized and point are assigned to a particular centroid
+                int clusterNum;
+                if (i < 9) {
+                    clusterNum = i + 2;
+                } else {
+                    clusterNum = generator.nextInt(conf.maxK - 2 + 1) + 2;
+                }
+                // k-means centroids are initialized and point are assigned to a particular centroid
                 Solution solution = new Solution(kMeansAssignments(clusterNum), clusterNum);
 
                 // step 2 -randomize velocity in the defined range
@@ -203,13 +222,13 @@ public class PSO {
         //updateUtopiaPoint(psoList);
 
 
-        System.out.println("INITIAL POPULATION:");
+        /*System.out.println("INITIAL POPULATION:");
         for(int i = 0; i < swarmSize; i++) {
             Solution sol = psoList.get(i).getSolution();
             System.out.println(Utils.doublePrecision(adjustedRandIndex.measure(sol.getSolution(), labelsTrue), 6));
             System.out.println(Arrays.toString(sol.getObjectives()));
         }
-        System.out.println("--------------------");
+        System.out.println("--------------------");*/
     }
 
     private int[] kMeansAssignments(int k) throws Exception {
@@ -347,12 +366,12 @@ public class PSO {
 
         /* recompute non-dom set to compare with previous one */
         this.nonDomPSOList = determineParetoSet(psoList);
-        if (nonDomPSOList.size() == 0) {
+        /*if (nonDomPSOList.size() == 0) {
             for (Particle p: psoList) {
                 System.out.print(p.getSolution().getFitness() +" ");
             }
             System.out.println(System.lineSeparator());
-        }
+        }*/
         if (nonDomPSOList.size() == 0) {
             for (Particle particle: psoList) {
                 if (particle.getSolution().getFitness() >= THRESHOLD) {
@@ -375,7 +394,7 @@ public class PSO {
         List<Particle> listToAnalyze = new ArrayList<>();
         listToAnalyze.add(pickALeader(false));
         printParticlesPerformace(listToAnalyze);
-        System.out.println("A:"+iterationsBest.get(curIterationNum).getAri());
+        //System.out.println("A:"+iterationsBest.get(curIterationNum).getAri());
         //printParticlesPerformace(nonDomPSOList, false);
 
         /*if (this.curIterationNum % 20 == 0) {
@@ -405,7 +424,7 @@ public class PSO {
         for (int i = 0; i < particles.size(); ++i) {
             objsResult[i] = particles.get(i).getSolution().getObjectives().clone();
         }
-        if (this.normObjectives) {
+        if (this.conf.normObjs) {
             utils.Utils.normalize(objsResult, objBestCoordinates, objWorstCoordinates);
         }
         return objsResult;
@@ -434,7 +453,7 @@ public class PSO {
             double[][] objs = objectivesFromParticles(nonDomPSOList);
             assert (objs.length > 0);
             int leaderIdx = -1;
-            if (this.normObjectives) {
+            if (this.conf.normObjs) {
                 leaderIdx = Utils.pickClosestToUtopia(objs, new double[]{0.0, 0.0});
             } else {
                 leaderIdx = Utils.pickClosestToUtopia(objs, objBestCoordinates);

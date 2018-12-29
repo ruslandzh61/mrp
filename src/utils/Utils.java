@@ -608,9 +608,48 @@ public class Utils {
                 .doubleValue();
     }
 
+    public static void reduceDataset(Dataset dataset, int portion, boolean randomly) throws IOException {
+        // given that clusters are in order and cluster ids are in order
+        List<String[]> fileArr = readFile(dataset.getPath(), ',');
+        int[] labels = extractLabels(fileArr, fileArr.get(0).length-1);
+        List<Integer> labelsList = new ArrayList<>(labels.length);
+        for (int i = 0; i < labels.length; ++i) {
+            labelsList.add(labels[i]);
+        }
+        List<String[]> newData = new ArrayList<>(labels.length/2+1);
+        Random rnd = new Random();
+        for (int i = 1; i <= dataset.getK(); ++i) {
+            HashSet<Integer> randomIdx = new HashSet<>();
+            int first = labelsList.indexOf(i);
+            int last = labelsList.lastIndexOf(i);
+            if (randomly) {
+                while (randomIdx.size() <= (last - first) / portion) {
+                    randomIdx.add(rnd.nextInt(last - first + 1) + first);
+                }
+                for (int idx: randomIdx) {
+                    newData.add(fileArr.get(idx));
+                }
+            } else {
+                int mid = (last - first) / portion + first + 1;
+                for (int j = first; j <= mid; ++j) {
+                    newData.add(fileArr.get(j));
+                }
+            }
+        }
+        String res = "";
+        for (String[] record: newData) {
+            String s = Arrays.toString(record);
+            res = res.concat(s.substring(1,s.length()-1)+System.getProperty("line.separator"));
+        }
+
+        whenWriteStringUsingBufferedWritter_thenCorrect(res, dataset.getPath().replace(".", "r3."), false);
+    }
+
     public static void main(String[] args) throws Exception {
+        //Dataset d = Dataset.S2;
+        //reduceDataset(d, 2, true);
         //replaceInFile("data/output.csv", " ","");
-        //replaceInFile("data/o1.csv", " ", "");
+        //replaceInFile("data/s2r3.csv", " ", "");
         //Utils.nominalFormToNumber("data/compound.csv", ',', -1);
         //Utils.nominalForm("data/a1.csv", "data/o1.csv");
 

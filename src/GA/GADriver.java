@@ -32,7 +32,7 @@ public class GADriver extends Analyzer {
         mgaC11(30,60, false, true, MyGenClustPlusPlus.FITNESS.DBINDEX),
         mgaC12(50,60, false, true, MyGenClustPlusPlus.FITNESS.DBINDEX),
         mgaC13(11,20, true, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
-        mgaC14(11,60, true, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
+        mgaC14(11,60, false, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
         mgaC15(30,60, true, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
         mgaC16(50,60, true, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
         mgaC17(11,20, false, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
@@ -96,6 +96,7 @@ public class GADriver extends Analyzer {
 
         for (int run = 1; run <= reporter.size(); ++run) {
             System.out.println("RUN: " + run);
+            long startTime = System.currentTimeMillis();
             Experiment e;
             int[] labelsPred;
             if (myGenClust) {
@@ -135,10 +136,12 @@ public class GADriver extends Analyzer {
             //output.append(temp.substring(1, temp.length() - 1)).append(System.getProperty("line.separator"));
 
             e = this.measure(labelsPred);
-            /*System.out.println("A:" + e.getAri());
+            long endTime = System.currentTimeMillis();
+            System.out.println("TIME:" + ((endTime - startTime) / 1000.0)  / 60);
+            System.out.println("A:" + e.getAri());
             System.out.println("D:" + e.getDb());
             System.out.println("S:" + e.getSilh());
-            System.out.println("K:" + e.getK());*/
+            System.out.println("K:" + e.getK());
             reporter.set(run-1, e);
         }
 
@@ -157,7 +160,7 @@ public class GADriver extends Analyzer {
         String resultFilePath = "results/ga11.xls";
         String solutionsFilePath = "results/ga11.txt";
 
-        for (Dataset dataset:  new Dataset[]{Dataset.DIM256, Dataset.S1, Dataset.S2, Dataset.S3, Dataset.S4}) {
+        /*for (Dataset dataset:  new Dataset[]{Dataset.S1, Dataset.S2, Dataset.S3, Dataset.S4}) {
             System.out.println("DATASET: " + dataset.getPath());
             GADriver gaDriver = new GADriver(false);
             gaDriver.setDataset(dataset);
@@ -166,24 +169,23 @@ public class GADriver extends Analyzer {
             gaDriver.run();
             gaDriver.analyze(true);
             gaDriver.saveResults(resultFilePath, solutionsFilePath);
-        }
+        }*/
 
         runs = 10;
-        Dataset[] datasets = {Dataset.GLASS, Dataset.FLAME, Dataset.DERMATOLOGY, Dataset.COMPOUND, Dataset.WDBC, Dataset.PATHBASED};
+        Dataset[] datasets = {Dataset.S2};
         GaConfiguration[] gaConfigurations = GaConfiguration.values();
         for (GaConfiguration conf: gaConfigurations) {
             System.out.println("configuration: " + conf.name());
             for (Dataset dataset: datasets) {
                 System.out.println("DATASET: " + dataset.getPath());
-                resultFilePath = "results/" + conf.name() + ".xls";
                 solutionsFilePath = "results/" + conf.name() + ".txt";
-                GADriver driver = new GADriver(true);
+                GADriver driver = new GADriver(false);
                 driver.setDataset(dataset);
                 driver.setGaConfiguration(conf);
                 driver.setRuns(runs);
                 driver.run();
                 driver.analyze(true);
-                driver.saveResults(resultFilePath, solutionsFilePath);
+                driver.saveResults(solutionsFilePath);
             }
         }
     }
