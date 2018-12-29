@@ -22,11 +22,11 @@ public class ExcelRW {
 
     private static String[] columns = {"ari", "db", "silh", "k"};
 
-    /*public static void write(String path, Experiment[] experiments, Dataset dataset) throws Exception {
+    public static void write(String path, Experiment[] experiments, Dataset dataset) throws Exception {
         File file = new File(path);
         Workbook workbook;
         if (file.exists()) {
-            workbook = HSSFWorkbookFactory.create(new File(path));
+            workbook = HSSFWorkbookFactory.create(file);
         } else {
             workbook = new HSSFWorkbook();
         }
@@ -59,7 +59,7 @@ public class ExcelRW {
         FileOutputStream fileOut = new FileOutputStream(path);
         workbook.write(fileOut);
         fileOut.close();
-    }*/
+    }
 
     public static void main(String[] args) throws Exception {
         /*Experiment[] experiments1 = {

@@ -30,6 +30,9 @@ public abstract class Analyzer {
         KMEANS, GENCLUST, MGENCLUST, MCPSO;
     }
 
+    public Experiment getExperiment(int idx) {
+        return reporter.get(idx);
+    }
     protected void setRuns(int runs) {
         reporter = new Reporter(runs);
     }
@@ -112,8 +115,7 @@ public abstract class Analyzer {
     protected void saveResults(String solutionsFilePath) throws Exception {
         StringBuilder solutionsLog = new StringBuilder();
 
-        solutionsLog.append(dataset.name() + System.lineSeparator() +
-                Arrays.toString(labelsTrue) + System.lineSeparator());
+        solutionsLog.append(dataset.name() + " " + reporter.size() + System.lineSeparator());
         for (int j = 0; j < reporter.size(); ++j) {
             solutionsLog.append(Arrays.toString(reporter.get(j).getSolution()) + System.lineSeparator());
         }

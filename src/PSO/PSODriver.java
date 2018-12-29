@@ -21,7 +21,13 @@ import java.util.*;
 public class PSODriver extends Analyzer {
 
     private PSOConfiguration configuration;
-    List<List<Experiment>> iterations;
+
+    public void setSeedStartFrom(int seedStartFrom) {
+        this.seedStartFrom = seedStartFrom;
+    }
+
+    private int seedStartFrom;
+    //List<List<Experiment>> iterations;
 
     public PSODriver(PSOConfiguration aConf) {
         this.configuration = aConf;
@@ -30,7 +36,7 @@ public class PSODriver extends Analyzer {
     @Override
     protected void setRuns(int runs) {
         super.setRuns(runs);
-        iterations = new ArrayList<>(runs);
+        //iterations = new ArrayList<>(runs);
     }
 
     /**
@@ -54,6 +60,11 @@ public class PSODriver extends Analyzer {
         configuration.maxK = (int) (Math.sqrt(problem.getData().length));
         Random rnd = new Random(1);
 
+        // skip several seed values in order to start from
+        for (int i = 0; i < this.seedStartFrom; ++i) {
+            rnd.nextInt();
+        }
+
         for (int run = 1; run <= reporter.size(); ++run) {
             System.out.println("RUN: " + run);
             startTime = System.currentTimeMillis();
@@ -74,7 +85,8 @@ public class PSODriver extends Analyzer {
             System.out.println("S:" + e.getSilh());
             System.out.println("K:" + e.getK());
             reporter.set(run-1, e);
-            iterations.add(pso.iterationsBest);
+
+            //iterations.add(pso.iterationsBest);
             // test hill-climber
             /*int[] labelsPredCloned = labelsPred.clone();
             centroids = Utils.centroids(this.dataAttrs, labelsPredCloned);
@@ -112,19 +124,23 @@ public class PSODriver extends Analyzer {
     }
 
     public static void main(String[] args) throws Exception {
-        int runs = 10;
+        int startIdx = Integer.parseInt(args[0]); // inclusively
+        int endIdx = Integer.parseInt(args[1]); // exclusively
+        Dataset[] allDatasets = Dataset.values();
+        int runs = Integer.parseInt(args[2]);
+        int startSeedFrom = Integer.parseInt(args[3]);
         String solutionsFilePath;
-        Dataset[] datasets = {Dataset.S2};
-
         PSOConfiguration conf = PSOConfiguration.CONF1;
+        solutionsFilePath = "results/PSO/pso" + conf.name() + "_" + startIdx + "-" + endIdx + "-" + runs + "-" + startSeedFrom + ".txt";
         System.out.println("CONFIGURATION: " + conf.name());
-        solutionsFilePath = "results/pso" + conf.name() + ".txt";
-        for (Dataset dataset : datasets) {
+        for (int i = startIdx; i < endIdx; ++i) {
+            Dataset dataset = allDatasets[i];
             System.out.println("DATASET: " + dataset.name());
             PSODriver psoDriver = new PSODriver(conf);
             psoDriver.setDataset(dataset);
             psoDriver.setRuns(runs);
             psoDriver.setConfiguration(conf);
+            psoDriver.setSeedStartFrom(startSeedFrom);
             psoDriver.run();
             System.out.println("AVERAGE OVER RUNS");
             psoDriver.analyze(true);

@@ -8,12 +8,10 @@ public enum Dataset {
     WDBC("data/wdbc.csv", 0, true, true, 569, 30, 2),
     FLAME("data/flame.csv", 0, false, true, 240, 2, 2), COMPOUND("data/compound.csv", 0, false, true, 399, 2, 6),
     PATHBASED("data/pathbased.csv", 0, false, true, 300, 2, 3),
-    YEAST("data/yeast.csv", 0, true, true, 1484, 8, 10),
-    A1("data/a1.csv", 0, false, true, 3000, 2, 20), A2("data/a2.csv", 0, false, true, 5250, 2, 35),
-    S1("data/s1.csv", 0, false, true, 5000, 2, 15), S2("data/s2r3.csv", 0, false, true, 5000, 2, 15),
-    S3("data/s3.csv", 0, false, true, 5000, 2, 15), S4("data/s4.csv", 0, false, true, 5000, 2, 15),
+    A1("data/a1r3.csv", 0, false, true, 3000, 2, 20), A2("data/a2r5.csv", 0, false, true, 5250, 2, 35), A3("data/a3r7.csv", 0, false, true, 7500, 2, 50),
+    S1("data/s1r5.csv", 0, false, true, 5000, 2, 15), S2("data/s2r5.csv", 0, false, true, 5000, 2, 15),
+    S3("data/s3r5.csv", 0, false, true, 5000, 2, 15), S4("data/s4r5.csv", 0, false, true, 5000, 2, 15),
     DIM064("data/dim064.csv", 0, false, true, 1024, 64, 16), DIM256("data/dim256.csv", 0, false, true, 1024, 256, 16);
-    // A3("data/a3.csv", 0, false, true, 7500, 2, 50),
 
     private String path;
 
@@ -23,6 +21,16 @@ public enum Dataset {
     private int N;
     private int D;
     private int K;
+
+    public int[] getLabels() {
+        return labels;
+    }
+
+    public void setLabels(int[] labels) {
+        this.labels = labels.clone();
+    }
+
+    private int[] labels;
 
     Dataset(String aPath, int aHeader, boolean aRemoveFirst, boolean aNormalize, int aN, int aD, int aK) {
         this.path = aPath;

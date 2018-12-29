@@ -1,7 +1,9 @@
 package utils;
 
+import GA.GADriver;
 import PSO.Solution;
 import clustering.Dataset;
+import clustering.Experiment;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
@@ -14,6 +16,7 @@ import weka.filters.unsupervised.attribute.Remove;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.xml.crypto.Data;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -22,6 +25,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -608,16 +613,31 @@ public class Utils {
                 .doubleValue();
     }
 
-    public static void reduceDataset(Dataset dataset, int portion, boolean randomly) throws IOException {
+    public static void reduceDataset(Dataset dataset, boolean inOrder, int portion, boolean randomly) throws IOException {
         // given that clusters are in order and cluster ids are in order
         List<String[]> fileArr = readFile(dataset.getPath(), ',');
+        if (!inOrder) {
+            HashMap<String, Integer> map = new HashMap<>();
+            int i = 1;
+            int attrIdx = fileArr.get(0).length - 1;
+            for (String[] record : fileArr) {
+                if (!map.containsKey(record[attrIdx])) {
+                    map.put(record[attrIdx], i++);
+                }
+                record[attrIdx] = map.get(record[attrIdx]).toString();
+            }
+            //int[] labels = extractLabels(fileArr, fileArr.get(0).length-1);
+            Collections.sort(fileArr, (o1, o2) -> Integer.compare(Integer.parseInt(o1[attrIdx]), Integer.parseInt(o2[attrIdx])));
+        }
+
         int[] labels = extractLabels(fileArr, fileArr.get(0).length-1);
+
         List<Integer> labelsList = new ArrayList<>(labels.length);
         for (int i = 0; i < labels.length; ++i) {
             labelsList.add(labels[i]);
         }
         List<String[]> newData = new ArrayList<>(labels.length/2+1);
-        Random rnd = new Random();
+        Random rnd = new Random(1);
         for (int i = 1; i <= dataset.getK(); ++i) {
             HashSet<Integer> randomIdx = new HashSet<>();
             int first = labelsList.indexOf(i);
@@ -642,16 +662,58 @@ public class Utils {
             res = res.concat(s.substring(1,s.length()-1)+System.getProperty("line.separator"));
         }
 
-        whenWriteStringUsingBufferedWritter_thenCorrect(res, dataset.getPath().replace(".", "r3."), false);
+        whenWriteStringUsingBufferedWritter_thenCorrect(res, dataset.getPath().replace(".", "r" + portion + "."), false);
+    }
+
+    public static HashMap<String, int[][]> readSolutionFromFile(String filePath, int runs, boolean includesTrueLabels) throws IOException {
+        HashMap<String, int[][]>  res = new HashMap<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String datasetStr;
+            while ((datasetStr = br.readLine()) != null) {
+                if (runs < 0) {
+                    runs = Integer.parseInt(datasetStr.split(" ")[1]);
+                }
+                if (includesTrueLabels) {
+                    String labelsTrue = br.readLine();
+                }
+                int[][] solutions = new int[runs][];
+                for (int i = 0; i < runs; ++i) {
+                    String solLine = br.readLine();
+                    String[] expSols = solLine.substring(1, solLine.length()-1).split(", ");
+                    solutions[i] = new int[expSols.length];
+                    for (int j = 0; j < expSols.length; ++j) {
+                        solutions[i][j] = Integer.parseInt(expSols[j]);
+                    }
+                }
+                res.put(datasetStr, solutions);
+            }
+        }
+        return res;
+    }
+
+    public void generateResults() {
+        GADriver.GaConfiguration[] confs = {GADriver.GaConfiguration.mgaC1};//GADriver.GaConfiguration.values();
+        for (GADriver.GaConfiguration conf: confs) {
+            String filePath = "results/mGA/tuning" + conf.name() + ".txt";
+
+        }
     }
 
     public static void main(String[] args) throws Exception {
+        /*HashMap<String, int[][]> datasetTosolutions = readSolutionFromFile("results/mGA/tuning/mgaC1.txt", 10);
+        for (String dataset: datasetTosolutions.keySet()) {
+            System.out.println(dataset);
+            int[][] expSols = datasetTosolutions.get(dataset);
+            for (int[] expSol: expSols) {
+                System.out.println(Arrays.toString(expSol));
+            }
+        }*/
         //Dataset d = Dataset.S2;
-        //reduceDataset(d, 2, true);
-        //replaceInFile("data/output.csv", " ","");
-        //replaceInFile("data/s2r3.csv", " ", "");
+        //reduceDataset(d, true, 5, true);
+        //replaceInFile("data/s2r5.csv", " ", "");
+
         //Utils.nominalFormToNumber("data/compound.csv", ',', -1);
-        //Utils.nominalForm("data/a1.csv", "data/o1.csv");
+        //Utils.nominalForm("data/a2r5.csv", "data/o2r5.csv");
 
         //test centroids
         /*double[][] data = {{1,1},{5,5},{10,10},{11,11}};

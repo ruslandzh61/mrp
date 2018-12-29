@@ -128,7 +128,7 @@ public class PSO {
         System.out.println("--- PSO list end -----");
         System.out.println("NON-DOMINATED SET");
         printParticlesPerformace(nonDomPSOList, true);*/
-        System.out.println("------------------");
+        //System.out.println("------------------");
 
         /*System.out.println("Solution found at iteration " + curIterationNum);
         double[] objs = problem.evaluate(leader.getSolution().getSolution(), evaluation, ncc);
@@ -142,7 +142,7 @@ public class PSO {
         return leader.getSolution().getSolution();
     }
 
-    private void printParticlesPerformace(List<Particle> particles) {
+    private Analyzer printParticlesPerformace(List<Particle> particles) {
         Analyzer analyzer = new Analyzer() {
             @Override
             public void run() throws Exception {
@@ -159,10 +159,11 @@ public class PSO {
         };
         try {
             analyzer.run();
-            analyzer.analyze(false);
-            iterationsBest.add(analyzer.getMean());
+            analyzer.analyze(true);
+            return analyzer;
         } catch (Exception e) {
             System.out.println("failed to analyze solution at iteration:" + this.curIterationNum);
+            return null;
         }
         /*System.out.println(" -- ARI: " + ari + " -- DB: " + db + " -- distToUtopia: " +
                 Utils.dist(s.getSolution().getObjectives(), objBestCoordinates));
@@ -391,11 +392,22 @@ public class PSO {
         prevBest = new Solution(curBest);
         //prevParetoSize = this.nonDomPSOList.size();
 
-        List<Particle> listToAnalyze = new ArrayList<>();
-        listToAnalyze.add(pickALeader(false));
-        printParticlesPerformace(listToAnalyze);
+        //List<Particle> listToAnalyze = new ArrayList<>();
+        //listToAnalyze.add(pickALeader(false));
+        //iterationsBest.add(printParticlesPerformace(listToAnalyze).getMean());
         //System.out.println("A:"+iterationsBest.get(curIterationNum).getAri());
-        //printParticlesPerformace(nonDomPSOList, false);
+        //System.out.println("K:"+iterationsBest.get(curIterationNum).getK());
+
+        /*listToAnalyze = new ArrayList<>(nonDomPSOList.size());
+        for (Particle p : nonDomPSOList) {
+            listToAnalyze.add(p);
+        }
+        Analyzer analyzer = printParticlesPerformace(listToAnalyze);*/
+        /*System.out.println("non-dominated set size: " + nonDomPSOList.size());
+        for (int idx = 0; idx < nonDomPSOList.size(); ++idx) {
+            System.out.println("A:"+analyzer.getExperiment(idx).getAri());
+            System.out.println("K:"+analyzer.getExperiment(idx).getK());
+        }*/
 
         /*if (this.curIterationNum % 20 == 0) {
             printParticlesPerformace(nonDomPSOList, false);

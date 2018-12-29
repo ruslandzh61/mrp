@@ -94,7 +94,7 @@ public class KMeansDriver extends Analyzer {
         int counter = 1; // write counter before writing results to .txt;
         String solutionsFilePath = "results/my-kmeans++.txt";
 
-        Dataset[] datasets = {Dataset.S2};//Dataset.values();
+        Dataset[] datasets = {Dataset.S1};//Dataset.values();
         int runs = 5;
         boolean usePlusPlus = true;
         boolean useWeka = false;
