@@ -22,7 +22,8 @@ public class ExcelRW {
 
     private static String[] columns = {"ari", "db", "silh", "k"};
 
-    public static void write(String path, Experiment[] experiments, Dataset dataset) throws Exception {
+
+    public static void write(String path, Experiment[] experiments, String datasetName) throws Exception {
         File file = new File(path);
         FileOutputStream fileOut;
         Workbook workbook;
@@ -39,11 +40,11 @@ public class ExcelRW {
             fileOut = new FileOutputStream(path);
         }
         // if sheet with this name exists
-        int sheetIdx = workbook.getSheetIndex(dataset.name());
+        int sheetIdx = workbook.getSheetIndex(datasetName);
         if (sheetIdx >= 0) {
             workbook.removeSheetAt(sheetIdx);
         }
-        Sheet sheet = workbook.createSheet(dataset.name());
+        Sheet sheet = workbook.createSheet(datasetName);
         if (experiments[0].getConfiguration() != null) {
             columns = new String[]{"config", "ari", "db", "silh", "k"};
         }
@@ -108,7 +109,7 @@ public class ExcelRW {
         }
         Utils.whenWriteStringUsingBufferedWritter_thenCorrect(solutionsLog.toString(), solutionsFilePath, true);
         for (int i = 0; i < datasets.length; ++i) {
-            ExcelRW.write(resultFilePath, datasetExperiments[i], datasets[i]);
+            ExcelRW.write(resultFilePath, datasetExperiments[i], datasets[i].name());
         }
     }
 }

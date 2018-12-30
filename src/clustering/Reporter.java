@@ -25,6 +25,7 @@ public class Reporter {
 
     public void set(int experimentID, Experiment experiment) {
         experiments[experimentID] = experiment.clone();
+        experiments[experimentID].setTime(experiment.getTime());
         this.computed = false;
     }
 

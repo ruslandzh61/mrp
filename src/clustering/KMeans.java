@@ -25,20 +25,25 @@ public class KMeans {
     }
 
     private static int default_seed = 10;
+    private static double default_distMeasure = 2.0;
     private static Initialization default_init = Initialization.KMEANS_PLUS_PLUS;
 
     private int[] labels;
     private double[][] centroids;
     private int k;
     private int seed;
-    private double pow = 2.0;
+
+    public void setPow(double pow) {
+        this.pow = pow;
+    }
+
+    private double pow;
     private Random rnd;
     private Initialization initialization;
     private double[][] initialStartPoint;
 
     public KMeans(KMeans kMeans) {
         this.centroids = Utils.deepCopy(kMeans.getCentroids());
-        this.setSeed(kMeans.getSeed());
         this.labels = kMeans.getLabels().clone();
         this.k = kMeans.numberOfClusters();
         this.pow = kMeans.pow;

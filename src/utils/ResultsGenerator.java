@@ -85,18 +85,18 @@ public class ResultsGenerator {
     }
 
     // String[] confs = {GADriver.GaConfiguration.mgaC1.name()};//GADriver.GaConfiguration.values();
-    public void generate(String folderPath, int runs) throws Exception { // folder "results/mGA/tuning"
+    public void generate(String folderPath, int runs, boolean includesTrueLabels) throws Exception { // folder "results/mGA/tuning"
         Experiment[] experiments;
         Experiment[][] confMeans = new Experiment[datasets.length][configurations.length];
         Experiment[][] confStdDevs = new Experiment[datasets.length][configurations.length];
         int confIdx = 0;
-        String confMeansPath = folderPath + "mgaTuningMeans" + ".xls";
-        String confStdDevPath = folderPath + "mgaTuningStdDev" + ".xls";
+        String confMeansPath = folderPath + "means" + ".xls";
+        String confStdDevPath = folderPath + "stdDevs" + ".xls";
         for (String conf: configurations) {
             System.out.println(conf);
             experiments = new Experiment[runs+2];
             String filePath = folderPath + conf + ".txt";
-            HashMap<String, int[][]> datasetTosolutions = Utils.readSolutionFromFile(filePath, runs, true);
+            HashMap<String, int[][]> datasetTosolutions = Utils.readSolutionFromFile(filePath, -1, includesTrueLabels);
 
             int datasetIdx = 0;
             for (Dataset dataset: datasets) {
@@ -114,7 +114,7 @@ public class ResultsGenerator {
                 reporter.compute();
                 experiments[expSolIdx++] = reporter.getMean();
                 experiments[expSolIdx] = reporter.getStdDev();
-                ExcelRW.write(excelFilePath, experiments, datasets[datasetIdx]);
+                ExcelRW.write(excelFilePath, experiments, datasets[datasetIdx].name());
 
                 confMeans[datasetIdx][confIdx] = reporter.getMean();
                 confMeans[datasetIdx][confIdx].setConfiguration(conf);
@@ -128,15 +128,35 @@ public class ResultsGenerator {
 
         int datasetIdx = 0;
         for (Dataset dataset: datasets) {
-            ExcelRW.write(confMeansPath, confMeans[datasetIdx], dataset);
-            ExcelRW.write(confStdDevPath, confStdDevs[datasetIdx], dataset);
+            ExcelRW.write(confMeansPath, confMeans[datasetIdx], dataset.name());
+            ExcelRW.write(confStdDevPath, confStdDevs[datasetIdx], dataset.name());
             ++datasetIdx;
         }
+
+        Experiment[] confMeanOverDatasets = new Experiment[configurations.length];
+        Experiment[] confStdDevOverDatasets = new Experiment[configurations.length];
+
+        for (int i = 0; i < configurations.length; ++i) {
+            Reporter reporter = new Reporter(datasets.length);
+            for (int j = 0; j < confMeans.length; ++j) {
+                reporter.set(j, confMeans[j][i]);
+            }
+            reporter.compute();
+            confMeanOverDatasets[i] = reporter.getMean();
+            confMeanOverDatasets[i].setConfiguration(configurations[i]);
+
+            confStdDevOverDatasets[i] = reporter.getStdDev();
+            confMeanOverDatasets[i].setConfiguration(configurations[i]);
+        }
+
+        ExcelRW.write(confMeansPath, confMeanOverDatasets, "Overall");
+        ExcelRW.write(confStdDevPath, confStdDevOverDatasets, "Overall");
     }
 
     public static void main(String[] args) throws Exception {
-        Dataset[] datasets = {Dataset.GLASS, Dataset.FLAME, Dataset.DERMATOLOGY, Dataset.COMPOUND, Dataset.WDBC, Dataset.PATHBASED};
-        ResultsGenerator resultsGenerator = new ResultsGenerator(datasets, GADriver.confValuesStr());
-        resultsGenerator.generate("results/mGA/tuning/", 10);
+        Dataset[] datasets = {Dataset.GLASS, Dataset.DERMATOLOGY, Dataset.WDBC, Dataset.FLAME, Dataset.COMPOUND,
+                Dataset.PATHBASED, Dataset.DIM064, Dataset.DIM256};
+        ResultsGenerator resultsGenerator = new ResultsGenerator(datasets, new String[]{"psoCONF1"});
+        resultsGenerator.generate("results/PSO/", 30, false);
     }
 }

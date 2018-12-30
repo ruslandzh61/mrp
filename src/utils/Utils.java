@@ -72,7 +72,7 @@ public class Utils {
     public static double dist(double[] v,double[] w, double pow) {
         double sum = 0.0;
         for(int i=0;i<v.length;i++) {
-            sum = sum + Math.pow((v[i]-w[i]),pow);
+            sum = sum + Math.pow(Math.abs(v[i]-w[i]),pow);
         }
         return Math.sqrt(sum);
     }
@@ -665,13 +665,16 @@ public class Utils {
         whenWriteStringUsingBufferedWritter_thenCorrect(res, dataset.getPath().replace(".", "r" + portion + "."), false);
     }
 
-    public static HashMap<String, int[][]> readSolutionFromFile(String filePath, int runs, boolean includesTrueLabels) throws IOException {
+    public static HashMap<String, int[][]> readSolutionFromFile(String filePath, int r, boolean includesTrueLabels) throws IOException {
         HashMap<String, int[][]>  res = new HashMap<>();
+        int runs = r;
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String datasetStr;
             while ((datasetStr = br.readLine()) != null) {
-                if (runs <= 0) {
-                    runs = Integer.parseInt(datasetStr.split(" ")[1]);
+                if (r <= 0) {
+                    String[] datasetInfoLine = datasetStr.split(" ");
+                    runs = Integer.parseInt(datasetInfoLine[1]);
+                    datasetStr = datasetInfoLine[0];
                 }
                 if (includesTrueLabels) {
                     String labelsTrue = br.readLine();
@@ -689,14 +692,6 @@ public class Utils {
             }
         }
         return res;
-    }
-
-    public void generateResults() {
-        GADriver.GaConfiguration[] confs = {GADriver.GaConfiguration.mgaC1};//GADriver.GaConfiguration.values();
-        for (GADriver.GaConfiguration conf: confs) {
-            String filePath = "results/mGA/tuning" + conf.name() + ".txt";
-
-        }
     }
 
     private void printLabels(Dataset dataset) throws IOException {
@@ -724,10 +719,15 @@ public class Utils {
         }*/
         //Dataset d = Dataset.S2;
         //reduceDataset(d, true, 5, true);
-        //replaceInFile("data/s2r5.csv", " ", "");
+        Dataset[] datasets = {Dataset.AGGREGATION, Dataset.R15, Dataset.JAIN};
+        for (Dataset d: datasets) {
+            String newPath = d.getPath().replace(".csv", "o.csv");
+            nominalForm(d.getPath(), newPath);
+            replaceInFile(newPath, " ", "");
+        }
 
         //Utils.nominalFormToNumber("data/compound.csv", ',', -1);
-        //Utils.nominalForm("data/a2r5.csv", "data/o2r5.csv");
+        //Utils.nominalForm("data/aggregation.csv", "data/oaggregation.csv");
 
         //test centroids
         /*double[][] data = {{1,1},{5,5},{10,10},{11,11}};

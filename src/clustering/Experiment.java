@@ -7,6 +7,16 @@ public class Experiment {
     private int[] solution;
     private double ari, db, silh, k;
 
+    public double getTime() {
+        return time;
+    }
+
+    public void setTime(double time) {
+        this.time = time;
+    }
+
+    private double time;
+
     public String getConfiguration() {
         return configuration;
     }
@@ -20,7 +30,11 @@ public class Experiment {
     public Experiment() {}
 
     public Experiment(int[] aSolution, double aAri, double aDb, double aSilh, double aK) {
-        this.solution = aSolution.clone();
+        if (aSolution != null) {
+            this.solution = aSolution.clone();
+        } else {
+            this.solution = null;
+        }
         this.ari = aAri;
         this.db = aDb;
         this.silh = aSilh;

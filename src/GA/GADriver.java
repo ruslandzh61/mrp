@@ -1,5 +1,6 @@
 package GA;
 
+import PSO.PSOConfiguration;
 import clustering.*;
 import utils.NCConstruct;
 import utils.Utils;
@@ -38,9 +39,9 @@ public class GADriver extends Analyzer {
         mgaC17(11,20, false, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
         mgaC18(11,60, false, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
         mgaC19(30,60, false, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
-        mgaC20(50,60, false, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM);
-        //mgaC21(50,60, true, false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
-        //mgaC22(11,20, false, false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM);
+        mgaC20(50,60, false, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
+        mgaC21(50,60, true, false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
+        mgaC22(11,20, false, false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM);
 
         int chrSelectionGen;
         int generations;
@@ -96,7 +97,6 @@ public class GADriver extends Analyzer {
         Random rnd = new Random(1);
 
         // step 2 - pick objectives
-
         NCConstruct ncConstruct = null;
         Evaluator.Evaluation[] evaluations = null;
         Evaluator evaluator = null;
@@ -105,7 +105,6 @@ public class GADriver extends Analyzer {
             evaluations = new Evaluator.Evaluation[]{Evaluator.Evaluation.CONNECTIVITY, Evaluator.Evaluation.COHESION};
             evaluator = new Evaluator();
         }
-
         for (int run = 1; run <= reporter.size(); ++run) {
             System.out.println("RUN: " + run);
             long startTime = System.currentTimeMillis();
@@ -119,13 +118,14 @@ public class GADriver extends Analyzer {
                 cl.setEvaluations(evaluations);
                 cl.setMyData(this.dataAttrs);
                 cl.setTrueLabels(labelsTrue);
+                cl.setkMeansInit(KMeans.Initialization.KMEANS_PLUS_PLUS);
                 cl.setStartChromosomeSelectionGeneration(gaConfiguration.chrSelectionGen);
                 cl.setNumGenerations(gaConfiguration.generations);
                 cl.setNormalizeObjectives(gaConfiguration.normObjs);
                 cl.setHillClimb(true);
                 cl.setMaximin(gaConfiguration.maximin);
                 cl.setFitnessType(gaConfiguration.fitness);
-                cl.setDistance(2.0);
+                cl.setDistance(this.dataset.getDist());
                 cl.buildClusterer(this.wekaData);
                 labelsPred = Utils.adjustLabels(cl.getLabels());
             } else {
@@ -149,13 +149,16 @@ public class GADriver extends Analyzer {
 
             e = this.measure(labelsPred);
             long endTime = System.currentTimeMillis();
-            System.out.println("TIME:" + ((endTime - startTime) / 1000.0)  / 60);
+            double time = ((endTime - startTime) / 1000.0)  / 60;
+            e.setTime(time);
+            System.out.println("TIME:" + time);
             System.out.println("A:" + e.getAri());
             System.out.println("D:" + e.getDb());
             System.out.println("S:" + e.getSilh());
             System.out.println("K:" + e.getK());
             reporter.set(run-1, e);
         }
+
 
         //System.out.println(Arrays.toString(labelsTrue));
         //System.out.println(Arrays.toString(cl.getLabels()));
@@ -168,10 +171,35 @@ public class GADriver extends Analyzer {
     }
 
     public static void main(String[] args) throws Exception {
-        int runs = 30;
-        String solutionsFilePath = "results/ga11.txt";
+        String config = args[0];
+        int startIdx = Integer.parseInt(args[1]); // inclusively
+        int endIdx = Integer.parseInt(args[2]); // exclusively
+        Dataset[] allDatasets = Dataset.values();
+        int runs = Integer.parseInt(args[3]);
+        int startSeedFrom = Integer.parseInt(args[4]);
+        String solutionsFilePath;
+        GaConfiguration conf = GaConfiguration.valueOf(config);
+        assert (conf != null);
+        solutionsFilePath = "results/mGA/" + conf.name() + "_" + startIdx + "-" + endIdx + "-" + runs + "-" + startSeedFrom + ".txt";
+        System.out.println(solutionsFilePath + " will be created");
+        for (int i = startIdx; i < endIdx; ++i) {
+            long overallStartTime = System.currentTimeMillis();
 
-        /*for (Dataset dataset:  new Dataset[]{Dataset.S1, Dataset.S2, Dataset.S3, Dataset.S4}) {
+            Dataset dataset = allDatasets[i];
+            System.out.println("DATASET: " + dataset.name());
+            GADriver driver = new GADriver(true);
+            driver.setDataset(dataset);
+            driver.setGaConfiguration(conf);
+            driver.setRuns(runs);
+            driver.run();
+            driver.analyze(true);
+            driver.saveResults(solutionsFilePath);
+
+            long overallEndTime = System.currentTimeMillis();
+            double overallTime = ((overallEndTime - overallStartTime) / 1000.0)  / 60;
+            System.out.println("Overall time for dataset " + dataset.name() + ": " + overallTime);
+        }
+        /*for (Dataset dataset: datasets) {
             System.out.println("DATASET: " + dataset.getPath());
             GADriver gaDriver = new GADriver(false);
             gaDriver.setDataset(dataset);
@@ -179,17 +207,16 @@ public class GADriver extends Analyzer {
             gaDriver.setStartChrSelection(11);
             gaDriver.run();
             gaDriver.analyze(true);
-            gaDriver.saveResults(resultFilePath, solutionsFilePath);
+            //gaDriver.saveResults(resultFilePath, solutionsFilePath);
         }*/
 
-        runs = 5;
-        Dataset[] datasets = {Dataset.DERMATOLOGY};
-        GaConfiguration[] gaConfigurations = {GaConfiguration.mgaC13};
+        /*runs = 10;
+        GaConfiguration[] gaConfigurations = GaConfiguration.values();
         for (GaConfiguration conf: gaConfigurations) {
             System.out.println("configuration: " + conf.name());
             for (Dataset dataset: datasets) {
                 System.out.println("DATASET: " + dataset.getPath());
-                solutionsFilePath = "results/" + conf.name() + ".txt";
+                solutionsFilePath = "results/mGA/tuning/" + conf.name() + ".txt";
                 GADriver driver = new GADriver(true);
                 driver.setDataset(dataset);
                 driver.setGaConfiguration(conf);
@@ -198,6 +225,6 @@ public class GADriver extends Analyzer {
                 driver.analyze(true);
                 driver.saveResults(solutionsFilePath);
             }
-        }
+        }*/
     }
 }

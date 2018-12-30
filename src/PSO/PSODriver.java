@@ -139,7 +139,6 @@ public class PSODriver extends Analyzer {
             PSODriver psoDriver = new PSODriver(conf);
             psoDriver.setDataset(dataset);
             psoDriver.setRuns(runs);
-            psoDriver.setConfiguration(conf);
             psoDriver.setSeedStartFrom(startSeedFrom);
             psoDriver.run();
             System.out.println("AVERAGE OVER RUNS");

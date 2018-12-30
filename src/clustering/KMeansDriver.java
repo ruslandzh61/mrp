@@ -12,6 +12,12 @@ public class KMeansDriver extends Analyzer {
     private boolean isUsekMeansPlusPlus;
     private boolean isUseWekaVersion;
 
+    public void setDistMeasure(double distMeasure) {
+        this.distMeasure = distMeasure;
+    }
+
+    private double distMeasure;
+
     public KMeansDriver(boolean plus, boolean weka) {
         this.isUsekMeansPlusPlus = plus;
         this.isUseWekaVersion = weka;
@@ -47,7 +53,7 @@ public class KMeansDriver extends Analyzer {
                     kMeans.buildClusterer(this.wekaData);
                     labelsPred = kMeans.getAssignments();
                 } else {
-                    KMeans kMeans = new KMeans(k, 2.0);
+                    KMeans kMeans = new KMeans(k, distMeasure);
                     kMeans.setSeed(rnd.nextInt());
                     if (isUsekMeansPlusPlus) {
                         kMeans.setInitializationMethod(KMeans.Initialization.KMEANS_PLUS_PLUS);
@@ -92,12 +98,13 @@ public class KMeansDriver extends Analyzer {
 
     public static void main(String[] args) throws Exception {
         int counter = 1; // write counter before writing results to .txt;
-        String solutionsFilePath = "results/my-kmeans++.txt";
+        String solutionsFilePath = "results/newDatasets.txt";
 
-        Dataset[] datasets = {Dataset.S1};//Dataset.values();
+        Dataset[] datasets = {Dataset.AGGREGATION, Dataset.R15, Dataset.JAIN};//Dataset.values();
         int runs = 5;
         boolean usePlusPlus = true;
         boolean useWeka = false;
+        double distMeasure = 1.0;
 
         if (useWeka) {
             if (usePlusPlus) {
@@ -118,11 +125,12 @@ public class KMeansDriver extends Analyzer {
             System.out.println("normalize: " + dataset.isNormalize());
             System.out.println("N=" + dataset.getN() + "; D=" + dataset.getD() + "; K=" + dataset.getK());
             KMeansDriver kMeansDriver = new KMeansDriver(usePlusPlus, useWeka);
+            kMeansDriver.setDistMeasure(distMeasure);
             kMeansDriver.setDataset(dataset);
             kMeansDriver.setRuns(runs);
             kMeansDriver.run();
             kMeansDriver.analyze(true);
-            kMeansDriver.saveResults(solutionsFilePath);
+            //kMeansDriver.saveResults(solutionsFilePath);
             System.out.println("real number of clusters: " + dataset.getK());
         /*System.out.println("my k-means: ");
         PSODriver.runMyKmeans(clustering.KMeans.Initialization.RANDOM, 10, filePath, removeFirst, normalize);
