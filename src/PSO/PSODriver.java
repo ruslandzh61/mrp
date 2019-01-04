@@ -124,19 +124,22 @@ public class PSODriver extends Analyzer {
     }
 
     public static void main(String[] args) throws Exception {
-        Dataset dataset = Dataset.GLASS;
-        System.out.println("Dataset: " + dataset.name());
-        int runs = 10;
-        int startSeedFrom = 0;
+        PSOConfiguration conf = PSOConfiguration.valueOf(args[0]);
+        Dataset dataset = Dataset.valueOf(args[1]); //Dataset.S1;
+        int seedStartFrom = Integer.parseInt(args[2]);
+        int runs = Integer.parseInt(args[3]);
 
-        PSOConfiguration conf = PSOConfiguration.CONF1;
+        System.out.println("Dataset: " + dataset.name());
+        String solutionsFilePath = "results/PSO/pso" + conf.name() + "_" + dataset.name() + "-" + seedStartFrom + "-" + runs + ".txt";
+
         PSODriver psoDriver = new PSODriver(conf);
         psoDriver.setDataset(dataset);
         psoDriver.setRuns(runs);
-        psoDriver.setSeedStartFrom(startSeedFrom);
+        psoDriver.setSeedStartFrom(seedStartFrom);
         psoDriver.run();
         System.out.println("AVERAGE OVER RUNS");
         psoDriver.analyze(true);
+        psoDriver.saveResults(solutionsFilePath);
         /*int startIdx = Integer.parseInt(args[0]); // inclusively
         int endIdx = Integer.parseInt(args[1]); // exclusively
         Dataset[] allDatasets = Dataset.values();
