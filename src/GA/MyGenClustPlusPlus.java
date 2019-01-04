@@ -4,6 +4,7 @@ import java.util.*;
 
 import clustering.Evaluator;
 import clustering.KMeans;
+import smile.math.distance.Distance;
 import smile.validation.AdjustedRandIndex;
 import utils.NCConstruct;
 
@@ -21,7 +22,13 @@ import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
 
 public class MyGenClustPlusPlus extends RandomizableClusterer implements TechnicalInformationHandler {
-    public enum FITNESS {DBINDEX, SILHOUETTE, MULTIOBJECTIVE_SUM};
+    private double[] evaluationWeights;
+
+    public void setEvaluationWeights(double[] evaluationWeights) {
+        this.evaluationWeights = evaluationWeights;
+    }
+
+    public enum FITNESS {DBINDEX, SILHOUETTE, MULTIOBJECTIVE_SUM}
 
     private static final long serialVersionUID = -7247404718496233612L;
     private static final double MAXIMIN_THRESHOLD = -0.0001;
@@ -34,6 +41,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
     private int m_maxKMeansIterationsFinal = 50;
     private double m_duplicateThreshold = 0.0D;
     private int m_startChromosomeSelectionGeneration = 50;
+    private Distance m_distFunc;
     private KMeans m_bestChromosome;
     private double m_bestFitness;
     private int m_bestFitnessIndex;
@@ -88,7 +96,6 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
 
     private int[] trueLabels;
     private double[] objBestCoordinates, objWorstCoordinates;
-    private static final double THRESHOLD = 0.000001;
 
     public void setkMeansInit(KMeans.Initialization kMeansInit) {
         this.kMeansInit = kMeansInit;
@@ -187,7 +194,10 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
                  * to maintain a population of high achievers.
                  * We refer to the application of the hill-climber as polishing. */
                 for(newBestIndex = 0; newBestIndex < resultingPopulation.length; ++newBestIndex) {
+                    int count = -1;
+                    finalRun = null;
                     do {
+                        count++;
                         finalRun = new KMeans();
                         finalRun.setPow(myDistance);
                         finalRun.setSeed(this.m_rand.nextInt());
@@ -204,6 +214,10 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
                             finalRun = new KMeans(t);
                         }
                     } while(finalRun.getCentroids().length <= 1);
+
+                    if (count > 10) {
+                        finalRun = producerandomKMeansInstance();
+                    }
 
                     resultingPopulation[newBestIndex] = finalRun;
                 }
@@ -470,44 +484,68 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         /* Initial Population with Probabilistic Selection */
         for(i = 2; i <= maxK; ++i) {
             /* five clusterings for each value of k */
+            boolean backTrack = false;
             for(randomK = 0; randomK < multiplier; ++randomK) {
-                KMeans j = new KMeans(i, this.myDistance);
-                int chromosome = -1;
 
+                int chromosome = -1;
+                KMeans j = null;
                 // chromosome is built until number of clusters is at least two
                 do {
                     ++chromosome;
-                    if(chromosome > 100) {
-                        System.out.println("Unable to cluster this dataset using genetic algorithm, try imputing missing values first.");
-                        this.m_builtClusterer = j;
-                        this.m_numberOfClusters = this.m_builtClusterer.getCentroids().length;
-                        return null;
+                    if(chromosome > 10) {
+                        System.out.println("Unable to cluster this dataset using genetic algorithm with K: " + i + ", try imputing missing values first.");
+                        break;
                     }
-
-                    j.setSeed(this.m_rand.nextInt());
-                    j.setMaxIterations(this.m_maxKMeansIterationsInitial);
+                    j = new KMeans(i, this.myDistance);
+                    j.setSeed(m_rand.nextInt());
                     j.setInitializationMethod(this.kMeansInit);
+                    j.setMaxIterations(this.m_maxKMeansIterationsInitial);
                     j.buildClusterer(this.myData);
-                } while(utils.Utils.distinctNumberOfItems(j.getLabels()) < 2);
+                } while (j.numberOfClusters() < 2);
+                if (chromosome > 10) {
+                    backTrack = true;
+                    break;
+                }
 
                 population[chromosomeCount++] = j;
+            }
+            if (backTrack) {
+                maxK++;
+                chromosomeCount -= randomK;
             }
         }
 
         for(i = 0; i < maxK - 1; ++i) {
             randomK = this.m_rand.nextInt((int)(Math.sqrt((double)this.myData.length) - 2.0D)) + 2;
-
+            boolean backTrack = false;
             for(int var10 = 0; var10 < multiplier; ++var10) {
-                KMeans var11 = new KMeans(randomK, this.myDistance);
-                var11.setSeed(this.m_rand.nextInt());
-                var11.setInitializationMethod(this.kMeansInit);
+                KMeans var11 = null;
 
                 // chromosome is built until number of clusters is at least two
+                int chromosome = -1;
                 do {
+                    ++chromosome;
+                    if(chromosome > 10) {
+                        System.out.println("Unable to cluster this dataset using genetic algorithm with K: " + i + ", try imputing missing values first.");
+                        break;
+                    }
+                    var11 = new KMeans(randomK, this.myDistance);
+                    var11.setSeed(this.m_rand.nextInt());
+                    var11.setMaxIterations(this.m_maxKMeansIterationsInitial);
+                    var11.setInitializationMethod(this.kMeansInit);
                     var11.buildClusterer(this.myData);
-                } while(utils.Utils.distinctNumberOfItems(var11.getLabels()) < 2);
+                } while(var11.numberOfClusters() < 2);
+
+                if (chromosome > 10) {
+                    backTrack = true;
+                    break;
+                }
 
                 population[chromosomeCount++] = var11;
+            }
+            if (backTrack) {
+                maxK++;
+                chromosomeCount -= randomK;
             }
         }
 
@@ -524,6 +562,23 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
             updateUtopiaDystopia(objectives[i]);
         }
     }*/
+
+    private KMeans producerandomKMeansInstance() {
+        KMeans kMeans = null;
+        do {
+            try {
+                int randomK = this.m_rand.nextInt((int) (Math.sqrt((double) this.myData.length) - 2.0D)) + 2;
+                kMeans = new KMeans(randomK, this.myDistance);
+                kMeans.setInitializationMethod(this.kMeansInit);
+                kMeans.setSeed(m_rand.nextInt());
+                kMeans.buildClusterer(this.myData);
+                return kMeans;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } while (kMeans == null || kMeans.numberOfClusters() < 2);
+        return kMeans;
+    }
 
     private void updateUtopiaDystopia(double[] objs) {
         for (int iO = 0; iO < evaluations.length; ++iO) {
@@ -652,7 +707,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
             if (normalizeObjectives) {
                 utils.Utils.normalize(objs, objBestCoordinates, objWorstCoordinates);
             }
-            return 1.0D / utils.Utils.sum(objs, 1.0);
+            return 1.0D / utils.Utils.sum(objs, evaluationWeights, 1.0);
         } else if (this.fitnessType == FITNESS.SILHOUETTE) {
             return this.silhouette.compute(chromosome.getLabels(), this.myData);
         } else if (fitnessType == FITNESS.DBINDEX) {
@@ -663,11 +718,25 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
 
     private double[] fitness(KMeans[] pop) {
         double[] res = new double[pop.length];
+        boolean negativeFitness = false;
+        double minFitness = Double.POSITIVE_INFINITY;
         for (int i = 0; i < res.length; ++i) {
             res[i] = fitness(pop[i]);
+            if (res[i] < 0.0) {
+                negativeFitness = true;
+            }
+            if (res[i] < minFitness) {
+                minFitness = res[i];
+            }
         }
 
-        utils.Utils.normalize(res);
+        if (negativeFitness) {
+            System.out.println("negative fitness");
+            for (int i = 0; i < res.length; ++i) {
+                res[i] += Math.abs(minFitness);
+            }
+        }
+
         boolean isAllEqual = true;
         for (double f: res) {
             if (f != 0.0) {
@@ -750,7 +819,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
                             var20.printStackTrace();
                             System.out.println("failed in probabilistic selection to generate new buildClusterer" +
                                     "when given k is chosen more than five times");
-                            return null;
+                            var23 = producerandomKMeansInstance();
                         }
                     } else {
                         /* otherwise include in initial population and indicate that it's already chosen */
@@ -968,13 +1037,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
                 var31.buildClusterer(this.myData);
                 var28[var30] = var31;
             } catch (Exception var26) {
-                int randomK = this.m_rand.nextInt((int)(Math.sqrt((double)this.myData.length) - 2.0D)) + 2;
-                KMeans kMeans = new KMeans(randomK, this.myDistance);
-                kMeans.setSeed(this.m_rand.nextInt());
-                kMeans.setMaxIterations(this.m_maxKMeansIterationsInitial);
-                kMeans.setInitializationMethod(this.kMeansInit);
-                kMeans.buildClusterer(this.myData);
-                var28[var30] = new KMeans(kMeans);
+                var28[var30] = producerandomKMeansInstance();
             }
         }
 
@@ -1138,7 +1201,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
             return var8;
         } catch (Exception var7) {
             var7.printStackTrace();
-            return null;
+            return producerandomKMeansInstance();
         }
     }
 

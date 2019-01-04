@@ -20,43 +20,69 @@ public class GADriver extends Analyzer {
         // c11-c15: maximin with db index, do not norm objs
         // c16-c20: maximin with sum, norm objs
         // c21-c25: maximin with sum, do not norm objs
-        mgaC1(11,20, true, false, MyGenClustPlusPlus.FITNESS.DBINDEX),
-        mgaC2(11,60, true, false, MyGenClustPlusPlus.FITNESS.DBINDEX),
+        GA(),
+        mgaC1(10,20, true, false, MyGenClustPlusPlus.FITNESS.DBINDEX),
+        mgaC2(10,60, true, false, MyGenClustPlusPlus.FITNESS.DBINDEX),
         mgaC3(30,60, true, false, MyGenClustPlusPlus.FITNESS.DBINDEX),
         mgaC4(50,60, true, false, MyGenClustPlusPlus.FITNESS.DBINDEX),
-        mgaC5(11,20, true, true, MyGenClustPlusPlus.FITNESS.DBINDEX),
-        mgaC6(11,60, true, true, MyGenClustPlusPlus.FITNESS.DBINDEX),
+        mgaC5(10,20, true, true, MyGenClustPlusPlus.FITNESS.DBINDEX),
+        mgaC6(10,60, true, true, MyGenClustPlusPlus.FITNESS.DBINDEX),
         mgaC7(30,60, true, true, MyGenClustPlusPlus.FITNESS.DBINDEX),
         mgaC8(50,60, true, true, MyGenClustPlusPlus.FITNESS.DBINDEX),
-        mgaC9(11,20, false, true, MyGenClustPlusPlus.FITNESS.DBINDEX),
-        mgaC10(11,60, false, true, MyGenClustPlusPlus.FITNESS.DBINDEX),
+        mgaC9(10,20, false, true, MyGenClustPlusPlus.FITNESS.DBINDEX),
+        mgaC10(10,60, false, true, MyGenClustPlusPlus.FITNESS.DBINDEX),
         mgaC11(30,60, false, true, MyGenClustPlusPlus.FITNESS.DBINDEX),
         mgaC12(50,60, false, true, MyGenClustPlusPlus.FITNESS.DBINDEX),
-        mgaC13(11,20, true, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
-        mgaC14(11,60, false, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
+        mgaC13(10,20, true, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
+        mgaC14(10,60, false, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
         mgaC15(30,60, true, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
         mgaC16(50,60, true, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
-        mgaC17(11,20, false, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
-        mgaC18(11,60, false, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
+        mgaC17(10,20, false, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
+        mgaC18(10,60, false, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
         mgaC19(30,60, false, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
         mgaC20(50,60, false, true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
         mgaC21(50,60, true, false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
-        mgaC22(11,20, false, false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM);
+        mgaC22(10,20, false, false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM),
 
-        int chrSelectionGen;
-        int generations;
-        boolean normObjs;
-        boolean maximin;
+        mgaC23(10,20, true,true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.9,0.1}),
+        mgaC24(10,20, true,true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.6,0.4}),
+        mgaC25(10,20, true,true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.2,0.8}),
+        mgaC26(10,20, true,true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.4,0.6}),
+        mgaC27(10,20, true,true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.8,0.2}),
+        mgaC28(10,20, true,true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.1,0.9}),
+
+        mgaC29(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.9,0.1}),
+        mgaC30(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.6,0.4}),
+        mgaC31(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.2,0.8}),
+        mgaC32(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.4,0.6}),
+        mgaC33(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.8,0.2}),
+        mgaC34(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.1,0.9}),
+        mgaC35(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.7,0.3}),
+        mgaC36(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.3,0.7});
+
+        private int chrSelectionGen;
+        private int generations;
+        private boolean normObjs;
+        private boolean maximin;
+        private MyGenClustPlusPlus.FITNESS fitness;
+        private double[] w;
 
         GaConfiguration(int chrSelectionGen, int generations, boolean normObjs, boolean maximin, MyGenClustPlusPlus.FITNESS fitness) {
+            this(chrSelectionGen,generations,normObjs,maximin, fitness,new double[]{0.5, 0.5});
+        }
+
+        GaConfiguration(int chrSelectionGen, int generations, boolean normObjs, boolean maximin,
+                        MyGenClustPlusPlus.FITNESS fitness, double[] aW) {
             this.chrSelectionGen = chrSelectionGen;
             this.generations = generations;
             this.normObjs = normObjs;
             this.maximin = maximin;
             this.fitness = fitness;
+            this.w = aW.clone();
         }
 
-        MyGenClustPlusPlus.FITNESS fitness;
+        GaConfiguration() {
+        }
     }
 
     public static String[] confValuesStr() {
@@ -68,23 +94,17 @@ public class GADriver extends Analyzer {
         return res;
     }
 
-    private boolean myGenClust;
-
     public void setGaConfiguration(GaConfiguration gaConfiguration) {
         this.gaConfiguration = gaConfiguration;
     }
 
     private GaConfiguration gaConfiguration;
 
-    public void setStartChrSelection(int startChrSelection) {
-        this.startChrSelection = startChrSelection;
+    public void setSeedStartFrom(int seedStartFrom) {
+        this.seedStartFrom = seedStartFrom;
     }
 
-    private int startChrSelection;
-
-    public GADriver(boolean myGenClust) {
-        this.myGenClust = myGenClust;
-    }
+    private int seedStartFrom;
 
     public void run() throws Exception {
         assert (reporter != null);
@@ -96,11 +116,16 @@ public class GADriver extends Analyzer {
         GenClustPlusPlus gl;
         Random rnd = new Random(1);
 
+        for (int i = 0; i < this.seedStartFrom; ++i) {
+            rnd.nextInt();
+            System.out.println(i);
+        }
+
         // step 2 - pick objectives
         NCConstruct ncConstruct = null;
         Evaluator.Evaluation[] evaluations = null;
         Evaluator evaluator = null;
-        if (myGenClust) {
+        if (this.gaConfiguration != GaConfiguration.GA) {
             ncConstruct = new NCConstruct(dataAttrs);
             evaluations = new Evaluator.Evaluation[]{Evaluator.Evaluation.CONNECTIVITY, Evaluator.Evaluation.COHESION};
             evaluator = new Evaluator();
@@ -110,7 +135,7 @@ public class GADriver extends Analyzer {
             long startTime = System.currentTimeMillis();
             Experiment e;
             int[] labelsPred;
-            if (myGenClust) {
+            if (this.gaConfiguration != GaConfiguration.GA) {
                 cl = new MyGenClustPlusPlus();
                 cl.setSeed(rnd.nextInt());
                 cl.setNcConstruct(ncConstruct);
@@ -118,19 +143,23 @@ public class GADriver extends Analyzer {
                 cl.setEvaluations(evaluations);
                 cl.setMyData(this.dataAttrs);
                 cl.setTrueLabels(labelsTrue);
-                cl.setkMeansInit(KMeans.Initialization.KMEANS_PLUS_PLUS);
+                cl.setkMeansInit(KMeans.Initialization.RANDOM);
+                cl.setHillClimb(true);
+                cl.setDistance(this.dataset.getDist());
+
                 cl.setStartChromosomeSelectionGeneration(gaConfiguration.chrSelectionGen);
                 cl.setNumGenerations(gaConfiguration.generations);
                 cl.setNormalizeObjectives(gaConfiguration.normObjs);
-                cl.setHillClimb(true);
                 cl.setMaximin(gaConfiguration.maximin);
                 cl.setFitnessType(gaConfiguration.fitness);
-                cl.setDistance(this.dataset.getDist());
+                cl.setEvaluationWeights(gaConfiguration.w);
+
                 cl.buildClusterer(this.wekaData);
                 labelsPred = Utils.adjustLabels(cl.getLabels());
             } else {
                 gl = new GenClustPlusPlus();
-                gl.setStartChromosomeSelectionGeneration(this.startChrSelection);
+                gl.setStartChromosomeSelectionGeneration(10);
+                gl.setNumGenerations(20);
                 gl.setSeed(rnd.nextInt());
                 gl.buildClusterer(this.wekaData);
                 labelsPred = new int[this.wekaData.size()];
@@ -166,12 +195,40 @@ public class GADriver extends Analyzer {
           //      System.getProperty("line.separator"), "../datasets/output.csv");
     }
 
-    public void setMyGenClust(boolean myGenClust) {
-        this.myGenClust = myGenClust;
+    static void testGA(Dataset dataset, int runs, int seedStartFrom) throws Exception {
+        String solutionsFilePath = "results/GA/ga" + "_" + dataset.name() + "-" + seedStartFrom + "-" + runs + ".txt";
+
+        GADriver driver = new GADriver();
+        driver.setDataset(dataset);
+        driver.setRuns(runs);
+        driver.setGaConfiguration(GaConfiguration.GA);
+        driver.setSeedStartFrom(seedStartFrom);
+        driver.run();
+        driver.analyze(true);
+        driver.saveResults(solutionsFilePath);
     }
 
     public static void main(String[] args) throws Exception {
-        String config = args[0];
+        String confStr = args[0];
+        GaConfiguration conf = GaConfiguration.valueOf(confStr);
+        Dataset dataset = Dataset.valueOf(args[1]);
+        int seedStartFrom = Integer.parseInt(args[2]);
+        int runs = Integer.parseInt(args[3]);
+        if (conf != GaConfiguration.GA) {
+            String solutionsFilePath = "results/mGA/" + conf.name() + "_" + "-" + seedStartFrom + "-" + runs + ".txt";
+
+            GADriver driver = new GADriver();
+            driver.setDataset(dataset);
+            driver.setGaConfiguration(conf);
+            driver.setRuns(runs);
+            driver.setSeedStartFrom(seedStartFrom);
+            driver.run();
+            driver.analyze(true);
+            driver.saveResults(solutionsFilePath);
+        } else {
+            testGA(dataset, runs, seedStartFrom);
+        }
+        /*String config = args[0];
         int startIdx = Integer.parseInt(args[1]); // inclusively
         int endIdx = Integer.parseInt(args[2]); // exclusively
         Dataset[] allDatasets = Dataset.values();
@@ -198,7 +255,8 @@ public class GADriver extends Analyzer {
             long overallEndTime = System.currentTimeMillis();
             double overallTime = ((overallEndTime - overallStartTime) / 1000.0)  / 60;
             System.out.println("Overall time for dataset " + dataset.name() + ": " + overallTime);
-        }
+        }*/
+
         /*for (Dataset dataset: datasets) {
             System.out.println("DATASET: " + dataset.getPath());
             GADriver gaDriver = new GADriver(false);

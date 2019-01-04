@@ -85,7 +85,7 @@ public class ResultsGenerator {
     }
 
     // String[] confs = {GADriver.GaConfiguration.mgaC1.name()};//GADriver.GaConfiguration.values();
-    public void generate(String folderPath, int runs, boolean includesTrueLabels) throws Exception { // folder "results/mGA/tuning"
+    public void generate(String folderPath, int runs, boolean includesRuns, boolean includesTrueLabels, boolean includesTime) throws Exception { // folder "results/mGA/tuning"
         Experiment[] experiments;
         Experiment[][] confMeans = new Experiment[datasets.length][configurations.length];
         Experiment[][] confStdDevs = new Experiment[datasets.length][configurations.length];
@@ -96,7 +96,7 @@ public class ResultsGenerator {
             System.out.println(conf);
             experiments = new Experiment[runs+2];
             String filePath = folderPath + conf + ".txt";
-            HashMap<String, int[][]> datasetTosolutions = Utils.readSolutionFromFile(filePath, -1, includesTrueLabels);
+            HashMap<String, int[][]> datasetTosolutions = Utils.readSolutionFromFile(filePath, runs, includesRuns, includesTrueLabels, includesTime);
 
             int datasetIdx = 0;
             for (Dataset dataset: datasets) {
@@ -153,10 +153,11 @@ public class ResultsGenerator {
         ExcelRW.write(confStdDevPath, confStdDevOverDatasets, "Overall");
     }
 
+
     public static void main(String[] args) throws Exception {
-        Dataset[] datasets = {Dataset.GLASS, Dataset.DERMATOLOGY, Dataset.WDBC, Dataset.FLAME, Dataset.COMPOUND,
-                Dataset.PATHBASED, Dataset.DIM064, Dataset.DIM256};
-        ResultsGenerator resultsGenerator = new ResultsGenerator(datasets, new String[]{"psoCONF1"});
-        resultsGenerator.generate("results/PSO/", 30, false);
+        Dataset[] datasets = {Dataset.JAIN, Dataset.GLASS, Dataset.DERMATOLOGY, Dataset.WDBC, Dataset.FLAME, Dataset.COMPOUND,
+                Dataset.PATHBASED, Dataset.DIM064, Dataset.DIM256, Dataset.S1, Dataset.S2, Dataset.S3, Dataset.S4};
+        ResultsGenerator resultsGenerator = new ResultsGenerator(datasets, new String[]{"ga11"});
+        resultsGenerator.generate("results/GA/", 30, false, true, false);
     }
 }

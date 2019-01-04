@@ -39,4 +39,11 @@ public enum PSOConfiguration {
     public double numTopParticlesToPickForLeader = 0.2;
     public boolean normObjs = false;
     public boolean equalClusterNumDistribution = true;
+
+    public static void main(String[] args) {
+        PSOConfiguration conf = CONF1;
+        System.out.println(conf.c1);
+        conf.c1 = 1.33;
+        System.out.println(conf.c1);
+    }
 }

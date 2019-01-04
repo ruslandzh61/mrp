@@ -2,6 +2,8 @@ package clustering;
 
 import utils.Utils;
 import weka.clusterers.SimpleKMeans;
+import weka.core.EuclideanDistance;
+import weka.core.ManhattanDistance;
 import weka.core.SelectedTag;
 import java.util.Random;
 
@@ -46,6 +48,11 @@ public class KMeansDriver extends Analyzer {
                         selectedTag = new SelectedTag(SimpleKMeans.KMEANS_PLUS_PLUS, SimpleKMeans.TAGS_SELECTION);
                     } else {
                         selectedTag = new SelectedTag(SimpleKMeans.RANDOM, SimpleKMeans.TAGS_SELECTION);
+                    }
+                    if (this.distMeasure == 1.0) {
+                        kMeans.setDistanceFunction(new ManhattanDistance(this.wekaData));
+                    } else {
+                        kMeans.setDistanceFunction(new EuclideanDistance(this.wekaData));
                     }
                     kMeans.setInitializationMethod(selectedTag);
                     kMeans.setSeed(rnd.nextInt());
@@ -100,10 +107,10 @@ public class KMeansDriver extends Analyzer {
         int counter = 1; // write counter before writing results to .txt;
         String solutionsFilePath = "results/newDatasets.txt";
 
-        Dataset[] datasets = {Dataset.AGGREGATION, Dataset.R15, Dataset.JAIN};//Dataset.values();
-        int runs = 5;
-        boolean usePlusPlus = true;
-        boolean useWeka = false;
+        Dataset[] datasets = {Dataset.GLASS}; //Dataset.AGGREGATION, Dataset.R15, Dataset.JAIN};//Dataset.values();
+        int runs = 10;
+        boolean usePlusPlus = false;
+        boolean useWeka = true;
         double distMeasure = 1.0;
 
         if (useWeka) {

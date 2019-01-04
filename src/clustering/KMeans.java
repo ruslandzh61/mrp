@@ -17,7 +17,12 @@ public class KMeans {
     private int niter = 50;
     private int maxIters = 500;
     private double threshold = 0.005;
+
     public KMeans() {
+        this.pow = default_distMeasure;
+        this.seed = default_seed;
+        this.rnd = new Random(seed);
+        this.initialization = default_init;
     }
 
     public enum Initialization {
@@ -184,12 +189,12 @@ public class KMeans {
         return "number of clusters: " + this.k;
     }
 
-    private void initialize(double[][] data) throws Exception {
+    private void initialize(double[][] data) {
         int N = data.length;
         int D = data[0].length;
         labels = new int[N];
         if (this.k > Math.sqrt(N)) {
-            throw new Exception("too many clusters");
+            System.out.println("too many clusters");
         }
         // choose existing data points as initial data points
         centroids = new double[k][D];

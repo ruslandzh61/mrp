@@ -71,10 +71,10 @@ public class Utils {
 
     public static double dist(double[] v,double[] w, double pow) {
         double sum = 0.0;
-        for(int i=0;i<v.length;i++) {
-            sum = sum + Math.pow(Math.abs(v[i]-w[i]),pow);
+        for(int i = 0; i < v.length; i++) {
+            sum += Math.pow(Math.abs(v[i]-w[i]),pow);
         }
-        return Math.sqrt(sum);
+        return Math.pow(sum, 1.0/pow);
     }
 
     public static double[][] deepCopy(double[][] a) {
@@ -102,6 +102,14 @@ public class Utils {
         double res = 0;
         for (double el: arr) {
             res += Math.pow(el, pow);
+        }
+        return res;
+    }
+
+    public static double sum(double[] arr, double[] w, double pow) {
+        double res = 0;
+        for (int i = 0; i < arr.length; ++i) {
+            res += Math.pow(arr[i], pow) * w[i];
         }
         return res;
     }
@@ -665,13 +673,13 @@ public class Utils {
         whenWriteStringUsingBufferedWritter_thenCorrect(res, dataset.getPath().replace(".", "r" + portion + "."), false);
     }
 
-    public static HashMap<String, int[][]> readSolutionFromFile(String filePath, int r, boolean includesTrueLabels) throws IOException {
+    public static HashMap<String, int[][]> readSolutionFromFile(String filePath, int r, boolean includesRuns, boolean includesTrueLabels, boolean includesTime) throws IOException {
         HashMap<String, int[][]>  res = new HashMap<>();
         int runs = r;
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String datasetStr;
             while ((datasetStr = br.readLine()) != null) {
-                if (r <= 0) {
+                if (includesRuns) {
                     String[] datasetInfoLine = datasetStr.split(" ");
                     runs = Integer.parseInt(datasetInfoLine[1]);
                     datasetStr = datasetInfoLine[0];
@@ -679,8 +687,13 @@ public class Utils {
                 if (includesTrueLabels) {
                     String labelsTrue = br.readLine();
                 }
+
                 int[][] solutions = new int[runs][];
+                String time;
                 for (int i = 0; i < runs; ++i) {
+                    if (includesTime) {
+                        time = br.readLine();
+                    }
                     String solLine = br.readLine();
                     String[] expSols = solLine.substring(1, solLine.length()-1).split(", ");
                     solutions[i] = new int[expSols.length];
