@@ -95,8 +95,8 @@ public class KMeans {
                 labels[i] = clusterInstance(copiedData[i]);
             }
 
-            double curSSE = sse(centroids, labels, data);
-            double prevSSE = sse(prevCentroids, prevLabels, data);
+            double curSSE = utils.Utils.sse(centroids, labels, data);
+            double prevSSE = utils.Utils.sse(prevCentroids, prevLabels, data);
             double diff = Math.abs(curSSE - prevSSE);
             if (initialization == Initialization.HILL_CLIMBER && diff < threshold) {
                 //System.out.println("converged at: " + round);
@@ -107,42 +107,6 @@ public class KMeans {
             prevLabels = labels.clone();
         }
         getRidOfEmptyCentroids();
-    }
-
-    private double sse(double[][] centroidList, int[] labelList, double[][] data) {
-        HashMap<Integer, double[]> mapC = new HashMap<>();
-        for (int i = 0; i < centroidList.length; ++i) {
-            mapC.put(i, centroidList[i]);
-        }
-        List<Cluster> clusters = transform(mapC, labelList, data);
-        double sum = 0;
-        for (Cluster cluster : clusters) {
-            for (double[] point: cluster.getPoints()) {
-                double dist = Utils.dist(cluster.getCentroid(), point, 2.0);
-                sum += dist;
-            }
-        }
-        return sum;
-    }
-
-    private List<Cluster> transform(HashMap<Integer, double[]> aClusters, int[] aLabels, double[][] aData) {
-        List<Cluster> clusters = new ArrayList<>(aClusters.size());
-        HashMap<Integer, Integer> mapIDToArr = new HashMap<>();
-        int idx = 0;
-        for (int id: aClusters.keySet()) {
-            clusters.add(new Cluster(id, aClusters.get(id)));
-            mapIDToArr.put(id, idx);
-            ++idx;
-        }
-
-        for (int i = 0; i < aData.length; ++i) {
-            int label = aLabels[i];
-            int indexToPut = mapIDToArr.get(label);
-            clusters.get(indexToPut).add(aData[i]);
-        }
-        clusters.removeIf(cluster -> cluster.size() < 1);
-
-        return clusters;
     }
 
     private void getRidOfEmptyCentroids() {

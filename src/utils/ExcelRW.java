@@ -22,6 +22,53 @@ public class ExcelRW {
 
     private static String[] columns = {"ari", "db", "silh", "k"};
 
+    public static void write(String path, Dataset dataset, double[][] table) throws IOException {
+        String datasetName = dataset.name();
+        File file = new File(path);
+        FileOutputStream fileOut;
+        Workbook workbook;
+        if (file.exists()) {
+            try {
+                workbook = HSSFWorkbookFactory.create(file);
+            } catch (Exception e) {
+                file = new File(path.replace(".xls", "New.xls"));
+                workbook = HSSFWorkbookFactory.create(file);
+            }
+            fileOut = new FileOutputStream(file);
+        } else {
+            workbook = new HSSFWorkbook();
+            fileOut = new FileOutputStream(path);
+        }
+        // if sheet with this name exists
+        int sheetIdx = workbook.getSheetIndex(datasetName);
+        if (sheetIdx >= 0) {
+            workbook.removeSheetAt(sheetIdx);
+        }
+        Sheet sheet = workbook.createSheet(datasetName);
+        columns = new String[]{"K", "SSE"};
+        Row headerRow = sheet.createRow(0);
+        for (int i = 0; i < columns.length; ++i) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(columns[i]);
+        }
+
+        int rowIdx = 1;
+        for (double[] r: table) {
+            Row row = sheet.createRow(rowIdx++);
+            for (int i = 0; i < r.length; ++i) {
+                row.createCell(i).setCellValue(r[i]);
+            }
+        }
+
+        // Resize all columns to fit the content size
+        for(int i = 0; i < columns.length; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        // Write the output to a file
+        workbook.write(fileOut);
+        fileOut.close();
+    }
 
     public static void write(String path, Experiment[] experiments, String datasetName) throws Exception {
         File file = new File(path);
@@ -81,7 +128,7 @@ public class ExcelRW {
     }
 
     public static void main(String[] args) throws Exception {
-        Experiment[] experiments1 = {
+        /*Experiment[] experiments1 = {
                 new Experiment(new int[]{1,1,2,4}, 3.2, 2.3, 0.5, 6),
                 new Experiment(new int[]{2,1,4,2}, 3.4, 3, 0.6, 4)
         };
@@ -110,6 +157,6 @@ public class ExcelRW {
         Utils.whenWriteStringUsingBufferedWritter_thenCorrect(solutionsLog.toString(), solutionsFilePath, true);
         for (int i = 0; i < datasets.length; ++i) {
             ExcelRW.write(resultFilePath, datasetExperiments[i], datasets[i].name());
-        }
+        }*/
     }
 }

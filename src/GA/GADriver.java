@@ -58,7 +58,8 @@ public class GADriver extends Analyzer {
         mgaC33(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.8,0.2}),
         mgaC34(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.1,0.9}),
         mgaC35(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.7,0.3}),
-        mgaC36(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.3,0.7});
+        mgaC36(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.3,0.7}),
+        mgaC37(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.05,0.95});
 
         private int chrSelectionGen;
         private int generations;
@@ -145,7 +146,7 @@ public class GADriver extends Analyzer {
                 cl.setTrueLabels(labelsTrue);
                 cl.setkMeansInit(KMeans.Initialization.RANDOM);
                 cl.setHillClimb(true);
-                cl.setDistance(this.dataset.getDist());
+                cl.setDistance(1.0);
 
                 cl.setStartChromosomeSelectionGeneration(gaConfiguration.chrSelectionGen);
                 cl.setNumGenerations(gaConfiguration.generations);
@@ -209,14 +210,14 @@ public class GADriver extends Analyzer {
     }
 
     public static void main(String[] args) throws Exception {
+        System.out.println("GA");
         String confStr = args[0];
         GaConfiguration conf = GaConfiguration.valueOf(confStr);
         Dataset dataset = Dataset.valueOf(args[1]);
         int seedStartFrom = Integer.parseInt(args[2]);
         int runs = Integer.parseInt(args[3]);
         if (conf != GaConfiguration.GA) {
-            String solutionsFilePath = "results/mGA/" + conf.name() + "_" + "-" + seedStartFrom + "-" + runs + ".txt";
-
+            String solutionsFilePath = "results/mGA/" + conf.name() + "_" + dataset.name() + "-" + seedStartFrom + "-" + runs + ".txt";
             GADriver driver = new GADriver();
             driver.setDataset(dataset);
             driver.setGaConfiguration(conf);

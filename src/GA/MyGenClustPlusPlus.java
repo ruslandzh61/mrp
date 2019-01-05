@@ -707,7 +707,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
             if (normalizeObjectives) {
                 utils.Utils.normalize(objs, objBestCoordinates, objWorstCoordinates);
             }
-            return 1.0D / utils.Utils.sum(objs, evaluationWeights, 1.0);
+            return 1.0D / utils.Utils.sum(objs, evaluationWeights, 2.0);
         } else if (this.fitnessType == FITNESS.SILHOUETTE) {
             return this.silhouette.compute(chromosome.getLabels(), this.myData);
         } else if (fitnessType == FITNESS.DBINDEX) {

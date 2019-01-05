@@ -2,6 +2,7 @@ package utils;
 
 import GA.GADriver;
 import PSO.Solution;
+import clustering.Cluster;
 import clustering.Dataset;
 import clustering.Experiment;
 import com.opencsv.CSVParser;
@@ -720,8 +721,46 @@ public class Utils {
         System.out.println(Arrays.toString(labelsTrue));
     }
 
-    public static void main(String[] args) throws Exception {
+    public static double sse(double[][] centroidList, int[] labelList, double[][] data) {
+        HashMap<Integer, double[]> mapC = new HashMap<>();
+        for (int i = 0; i < centroidList.length; ++i) {
+            mapC.put(i, centroidList[i]);
+        }
+        List<Cluster> clusters = transform(mapC, labelList, data);
+        double sum = 0;
+        for (Cluster cluster : clusters) {
+            for (double[] point: cluster.getPoints()) {
+                double dist = Utils.dist(cluster.getCentroid(), point, 2.0);
+                sum += dist;
+            }
+        }
+        return sum;
+    }
 
+    public static List<Cluster> transform(HashMap<Integer, double[]> aClusters, int[] aLabels, double[][] aData) {
+        List<Cluster> clusters = new ArrayList<>(aClusters.size());
+        HashMap<Integer, Integer> mapIDToArr = new HashMap<>();
+        int idx = 0;
+        for (int id: aClusters.keySet()) {
+            clusters.add(new Cluster(id, aClusters.get(id)));
+            mapIDToArr.put(id, idx);
+            ++idx;
+        }
+
+        for (int i = 0; i < aData.length; ++i) {
+            int label = aLabels[i];
+            int indexToPut = mapIDToArr.get(label);
+            clusters.get(indexToPut).add(aData[i]);
+        }
+        clusters.removeIf(cluster -> cluster.size() < 1);
+
+        return clusters;
+    }
+
+    public static void main(String[] args) throws Exception {
+        //Utils.reduceDataset(Dataset.IS, false, 2, true);
+        Utils.replaceInFile(Dataset.IS.getPath(), " ", "");
+        //Utils.nominalForm(Dataset.IS.getPath(), "data/ois.csv");
         /*HashMap<String, int[][]> datasetTosolutions = readSolutionFromFile("results/mGA/tuning/mgaC1.txt", 10);
         for (String dataset: datasetTosolutions.keySet()) {
             System.out.println(dataset);
@@ -732,12 +771,12 @@ public class Utils {
         }*/
         //Dataset d = Dataset.S2;
         //reduceDataset(d, true, 5, true);
-        Dataset[] datasets = {Dataset.AGGREGATION, Dataset.R15, Dataset.JAIN};
+        /*Dataset[] datasets = {Dataset.AGGREGATION, Dataset.R15, Dataset.JAIN};
         for (Dataset d: datasets) {
             String newPath = d.getPath().replace(".csv", "o.csv");
             nominalForm(d.getPath(), newPath);
             replaceInFile(newPath, " ", "");
-        }
+        }*/
 
         //Utils.nominalFormToNumber("data/compound.csv", ',', -1);
         //Utils.nominalForm("data/aggregation.csv", "data/oaggregation.csv");

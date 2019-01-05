@@ -108,7 +108,7 @@ public class PSO {
 
         while(curIterationNum < conf.maxIteration && numOfIterWithoutImprov < conf.maxIterWithoutImprovement) {
             //if (this.curIterationNum % 20 == 0) {
-            System.out.println("ITERATION " + curIterationNum + ": ");
+            //System.out.println("ITERATION " + curIterationNum + ": ");
             //}
             update();
             /*if (this.curIterationNum % 20 == 0) {
@@ -135,9 +135,6 @@ public class PSO {
         } else {
             Collections.sort(this.psoList);
             leader = this.psoList.get(0);
-            for (int i = 0; i < 5; ++i) {
-                System.out.println("F:" + psoList.get(i).getSolution().getFitness());
-            }
         }
         Utils.removeNoise(leader.getSolution().getSolution(), problem.getData(), minSizeOfCluster, 2.0);
         Utils.adjustAssignments(leader.getSolution().getSolution());
@@ -490,7 +487,7 @@ public class PSO {
             }
             prevBest = new Solution(curBest);
 
-            int[] labelsPred = psoList.get(0).getSolution().getSolution();
+            /*int[] labelsPred = psoList.get(0).getSolution().getSolution();
             HashMap<Integer, double[]> centroids = Utils.centroids(this.problem.getData(), labelsPred);
             double aRIScore = this.adjustedRandIndex.measure(this.labelsTrue, labelsPred);
             double dbScore = Utils.dbIndexScore(centroids, labelsPred, this.problem.getData());
@@ -499,13 +496,13 @@ public class PSO {
             System.out.println("A: " + aRIScore);
             System.out.println("D: " + dbScore);
             System.out.println("S: " + silhScore);
-            System.out.println("K: " + numClusters);
+            System.out.println("K: " + numClusters);*/
 
         }
     }
 
     private double fitness(double[] objs) {
-        return utils.Utils.sum(objs, this.conf.weights, 1.0);
+        return utils.Utils.sum(objs, this.conf.weights, 2.0);
     }
 
     private List<Particle> determineParetoSet(List<Particle> particleList) {

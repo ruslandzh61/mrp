@@ -124,8 +124,9 @@ public class PSODriver extends Analyzer {
     }
 
     public static void main(String[] args) throws Exception {
+        System.out.println("PSO");
         PSOConfiguration conf = PSOConfiguration.valueOf(args[0]);
-        Dataset dataset = Dataset.valueOf(args[1]); //Dataset.S1;
+        Dataset dataset =  Dataset.valueOf(args[1]); //Dataset.S1;
         int seedStartFrom = Integer.parseInt(args[2]);
         int runs = Integer.parseInt(args[3]);
 

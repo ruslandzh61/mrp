@@ -115,7 +115,7 @@ public abstract class Analyzer {
     protected void saveResults(String solutionsFilePath) throws Exception {
         StringBuilder solutionsLog = new StringBuilder();
 
-        solutionsLog.append(dataset.name() + System.lineSeparator() + Arrays.toString(dataset.getLabels()) + System.lineSeparator()); // " " + reporter.size() + System.lineSeparator());
+        solutionsLog.append(dataset.name() + " " + reporter.size() + System.lineSeparator());
         for (int j = 0; j < reporter.size(); ++j) {
             //solutionsLog.append(reporter.get(j).getTime() + System.lineSeparator());
             solutionsLog.append(Arrays.toString(reporter.get(j).getSolution()) + System.lineSeparator());

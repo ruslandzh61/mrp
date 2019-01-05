@@ -155,9 +155,9 @@ public class ResultsGenerator {
 
 
     public static void main(String[] args) throws Exception {
-        Dataset[] datasets = {Dataset.JAIN, Dataset.GLASS, Dataset.DERMATOLOGY, Dataset.WDBC, Dataset.FLAME, Dataset.COMPOUND,
-                Dataset.PATHBASED, Dataset.DIM064, Dataset.DIM256, Dataset.S1, Dataset.S2, Dataset.S3, Dataset.S4};
-        ResultsGenerator resultsGenerator = new ResultsGenerator(datasets, new String[]{"ga11"});
-        resultsGenerator.generate("results/GA/", 30, false, true, false);
+        Dataset[] datasets = {Dataset.GLASS, Dataset.WDBC, Dataset.FLAME, Dataset.COMPOUND,
+                Dataset.PATHBASED, Dataset.JAIN, Dataset.S1, Dataset.S3, Dataset.DIM064, Dataset.DIM256};
+        ResultsGenerator resultsGenerator = new ResultsGenerator(datasets, new String[]{"pso"});
+        resultsGenerator.generate("results/PSO/", 30, true, false, false);
     }
 }

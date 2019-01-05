@@ -2,14 +2,70 @@
 <project version="4">
   <component name="ArtifactsWorkspaceSettings">
     <artifacts-to-build>
-      <artifact name="GADriver2" />
+      <artifact name="KmeansDriver" />
     </artifacts-to-build>
   </component>
   <component name="ChangeListManager">
     <list default="true" id="31ac2908-1b01-48a7-8033-ec2e78d94e2f" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/meta/GA/META-INF/MANIFEST.MF" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/meta/PSO/META-INF/MANIFEST.MF" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/.idea/artifacts/Project_jar.xml" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/data/is.csv" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/artifacts/Project_jar/Project.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/artifacts/mGA/GADriver.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/artifacts/mGA2/GADriver2.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/artifacts/mGA2/GADriver3.jar" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/out/production/Project/meta/mGA/META-INF/MANIFEST.MF" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/results/PSO/psoCONF1.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/results/PSO/psoCONF1.xls" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/results/PSO/psoCONF1_0-6.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/results/PSO/psoCONF1_6-7-20-10.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/results/PSO/psoCONF1_6-9.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/results/PSO/psoCONF1_9-13.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/results/mGA/mgaC13.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/results/mGA/mgaC13.xls" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/results/mGA/mgaC13_0-9-30-0.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/results/mGA/mgaC13_9-10-15-0.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/results/mGA/mgaC13_9-10-15-15.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/results/mGA/mgaC31_-0-5.txt" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/meta/mGA/META-INF/MANIFEST.MF" afterPath="" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/.idea/artifacts/GADriver2.xml" afterPath="$PROJECT_DIR$/.idea/artifacts/PSODriver.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/GA/GADriver$GaConfiguration.class" afterPath="$PROJECT_DIR$/out/production/Project/GA/GADriver$GaConfiguration.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/GA/GADriver.class" afterPath="$PROJECT_DIR$/out/production/Project/GA/GADriver.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/GA/MyGenClustPlusPlus.class" afterPath="$PROJECT_DIR$/out/production/Project/GA/MyGenClustPlusPlus.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/PSO/PSO$1.class" afterPath="$PROJECT_DIR$/out/production/Project/PSO/PSO$1.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/PSO/PSO.class" afterPath="$PROJECT_DIR$/out/production/Project/PSO/PSO.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/PSO/PSOConfiguration.class" afterPath="$PROJECT_DIR$/out/production/Project/PSO/PSOConfiguration.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/PSO/PSODriver.class" afterPath="$PROJECT_DIR$/out/production/Project/PSO/PSODriver.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/clustering/Analyzer.class" afterPath="$PROJECT_DIR$/out/production/Project/clustering/Analyzer.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/clustering/Dataset.class" afterPath="$PROJECT_DIR$/out/production/Project/clustering/Dataset.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/clustering/KMeans.class" afterPath="$PROJECT_DIR$/out/production/Project/clustering/KMeans.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/clustering/KMeansDriver.class" afterPath="$PROJECT_DIR$/out/production/Project/clustering/KMeansDriver.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/utils/ExcelRW.class" afterPath="$PROJECT_DIR$/out/production/Project/utils/ExcelRW.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/utils/ResultsGenerator.class" afterPath="$PROJECT_DIR$/out/production/Project/utils/ResultsGenerator.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/utils/Utils.class" afterPath="$PROJECT_DIR$/out/production/Project/utils/Utils.class" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/results/GA/ga11.xls" afterPath="$PROJECT_DIR$/results/GA/ga11.xls" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/results/PSO/means.xls" afterPath="$PROJECT_DIR$/results/PSO/means.xls" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/results/PSO/stdDevs.xls" afterPath="$PROJECT_DIR$/results/PSO/stdDevs.xls" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/results/k-means/my-kmeans++.xls" afterPath="$PROJECT_DIR$/results/k-means/my-kmeans++.xls" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/results/mGA/means.xls" afterPath="$PROJECT_DIR$/results/mGA/means.xls" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/results/mGA/stdDevs.xls" afterPath="$PROJECT_DIR$/results/mGA/stdDevs.xls" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/artifacts/GADriver.xml" afterPath="$PROJECT_DIR$/.idea/artifacts/GADriver.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/META-INF/MANIFEST.MF" afterPath="$PROJECT_DIR$/out/production/Project/META-INF/MANIFEST.MF" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/GA/GADriver.java" afterPath="$PROJECT_DIR$/src/GA/GADriver.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/GA/MyGenClustPlusPlus.java" afterPath="$PROJECT_DIR$/src/GA/MyGenClustPlusPlus.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/META-INF/MANIFEST.MF" afterPath="$PROJECT_DIR$/src/META-INF/MANIFEST.MF" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/PSO/PSO.java" afterPath="$PROJECT_DIR$/src/PSO/PSO.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/PSO/PSOConfiguration.java" afterPath="$PROJECT_DIR$/src/PSO/PSOConfiguration.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/PSO/PSODriver.java" afterPath="$PROJECT_DIR$/src/PSO/PSODriver.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/clustering/Analyzer.java" afterPath="$PROJECT_DIR$/src/clustering/Analyzer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/clustering/Dataset.java" afterPath="$PROJECT_DIR$/src/clustering/Dataset.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/clustering/KMeans.java" afterPath="$PROJECT_DIR$/src/clustering/KMeans.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/clustering/KMeansDriver.java" afterPath="$PROJECT_DIR$/src/clustering/KMeansDriver.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/utils/ExcelRW.java" afterPath="$PROJECT_DIR$/src/utils/ExcelRW.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/utils/ResultsGenerator.java" afterPath="$PROJECT_DIR$/src/utils/ResultsGenerator.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/utils/Utils.java" afterPath="$PROJECT_DIR$/src/utils/Utils.java" />
     </list>
     <ignored path="GA-PSO-Clustering.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -34,24 +90,45 @@
       <file leaf-file-name="Analyzer.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/clustering/Analyzer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="242">
-              <caret line="139" column="60" selection-start-line="139" selection-start-column="60" selection-end-line="139" selection-end-column="60" />
+            <state relative-caret-position="1560">
+              <caret line="124" column="8" selection-start-line="115" selection-start-column="8" selection-end-line="124" selection-end-column="8" />
+              <folding>
+                <element signature="e#884#885#0" expanded="true" />
+                <element signature="e#929#930#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Utils.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/utils/Utils.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="10425">
+              <caret line="723" column="25" selection-start-line="723" selection-start-column="25" selection-end-line="723" selection-end-column="25" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="PSO.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/PSO/PSO.java">
+      <file leaf-file-name="KMeansDriver.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/clustering/KMeansDriver.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="360">
-              <caret line="102" column="47" selection-start-line="102" selection-start-column="47" selection-end-line="102" selection-end-column="47" />
+            <state relative-caret-position="396">
+              <caret line="149" column="0" selection-start-line="149" selection-start-column="0" selection-end-line="149" selection-end-column="0" />
               <folding>
-                <element signature="e#18508#18518#0" expanded="true" />
-                <element signature="e#18926#18936#0" expanded="true" />
-                <element signature="e#22050#22051#0" expanded="true" />
-                <element signature="e#22118#22119#0" expanded="true" />
+                <element signature="method#run#0;class#KMeansDriver#0" expanded="false" />
+                <element signature="method#testMultiKmeans#0;class#KMeansDriver#0" expanded="false" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Evaluator.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/clustering/Evaluator.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="840">
+              <caret line="60" column="21" selection-start-line="60" selection-start-column="21" selection-end-line="60" selection-end-column="21" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -69,41 +146,28 @@
       <file leaf-file-name="Reporter.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/clustering/Reporter.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="197">
+            <state relative-caret-position="780">
               <caret line="57" column="51" selection-start-line="57" selection-start-column="51" selection-end-line="57" selection-end-column="51" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Particle.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/PSO/Particle.java">
+      <file leaf-file-name="ExcelRW.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/utils/ExcelRW.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="152">
-              <caret line="17" column="14" selection-start-line="17" selection-start-column="14" selection-end-line="17" selection-end-column="14" />
+            <state relative-caret-position="1755">
+              <caret line="129" column="61" selection-start-line="129" selection-start-column="61" selection-end-line="129" selection-end-column="61" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Solution.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/PSO/Solution.java">
+      <file leaf-file-name="KMeans.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/clustering/KMeans.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="152">
-              <caret line="67" column="18" selection-start-line="67" selection-start-column="18" selection-end-line="67" selection-end-column="18" />
-              <folding>
-                <element signature="e#1898#1899#0" expanded="true" />
-                <element signature="e#1928#1929#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="PSODriver.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/PSO/PSODriver.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="260">
-              <caret line="139" column="48" selection-start-line="139" selection-start-column="48" selection-end-line="139" selection-end-column="48" />
+            <state relative-caret-position="1500">
+              <caret line="109" column="5" selection-start-line="109" selection-start-column="5" selection-end-line="109" selection-end-column="5" />
               <folding />
             </state>
           </provider>
@@ -112,31 +176,19 @@
       <file leaf-file-name="PSOConfiguration.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/PSO/PSOConfiguration.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="8" column="4" selection-start-line="8" selection-start-column="4" selection-end-line="8" selection-end-column="4" />
+            <state relative-caret-position="510">
+              <caret line="34" column="0" selection-start-line="34" selection-start-column="0" selection-end-line="34" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="MyGenClustPlusPlus.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/GA/MyGenClustPlusPlus.java">
+      <file leaf-file-name="Dataset.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/clustering/Dataset.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="152">
-              <caret line="314" column="36" selection-start-line="314" selection-start-column="32" selection-end-line="314" selection-end-column="36" />
+            <state relative-caret-position="165">
+              <caret line="11" column="6" selection-start-line="11" selection-start-column="6" selection-end-line="11" selection-end-column="6" />
               <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="GADriver.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/GA/GADriver.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="195">
-              <caret line="213" column="51" selection-start-line="213" selection-start-column="51" selection-end-line="215" selection-end-column="45" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
             </state>
           </provider>
         </entry>
@@ -196,20 +248,20 @@
         <option value="$PROJECT_DIR$/src/utils/Silh.java" />
         <option value="$PROJECT_DIR$/src/PSO/Solution.java" />
         <option value="$PROJECT_DIR$/src/clustering/Cluster.java" />
-        <option value="$PROJECT_DIR$/src/utils/ExcelRW.java" />
         <option value="$PROJECT_DIR$/src/clustering/Experiment.java" />
         <option value="$PROJECT_DIR$/src/clustering/Reporter.java" />
-        <option value="$PROJECT_DIR$/src/clustering/KMeans.java" />
-        <option value="$PROJECT_DIR$/src/utils/Utils.java" />
+        <option value="$PROJECT_DIR$/src/GA/MyGenClustPlusPlus.java" />
         <option value="$PROJECT_DIR$/src/clustering/Analyzer.java" />
         <option value="$PROJECT_DIR$/src/utils/ResultsGenerator.java" />
-        <option value="$PROJECT_DIR$/src/GA/MyGenClustPlusPlus.java" />
-        <option value="$PROJECT_DIR$/src/clustering/Dataset.java" />
-        <option value="$PROJECT_DIR$/src/GA/GADriver.java" />
-        <option value="$PROJECT_DIR$/src/clustering/KMeansDriver.java" />
         <option value="$PROJECT_DIR$/src/PSO/PSOConfiguration.java" />
-        <option value="$PROJECT_DIR$/src/PSO/PSO.java" />
+        <option value="$PROJECT_DIR$/src/GA/GADriver.java" />
         <option value="$PROJECT_DIR$/src/PSO/PSODriver.java" />
+        <option value="$PROJECT_DIR$/src/clustering/Dataset.java" />
+        <option value="$PROJECT_DIR$/src/PSO/PSO.java" />
+        <option value="$PROJECT_DIR$/src/utils/ExcelRW.java" />
+        <option value="$PROJECT_DIR$/src/utils/Utils.java" />
+        <option value="$PROJECT_DIR$/src/clustering/KMeans.java" />
+        <option value="$PROJECT_DIR$/src/clustering/KMeansDriver.java" />
       </list>
     </option>
   </component>
@@ -405,28 +457,6 @@
               <option name="myItemId" value="artifacts" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Project_jar" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="GA-PSO-Clustering" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="Project" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="out" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="artifacts" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
@@ -446,7 +476,7 @@
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="FullScreen" value="true" />
   </component>
-  <component name="RunManager" selected="Application.PSODriver">
+  <component name="RunManager" selected="Application.KMeansDriver">
     <configuration default="false" name="Utils" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
@@ -496,28 +526,8 @@
       </extension>
       <option name="MAIN_CLASS_NAME" value="GA.GADriver" />
       <option name="VM_PARAMETERS" value="-ea" />
-      <option name="PROGRAM_PARAMETERS" value="GA S1 0 2" />
+      <option name="PROGRAM_PARAMETERS" value="GA IS 0 2" />
       <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="ENABLE_SWING_INSPECTOR" value="false" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <module name="Project" />
-      <envs />
-      <method />
-    </configuration>
-    <configuration default="false" name="PSODriver" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
-        <pattern>
-          <option name="PATTERN" value="PSO.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="MAIN_CLASS_NAME" value="PSO.PSODriver" />
-      <option name="VM_PARAMETERS" />
-      <option name="PROGRAM_PARAMETERS" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
       <option name="ENABLE_SWING_INSPECTOR" value="false" />
@@ -535,6 +545,26 @@
         </pattern>
       </extension>
       <option name="MAIN_CLASS_NAME" value="utils.ResultsGenerator" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="Project" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="false" name="ExcelRW" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
+        <pattern>
+          <option name="PATTERN" value="utils.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="MAIN_CLASS_NAME" value="utils.ExcelRW" />
       <option name="VM_PARAMETERS" />
       <option name="PROGRAM_PARAMETERS" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
@@ -965,16 +995,16 @@
       <item index="0" class="java.lang.String" itemvalue="Application.Utils" />
       <item index="1" class="java.lang.String" itemvalue="Application.KMeansDriver" />
       <item index="2" class="java.lang.String" itemvalue="Application.GADriver" />
-      <item index="3" class="java.lang.String" itemvalue="Application.PSODriver" />
-      <item index="4" class="java.lang.String" itemvalue="Application.ResultsGenerator" />
+      <item index="3" class="java.lang.String" itemvalue="Application.ResultsGenerator" />
+      <item index="4" class="java.lang.String" itemvalue="Application.ExcelRW" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Application.PSODriver" />
-        <item index="1" class="java.lang.String" itemvalue="Application.KMeansDriver" />
-        <item index="2" class="java.lang.String" itemvalue="Application.ResultsGenerator" />
+        <item index="0" class="java.lang.String" itemvalue="Application.KMeansDriver" />
+        <item index="1" class="java.lang.String" itemvalue="Application.ExcelRW" />
+        <item index="2" class="java.lang.String" itemvalue="Application.Utils" />
         <item index="3" class="java.lang.String" itemvalue="Application.GADriver" />
-        <item index="4" class="java.lang.String" itemvalue="Application.Utils" />
+        <item index="4" class="java.lang.String" itemvalue="Application.ResultsGenerator" />
       </list>
     </recent_temporary>
   </component>
@@ -1057,12 +1087,16 @@
       <workItem from="1546117600906" duration="47454000" />
       <workItem from="1546200841475" duration="5049000" />
       <workItem from="1546491795261" duration="29742000" />
-      <workItem from="1546569812251" duration="14394000" />
+      <workItem from="1546569812251" duration="20604000" />
+      <workItem from="1546621666339" duration="2826000" />
+      <workItem from="1546627258281" duration="13972000" />
+      <workItem from="1546664248717" duration="759000" />
+      <workItem from="1546668192072" duration="32000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1016712000" />
+    <option name="totallyTimeSpent" value="1040511000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -1079,17 +1113,16 @@
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32891566" sideWeight="0.49713877" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32771084" sideWeight="0.43133047" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39036146" sideWeight="0.55007154" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.38340485" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.35301206" sideWeight="0.4048641" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.35301206" sideWeight="0.4048641" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32891566" sideWeight="0.49713877" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32891566" sideWeight="0.49427754" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18526466" sideWeight="0.49371633" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18526466" sideWeight="0.49371633" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24964234" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -1100,6 +1133,7 @@
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32771084" sideWeight="0.43133047" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32891566" sideWeight="0.4828326" order="1" side_tool="false" content_ui="tabs" />
     </layout>
@@ -1135,7 +1169,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="173" />
+      <option name="time" value="174" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -1144,13 +1178,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://$PROJECT_DIR$/src/utils/weka.jar!/weka/core/Instance.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="12" column="17" selection-start-line="12" selection-start-column="17" selection-end-line="12" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/PSO/VelocityCalculator.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="270">
@@ -1264,13 +1291,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_112.jdk/Contents/Home/src.zip!/java/lang/String.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="32400">
-          <caret line="2237" column="18" selection-start-line="2237" selection-start-column="18" selection-end-line="2237" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_112.jdk/Contents/Home/src.zip!/java/lang/Object.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="169">
@@ -1368,24 +1388,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/clustering/KMeans.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="345">
-          <caret line="33" column="81" selection-start-line="33" selection-start-column="81" selection-end-line="33" selection-end-column="81" />
-          <folding>
-            <element signature="method#transform#0;class#KMeans#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/utils/Pareto.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1080">
-          <caret line="74" column="65" selection-start-line="74" selection-start-column="65" selection-end-line="74" selection-end-column="65" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/utils/Graph.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="255">
@@ -1399,57 +1401,9 @@
         <state relative-caret-position="975">
           <caret line="71" column="30" selection-start-line="71" selection-start-column="30" selection-end-line="71" selection-end-column="30" />
           <folding>
-            <element signature="e#2172#2173#0" expanded="true" />
-            <element signature="e#2234#2235#0" expanded="true" />
+            <element signature="e#2172#2173#0" expanded="false" />
+            <element signature="e#2234#2235#0" expanded="false" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/utils/ExcelRW.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="169">
-          <caret line="78" column="0" selection-start-line="78" selection-start-column="0" selection-end-line="78" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/utils/Utils.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="146">
-          <caret line="686" column="26" selection-start-line="686" selection-start-column="26" selection-end-line="686" selection-end-column="26" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/clustering/Evaluator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="479">
-          <caret line="60" column="21" selection-start-line="60" selection-start-column="21" selection-end-line="60" selection-end-column="21" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/utils/ResultsGenerator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="320">
-          <caret line="158" column="91" selection-start-line="158" selection-start-column="91" selection-end-line="158" selection-end-column="91" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/clustering/Dataset.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="10" column="53" selection-start-line="10" selection-start-column="53" selection-end-line="10" selection-end-column="53" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/clustering/KMeansDriver.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="125">
-          <caret line="101" column="33" selection-start-line="101" selection-start-column="33" selection-end-line="101" selection-end-column="33" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -1461,18 +1415,96 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/PSO/Solution.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="855">
+          <caret line="67" column="18" selection-start-line="67" selection-start-column="18" selection-end-line="67" selection-end-column="18" />
+          <folding>
+            <element signature="e#1898#1899#0" expanded="false" />
+            <element signature="e#1928#1929#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/GA/MyGenClustPlusPlus.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="152">
-          <caret line="314" column="36" selection-start-line="314" selection-start-column="32" selection-end-line="314" selection-end-column="36" />
+        <state relative-caret-position="9990">
+          <caret line="709" column="68" selection-start-line="709" selection-start-column="68" selection-end-line="709" selection-end-column="68" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/clustering/Reporter.java">
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_112.jdk/Contents/Home/src.zip!/java/lang/String.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="197">
-          <caret line="57" column="51" selection-start-line="57" selection-start-column="51" selection-end-line="57" selection-end-column="51" />
+        <state relative-caret-position="455">
+          <caret line="2222" column="0" selection-start-line="2222" selection-start-column="0" selection-end-line="2222" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_112.jdk/Contents/Home/src.zip!/java/util/regex/Pattern.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="161">
+          <caret line="1027" column="0" selection-start-line="1027" selection-start-column="0" selection-end-line="1027" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/utils/Pareto.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1080">
+          <caret line="74" column="65" selection-start-line="74" selection-start-column="65" selection-end-line="74" selection-end-column="65" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/utils/ResultsGenerator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="335">
+          <caret line="159" column="20" selection-start-line="159" selection-start-column="20" selection-end-line="159" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/PSO/PSODriver.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1830">
+          <caret line="131" column="0" selection-start-line="131" selection-start-column="0" selection-end-line="131" selection-end-column="0" />
+          <folding>
+            <element signature="e#5349#5350#0" expanded="true" />
+            <element signature="e#5399#5400#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/GA/GADriver.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="390">
+          <caret line="55" column="14" selection-start-line="55" selection-start-column="14" selection-end-line="55" selection-end-column="14" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/PSO/PSO.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1890">
+          <caret line="134" column="16" selection-start-line="134" selection-start-column="16" selection-end-line="134" selection-end-column="16" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/PSO/PSOConfiguration.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="510">
+          <caret line="34" column="0" selection-start-line="34" selection-start-column="0" selection-end-line="34" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/utils/ExcelRW.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1755">
+          <caret line="129" column="61" selection-start-line="129" selection-start-column="61" selection-end-line="129" selection-end-column="61" />
           <folding />
         </state>
       </provider>
@@ -1485,61 +1517,65 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/clustering/Reporter.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="780">
+          <caret line="57" column="51" selection-start-line="57" selection-start-column="51" selection-end-line="57" selection-end-column="51" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/clustering/Analyzer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="242">
-          <caret line="139" column="60" selection-start-line="139" selection-start-column="60" selection-end-line="139" selection-end-column="60" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/PSO/Solution.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="152">
-          <caret line="67" column="18" selection-start-line="67" selection-start-column="18" selection-end-line="67" selection-end-column="18" />
+        <state relative-caret-position="1560">
+          <caret line="124" column="8" selection-start-line="115" selection-start-column="8" selection-end-line="124" selection-end-column="8" />
           <folding>
-            <element signature="e#1898#1899#0" expanded="true" />
-            <element signature="e#1928#1929#0" expanded="true" />
+            <element signature="e#884#885#0" expanded="true" />
+            <element signature="e#929#930#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/PSO/PSOConfiguration.java">
+    <entry file="file://$PROJECT_DIR$/src/utils/Utils.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="8" column="4" selection-start-line="8" selection-start-column="4" selection-end-line="8" selection-end-column="4" />
+        <state relative-caret-position="10425">
+          <caret line="723" column="25" selection-start-line="723" selection-start-column="25" selection-end-line="723" selection-end-column="25" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/PSO/PSO.java">
+    <entry file="file://$PROJECT_DIR$/src/clustering/Evaluator.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="360">
-          <caret line="102" column="47" selection-start-line="102" selection-start-column="47" selection-end-line="102" selection-end-column="47" />
-          <folding>
-            <element signature="e#18508#18518#0" expanded="true" />
-            <element signature="e#18926#18936#0" expanded="true" />
-            <element signature="e#22050#22051#0" expanded="true" />
-            <element signature="e#22118#22119#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/GA/GADriver.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="213" column="51" selection-start-line="213" selection-start-column="51" selection-end-line="215" selection-end-column="45" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/PSO/PSODriver.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="260">
-          <caret line="139" column="48" selection-start-line="139" selection-start-column="48" selection-end-line="139" selection-end-column="48" />
+        <state relative-caret-position="840">
+          <caret line="60" column="21" selection-start-line="60" selection-start-column="21" selection-end-line="60" selection-end-column="21" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/clustering/KMeans.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1500">
+          <caret line="109" column="5" selection-start-line="109" selection-start-column="5" selection-end-line="109" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/clustering/Dataset.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="11" column="6" selection-start-line="11" selection-start-column="6" selection-end-line="11" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/clustering/KMeansDriver.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="396">
+          <caret line="149" column="0" selection-start-line="149" selection-start-column="0" selection-end-line="149" selection-end-column="0" />
+          <folding>
+            <element signature="method#run#0;class#KMeansDriver#0" expanded="false" />
+            <element signature="method#testMultiKmeans#0;class#KMeansDriver#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1549,7 +1585,7 @@
       <state key="ArtifactsStructureConfigurable.UI">
         <settings>
           <artifact-editor />
-          <last-edited>Project:jar</last-edited>
+          <last-edited>GADriver</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>

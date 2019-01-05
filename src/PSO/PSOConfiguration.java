@@ -6,7 +6,11 @@ package PSO;
 public enum PSOConfiguration {
     CONF1(200, false, true, true), // better than CONF2 based on preliminary parameter tuning experiments
     CONF2(200, true, true, true),
-    CONF3(200, true, true, false, new double[]{0.2, 0.8});
+    CONF3(200, true, true, false, new double[]{0.07, 0.93}),
+    CONF4(200, true, true, false, new double[]{0.15, 0.85}),
+    CONF5(200, true, true, false, new double[]{0.05, 0.95}),
+    CONF6(200, true, true, false, new double[]{0.1, 0.9}),
+    CONF7(200, true, true, false);
 
     PSOConfiguration(double c1, double c2, double maxW, double minW, int maxIteration, int maxIterWithoutImprovement,
                      int maxK, int pMax, double numTopParticlesToPickForLeader, boolean normObjs) {
