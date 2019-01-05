@@ -22,8 +22,7 @@ public class ExcelRW {
 
     private static String[] columns = {"ari", "db", "silh", "k"};
 
-    public static void write(String path, Dataset dataset, double[][] table) throws IOException {
-        String datasetName = dataset.name();
+    public static void write(String path, String[] datasetNames, String[][] table) throws IOException {
         File file = new File(path);
         FileOutputStream fileOut;
         Workbook workbook;
@@ -39,13 +38,9 @@ public class ExcelRW {
             workbook = new HSSFWorkbook();
             fileOut = new FileOutputStream(path);
         }
-        // if sheet with this name exists
-        int sheetIdx = workbook.getSheetIndex(datasetName);
-        if (sheetIdx >= 0) {
-            workbook.removeSheetAt(sheetIdx);
-        }
-        Sheet sheet = workbook.createSheet(datasetName);
-        columns = new String[]{"K", "SSE"};
+
+        Sheet sheet = workbook.createSheet();
+        columns = new String[]{"Dataset","ARI", "DB", "Silhouette", "k"};
         Row headerRow = sheet.createRow(0);
         for (int i = 0; i < columns.length; ++i) {
             Cell cell = headerRow.createCell(i);
@@ -53,11 +48,13 @@ public class ExcelRW {
         }
 
         int rowIdx = 1;
-        for (double[] r: table) {
-            Row row = sheet.createRow(rowIdx++);
+        for (String[] r: table) {
+            Row row = sheet.createRow(rowIdx);
+            row.createCell(0).setCellValue(datasetNames[rowIdx-1]);
             for (int i = 0; i < r.length; ++i) {
-                row.createCell(i).setCellValue(r[i]);
+                row.createCell(i+1).setCellValue(r[i]);
             }
+            ++rowIdx;
         }
 
         // Resize all columns to fit the content size
@@ -128,6 +125,11 @@ public class ExcelRW {
     }
 
     public static void main(String[] args) throws Exception {
+        String[] datasets = {Dataset.GLASS.name(), Dataset.WDBC.name(), Dataset.FLAME.name(), Dataset.COMPOUND.name(),
+                Dataset.PATHBASED.name(), Dataset.S1.name(), Dataset.S3.name(), Dataset.DIM064.name(), Dataset.DIM256.name()};
+        String[][] arrStr = {{"45+-4", "40+-6", "45+-4", "7"},{"55+-6", "40+-3", "35+-4","5"},{"30+-4", "45+-9", "35+-7", "5"}};
+        ExcelRW.write("test.xls", datasets, arrStr);
+
         /*Experiment[] experiments1 = {
                 new Experiment(new int[]{1,1,2,4}, 3.2, 2.3, 0.5, 6),
                 new Experiment(new int[]{2,1,4,2}, 3.4, 3, 0.6, 4)

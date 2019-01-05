@@ -674,17 +674,21 @@ public class Utils {
         whenWriteStringUsingBufferedWritter_thenCorrect(res, dataset.getPath().replace(".", "r" + portion + "."), false);
     }
 
-    public static HashMap<String, int[][]> readSolutionFromFile(String filePath, int r, boolean includesRuns, boolean includesTrueLabels, boolean includesTime) throws IOException {
+    public static HashMap<String, int[][]> readSolutionFromFile(String filePath, int r, boolean includesRuns,
+                                            boolean includesTrueLabels, boolean includesTime, Dataset[] datasets) throws IOException {
         HashMap<String, int[][]>  res = new HashMap<>();
         int runs = r;
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String datasetStr;
+            int datasetIdx = 0;
             while ((datasetStr = br.readLine()) != null) {
                 if (includesRuns) {
                     String[] datasetInfoLine = datasetStr.split(" ");
                     runs = Integer.parseInt(datasetInfoLine[1]);
                     datasetStr = datasetInfoLine[0];
                 }
+                assert (datasetStr.equals(datasets[datasetIdx]));
+
                 if (includesTrueLabels) {
                     String labelsTrue = br.readLine();
                 }
@@ -703,6 +707,8 @@ public class Utils {
                     }
                 }
                 res.put(datasetStr, solutions);
+
+                ++datasetIdx;
             }
         }
         return res;
@@ -759,7 +765,7 @@ public class Utils {
 
     public static void main(String[] args) throws Exception {
         //Utils.reduceDataset(Dataset.IS, false, 2, true);
-        Utils.replaceInFile(Dataset.IS.getPath(), " ", "");
+        //Utils.replaceInFile(Dataset.IS.getPath(), " ", "");
         //Utils.nominalForm(Dataset.IS.getPath(), "data/ois.csv");
         /*HashMap<String, int[][]> datasetTosolutions = readSolutionFromFile("results/mGA/tuning/mgaC1.txt", 10);
         for (String dataset: datasetTosolutions.keySet()) {

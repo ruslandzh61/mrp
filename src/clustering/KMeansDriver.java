@@ -35,6 +35,37 @@ public class KMeansDriver extends Analyzer {
 
     public KMeansDriver() {}
 
+    public void run(int k) throws Exception {
+        processData();
+
+        Random rnd = new Random(1);
+        int[] labelsPred;
+        for (int skipRnd = 0; skipRnd < seedStartFrom; ++skipRnd) {
+            rnd.nextInt();
+        }
+        for (int run = 1; run <= this.reporter.size(); ++run) {
+            KMeans kMeans = new KMeans(k, distMeasure);
+            kMeans.setSeed(rnd.nextInt());
+            if (isUsekMeansPlusPlus) {
+                kMeans.setInitializationMethod(KMeans.Initialization.KMEANS_PLUS_PLUS);
+            } else {
+                kMeans.setInitializationMethod(KMeans.Initialization.RANDOM);
+            }
+            kMeans.buildClusterer(this.dataAttrs);
+            labelsPred = kMeans.getLabels();
+            Utils.removeNoise(labelsPred, this.dataAttrs, 2, 2.0);
+            Utils.adjustAssignments(labelsPred);
+            Experiment e = measure(labelsPred);
+            reporter.set(run-1, e);
+
+            System.out.println("A:" + e.getAri());
+            System.out.println("D:" + e.getDb());
+            System.out.println("S:" + e.getSilh());
+            System.out.println("K:" + e.getK());
+            System.out.println("----");
+        }
+    }
+
     public void runK(String path, int runs) throws Exception {
         StringBuilder solutionsLog = new StringBuilder();
         Random rnd = new Random(1);
@@ -199,7 +230,7 @@ public class KMeansDriver extends Analyzer {
         }
     }
 
-    public static void main(String[] args) throws Exception {
+    static void testForElbow(String[] args) throws Exception {
         String path;
         boolean usePlusPlus = false;
         double distMeasure = 1.0;
@@ -213,5 +244,25 @@ public class KMeansDriver extends Analyzer {
         driver.setSeedStartFrom(seedStartFrom);
         driver.setUsekMeansPlusPlus(usePlusPlus);
         driver.runK(path, runs);
+    }
+
+    public static void main(String[] args) throws Exception {
+        System.out.println("K-means");
+        Dataset[] datasets = {Dataset.GLASS, Dataset.JAIN, Dataset.WDBC, Dataset.FLAME, Dataset.COMPOUND,
+        Dataset.PATHBASED, Dataset.S1, Dataset.S3, Dataset.DIM064, Dataset.DIM256};
+        int[] ks = {3,3,2,4,3,3,12,13,21,12};
+        int runs = 1;
+        int datasetIdx = 8; //Integer.parseInt(args[0]);
+        String solutionsFilePath = "results/k-means/" + datasets[datasetIdx].name() + ks[datasetIdx] + ".txt";
+        System.out.println(solutionsFilePath + "will be created");
+        KMeansDriver driver = new KMeansDriver();
+        driver.setUsekMeansPlusPlus(false);
+        driver.setDistMeasure(1.0);
+        driver.setDataset(datasets[datasetIdx]);
+        driver.setRuns(runs);
+        driver.setSeedStartFrom(30);
+        driver.run(ks[datasetIdx]);
+        driver.analyze(true);
+        driver.saveResults(solutionsFilePath);
     }
 }

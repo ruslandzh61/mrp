@@ -19,15 +19,15 @@ import java.util.List;
 public class ResultsGenerator {
     Dataset[] datasets;
     List<double[][]> dataAttrsList;
-    String[] configurations;
+    String configuration;
 
     AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
     Silh silhoutte = new Silh();
 
-    public ResultsGenerator(Dataset[] aDatasets, String[] aConfigurations) throws IOException {
+    public ResultsGenerator(Dataset[] aDatasets, String aConfiguration) throws IOException {
         datasets = aDatasets;
         this.dataAttrsList = new ArrayList<>(datasets.length);
-        this.configurations = aConfigurations;
+        this.configuration = aConfiguration;
         processDatasetData();
     }
 
@@ -87,77 +87,81 @@ public class ResultsGenerator {
     // String[] confs = {GADriver.GaConfiguration.mgaC1.name()};//GADriver.GaConfiguration.values();
     public void generate(String folderPath, int runs, boolean includesRuns, boolean includesTrueLabels, boolean includesTime) throws Exception { // folder "results/mGA/tuning"
         Experiment[] experiments;
-        Experiment[][] confMeans = new Experiment[datasets.length][configurations.length];
-        Experiment[][] confStdDevs = new Experiment[datasets.length][configurations.length];
-        int confIdx = 0;
-        String confMeansPath = folderPath + "means" + ".xls";
-        String confStdDevPath = folderPath + "stdDevs" + ".xls";
-        for (String conf: configurations) {
-            System.out.println(conf);
-            experiments = new Experiment[runs+2];
-            String filePath = folderPath + conf + ".txt";
-            HashMap<String, int[][]> datasetTosolutions = Utils.readSolutionFromFile(filePath, runs, includesRuns, includesTrueLabels, includesTime);
-
-            int datasetIdx = 0;
-            for (Dataset dataset: datasets) {
-                System.out.println(dataset);
-                int[][] expSols = datasetTosolutions.get(dataset.name());
-                Reporter reporter = new Reporter(expSols.length);
-                int expSolIdx = 0;
-                for (int[] expSol: expSols) {
-                    //System.out.println(Arrays.toString(expSol));
-                    experiments[expSolIdx] = measure(datasetIdx, expSol);
-                    reporter.set(expSolIdx, experiments[expSolIdx]);
-                    ++expSolIdx;
-                }
-                String excelFilePath = folderPath + conf + ".xls";
-                reporter.compute();
-                experiments[expSolIdx++] = reporter.getMean();
-                experiments[expSolIdx] = reporter.getStdDev();
-                ExcelRW.write(excelFilePath, experiments, datasets[datasetIdx].name());
-
-                confMeans[datasetIdx][confIdx] = reporter.getMean();
-                confMeans[datasetIdx][confIdx].setConfiguration(conf);
-                confStdDevs[datasetIdx][confIdx] = reporter.getStdDev();
-                confStdDevs[datasetIdx][confIdx].setConfiguration(conf);
-
-                ++datasetIdx;
-            }
-            ++confIdx;
-        }
+        Experiment[] confMeans = new Experiment[datasets.length];
+        Experiment[] confStdDevs = new Experiment[datasets.length];
+        System.out.println(this.configuration);
+        experiments = new Experiment[runs+2];
+        String filePath = folderPath + this.configuration + ".txt";
+        HashMap<String, int[][]> datasetTosolutions = Utils.readSolutionFromFile(filePath, runs, includesRuns, includesTrueLabels, includesTime, datasets);
 
         int datasetIdx = 0;
         for (Dataset dataset: datasets) {
-            ExcelRW.write(confMeansPath, confMeans[datasetIdx], dataset.name());
-            ExcelRW.write(confStdDevPath, confStdDevs[datasetIdx], dataset.name());
+            System.out.println(dataset);
+            int[][] expSols = datasetTosolutions.get(dataset.name());
+            Reporter reporter = new Reporter(expSols.length);
+            int expSolIdx = 0;
+            for (int[] expSol: expSols) {
+                //System.out.println(Arrays.toString(expSol));
+                experiments[expSolIdx] = measure(datasetIdx, expSol);
+                reporter.set(expSolIdx, experiments[expSolIdx]);
+                ++expSolIdx;
+            }
+            reporter.compute();
+            experiments[expSolIdx++] = reporter.getMean();
+            experiments[expSolIdx] = reporter.getStdDev();
+
+            confMeans[datasetIdx] = reporter.getMean();
+            confStdDevs[datasetIdx] = reporter.getStdDev();
+
             ++datasetIdx;
         }
 
-        Experiment[] confMeanOverDatasets = new Experiment[configurations.length];
-        Experiment[] confStdDevOverDatasets = new Experiment[configurations.length];
-
-        for (int i = 0; i < configurations.length; ++i) {
-            Reporter reporter = new Reporter(datasets.length);
-            for (int j = 0; j < confMeans.length; ++j) {
-                reporter.set(j, confMeans[j][i]);
-            }
-            reporter.compute();
-            confMeanOverDatasets[i] = reporter.getMean();
-            confMeanOverDatasets[i].setConfiguration(configurations[i]);
-
-            confStdDevOverDatasets[i] = reporter.getStdDev();
-            confMeanOverDatasets[i].setConfiguration(configurations[i]);
+        String[][] datasetMeanStdDevsAverage = new String[datasets.length+1][4];
+        String[] d;
+        for (int i = 0; i < datasets.length; ++i) {
+            d = datasetMeanStdDevsAverage[i];
+            d[0] = utils.Utils.doublePrecision(confMeans[i].getAri(), 4) + " +- " + utils.Utils.doublePrecision(confStdDevs[i].getAri(), 4);
+            d[1] = utils.Utils.doublePrecision(confMeans[i].getDb(), 4) + " +- " + utils.Utils.doublePrecision(confStdDevs[i].getDb(), 4);
+            d[2] = utils.Utils.doublePrecision(confMeans[i].getSilh(), 4) + " +- " + utils.Utils.doublePrecision(confStdDevs[i].getSilh(), 4);
+            d[3] = utils.Utils.doublePrecision(confMeans[i].getK(), 4) + " +- " + utils.Utils.doublePrecision(confStdDevs[i].getK(), 4);
         }
+        String excelFilePath = folderPath + "datasetMeanStdDevs.xls";
 
-        ExcelRW.write(confMeansPath, confMeanOverDatasets, "Overall");
-        ExcelRW.write(confStdDevPath, confStdDevOverDatasets, "Overall");
+        // average mean for all datasets
+        Reporter reporter = new Reporter(datasets.length);
+        for (int j = 0; j < confMeans.length; ++j) {
+            reporter.set(j, confMeans[j]);
+        }
+        reporter.compute();
+        Experiment confMeanOverDatasets = reporter.getMean();
+
+        // average std dev for all datasets
+        reporter = new Reporter(datasets.length);
+        for (int j = 0; j < confStdDevs.length; ++j) {
+            reporter.set(j, confStdDevs[j]);
+        }
+        reporter.compute();
+        Experiment confStdDevOverDatasets = reporter.getMean();
+
+        d = datasetMeanStdDevsAverage[datasetMeanStdDevsAverage.length-1];
+        d[0] = utils.Utils.doublePrecision(confMeanOverDatasets.getAri(), 4) + " +- " + utils.Utils.doublePrecision(confStdDevOverDatasets.getAri(), 4);
+        d[1] = utils.Utils.doublePrecision(confMeanOverDatasets.getDb(), 4) + " +- " + utils.Utils.doublePrecision(confStdDevOverDatasets.getDb(), 4);
+        d[2] = utils.Utils.doublePrecision(confMeanOverDatasets.getSilh(), 4) + " +- " + utils.Utils.doublePrecision(confStdDevOverDatasets.getSilh(), 4);
+        d[3] = utils.Utils.doublePrecision(confMeanOverDatasets.getK(), 4) + " +- " + utils.Utils.doublePrecision(confStdDevOverDatasets.getK(), 4);
+
+        String[] datasetNames = new String[datasets.length+1];
+        for (int i = 0; i < datasets.length; ++i) {
+            datasetNames[i] = datasets[i].name();
+        }
+        datasetNames[datasetNames.length-1] = "Average";
+        ExcelRW.write(excelFilePath, datasetNames, datasetMeanStdDevsAverage);
     }
 
 
     public static void main(String[] args) throws Exception {
         Dataset[] datasets = {Dataset.GLASS, Dataset.WDBC, Dataset.FLAME, Dataset.COMPOUND,
                 Dataset.PATHBASED, Dataset.JAIN, Dataset.S1, Dataset.S3, Dataset.DIM064, Dataset.DIM256};
-        ResultsGenerator resultsGenerator = new ResultsGenerator(datasets, new String[]{"pso"});
-        resultsGenerator.generate("results/PSO/", 30, true, false, false);
+        ResultsGenerator resultsGenerator = new ResultsGenerator(datasets, "mga");
+        resultsGenerator.generate("results/mGA/", 30, true, false, true);
     }
 }
