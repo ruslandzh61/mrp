@@ -16,11 +16,7 @@ public class KMeansDriver extends Analyzer {
     private boolean isUsekMeansPlusPlus;
     private boolean isUseWekaVersion;
 
-    public void setSeedStartFrom(int seedStartFrom) {
-        this.seedStartFrom = seedStartFrom;
-    }
 
-    private int seedStartFrom;
 
     public void setDistMeasure(double distMeasure) {
         this.distMeasure = distMeasure;

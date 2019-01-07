@@ -23,6 +23,7 @@ public class Particle implements Comparable<Particle> {
     private Random rnd;
     private int seed;
     private static int default_seed = 10;
+    private Solution prev = null;
 
     public Particle(Solution aSolution, double[] aVelocity) {
         assert (aVelocity != null);
@@ -46,12 +47,17 @@ public class Particle implements Comparable<Particle> {
         setSeed(particle.getSeed());
     }
 
+    public Solution getPrev() {
+        return prev;
+    }
+
     /**
      * update real solution vector X through intermediate solution vector Y. update Y first and then X for step t
      * gBest is global best solution at step t-1, pBest is personal best at step t-1 before calling update method
      * */
     public void update(Solution gBest, int maxK) {
         assert (gBest != null);
+        this.prev = new Solution(this.solution);
 
         int[] sol = solution.getSolution();
         // step 1 - obtain currect dummy intermediate solution vector at step t-1

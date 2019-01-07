@@ -22,23 +22,6 @@ public class PSODriver extends Analyzer {
 
     private PSOConfiguration configuration;
 
-    public void setSeedStartFrom(int seedStartFrom) {
-        this.seedStartFrom = seedStartFrom;
-    }
-
-    private int seedStartFrom;
-    //List<List<Experiment>> iterations;
-
-    public PSODriver(PSOConfiguration aConf) {
-        this.configuration = aConf;
-    }
-
-    @Override
-    protected void setRuns(int runs) {
-        super.setRuns(runs);
-        //iterations = new ArrayList<>(runs);
-    }
-
     /**
      * main method to run PSO-based buildClusterer
      * */
@@ -85,37 +68,6 @@ public class PSODriver extends Analyzer {
             System.out.println("S:" + e.getSilh());
             System.out.println("K:" + e.getK());
             reporter.set(run-1, e);
-
-            //iterations.add(pso.iterationsBest);
-            // test hill-climber
-            /*int[] labelsPredCloned = labelsPred.clone();
-            centroids = Utils.centroids(this.dataAttrs, labelsPredCloned);
-            double[][] initialCentroids = new double[centroids.size()][];
-            initialCentroids = centroids.values().toArray(initialCentroids);
-            clustering.KMeans kMeans = new clustering.KMeans(initialCentroids.length, 2.0);
-            kMeans.setInitializationMethod(clustering.KMeans.Initialization.HILL_CLIMBER);
-            kMeans.setInitial(initialCentroids);
-            kMeans.buildClusterer(this.dataAttrs);
-            labelsPred = Utils.adjustLabels(kMeans.getLabels());
-            Utils.removeNoise(labelsPred, this.dataAttrs, 2, 2.0);
-            Utils.adjustAssignments(labelsPred);
-
-            centroids = Utils.centroids(this.dataAttrs, labelsPred);
-            aRIScore = adjustedRandIndex.measure(labelsTrue, labelsPred);
-            dbScore = Utils.dbIndexScore(centroids, labelsPred, this.dataAttrs);
-            numClusters = Utils.distinctNumberOfItems(labelsPred);
-
-            System.out.println("ARI score of PSO with hill-climber for run:   " + Utils.doublePrecision(aRIScore, 4));
-            System.out.println("DB score of PSO with hill-climber for run:    " + Utils.doublePrecision(dbScore, 4));
-            System.out.println("number of clusters with hill-climber for run: " + numClusters);*/
-
-            // optional step - write true and constructed labels into a file
-        /*Utils.whenWriteStringUsingBufferedWritter_thenCorrect(Arrays.toString(labelsTrue) +
-                System.getProperty("line.separator") + "," + Arrays.toString(labelsPred), "data/output.txt");*/
-
-            // optional step - objectives of true clusters
-        /*System.out.println("objectives of true clusters: " + Arrays.toString(problem.evaluate(
-                new Solution(labelsTrue, Utils.distinctNumberOfItems(labelsTrue)), evaluation, new NCConstruct(data))));*/
         }
     }
 
@@ -126,14 +78,15 @@ public class PSODriver extends Analyzer {
     public static void main(String[] args) throws Exception {
         System.out.println("PSO");
         PSOConfiguration conf = PSOConfiguration.valueOf(args[0]);
-        Dataset dataset =  Dataset.valueOf(args[1]); //Dataset.S1;
+        Dataset dataset =  Dataset.valueOf(args[1]);
         int seedStartFrom = Integer.parseInt(args[2]);
         int runs = Integer.parseInt(args[3]);
 
         System.out.println("Dataset: " + dataset.name());
         String solutionsFilePath = "results/PSO/pso" + conf.name() + "_" + dataset.name() + "-" + seedStartFrom + "-" + runs + ".txt";
 
-        PSODriver psoDriver = new PSODriver(conf);
+        PSODriver psoDriver = new PSODriver();
+        psoDriver.setConfiguration(conf);
         psoDriver.setDataset(dataset);
         psoDriver.setRuns(runs);
         psoDriver.setSeedStartFrom(seedStartFrom);
@@ -141,26 +94,5 @@ public class PSODriver extends Analyzer {
         System.out.println("AVERAGE OVER RUNS");
         psoDriver.analyze(true);
         psoDriver.saveResults(solutionsFilePath);
-        /*int startIdx = Integer.parseInt(args[0]); // inclusively
-        int endIdx = Integer.parseInt(args[1]); // exclusively
-        Dataset[] allDatasets = Dataset.values();
-        int runs = Integer.parseInt(args[2]);
-        int startSeedFrom = Integer.parseInt(args[3]);
-        String solutionsFilePath;
-        PSOConfiguration conf = PSOConfiguration.CONF1;
-        solutionsFilePath = "results/PSO/pso" + conf.name() + "_" + startIdx + "-" + endIdx + "-" + runs + "-" + startSeedFrom + ".txt";
-        System.out.println("CONFIGURATION: " + conf.name());
-        for (int i = startIdx; i < endIdx; ++i) {
-            Dataset dataset = allDatasets[i];
-            System.out.println("DATASET: " + dataset.name());
-            PSODriver psoDriver = new PSODriver(conf);
-            psoDriver.setDataset(dataset);
-            psoDriver.setRuns(runs);
-            psoDriver.setSeedStartFrom(startSeedFrom);
-            psoDriver.run();
-            System.out.println("AVERAGE OVER RUNS");
-            psoDriver.analyze(true);
-            //psoDriver.saveResults(solutionsFilePath);
-        }*/
     }
 }

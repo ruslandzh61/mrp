@@ -25,6 +25,7 @@ public abstract class Analyzer {
     protected Silh silhoutte = new Silh();
     protected Reporter reporter;
     protected Experiment mean, stdDev;
+    protected int seedStartFrom;
 
     enum Algorithm {
         KMEANS, GENCLUST, MGENCLUST, MCPSO;
@@ -131,6 +132,10 @@ public abstract class Analyzer {
 
     public Experiment getStdDev() {
         return stdDev;
+    }
+
+    public void setSeedStartFrom(int seedStartFrom) {
+        this.seedStartFrom = seedStartFrom;
     }
 
     protected Experiment measure(int[] labelsPred) {

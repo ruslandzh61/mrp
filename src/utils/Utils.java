@@ -78,6 +78,14 @@ public class Utils {
         return Math.pow(sum, 1.0/pow);
     }
 
+    public static double dist(double[] v,double[] w, double[] weights, double pow) {
+        double sum = 0.0;
+        for(int i = 0; i < v.length; i++) {
+            sum += Math.pow(Math.abs(v[i]-w[i]),pow) * weights[i];
+        }
+        return Math.pow(sum, 1.0/pow);
+    }
+
     public static double[][] deepCopy(double[][] a) {
         if (a == null) return null;
         if (a.length == 0) return new double[0][0];
@@ -541,12 +549,12 @@ public class Utils {
         return maxiMins;
     }
 
-    public static int pickClosestToUtopia(double[][] objs, double[] utopiaCoords) {
+    public static int pickClosestToUtopia(double[][] objs, double[] utopiaCoords, double[] weights, double pow) {
         double minDist = Double.POSITIVE_INFINITY;
         int leader = -1;
         int i = 0;
         for (double[] cur: objs) {
-            double distToUtopia = Utils.dist(cur, utopiaCoords, 2.0);
+            double distToUtopia = Utils.dist(cur, utopiaCoords, weights, pow);
             if (distToUtopia < minDist) {
                 leader = i;
                 minDist = distToUtopia;

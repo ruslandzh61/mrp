@@ -19,15 +19,13 @@ import java.util.List;
 public class ResultsGenerator {
     Dataset[] datasets;
     List<double[][]> dataAttrsList;
-    String configuration;
 
     AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
     Silh silhoutte = new Silh();
 
-    public ResultsGenerator(Dataset[] aDatasets, String aConfiguration) throws IOException {
+    public ResultsGenerator(Dataset[] aDatasets) throws IOException {
         datasets = aDatasets;
         this.dataAttrsList = new ArrayList<>(datasets.length);
-        this.configuration = aConfiguration;
         processDatasetData();
     }
 
@@ -85,13 +83,13 @@ public class ResultsGenerator {
     }
 
     // String[] confs = {GADriver.GaConfiguration.mgaC1.name()};//GADriver.GaConfiguration.values();
-    public void generate(String folderPath, int runs, boolean includesRuns, boolean includesTrueLabels, boolean includesTime) throws Exception { // folder "results/mGA/tuning"
+    public void generate(String folderPath, String fileName, int runs, boolean includesRuns, boolean includesTrueLabels, boolean includesTime) throws Exception { // folder "results/mGA/tuning"
         Experiment[] experiments;
         Experiment[] confMeans = new Experiment[datasets.length];
         Experiment[] confStdDevs = new Experiment[datasets.length];
-        System.out.println(this.configuration);
+        System.out.println(folderPath + fileName);
         experiments = new Experiment[runs+2];
-        String filePath = folderPath + this.configuration + ".txt";
+        String filePath = folderPath + fileName + ".txt";
         HashMap<String, int[][]> datasetTosolutions = Utils.readSolutionFromFile(filePath, runs, includesRuns, includesTrueLabels, includesTime, datasets);
 
         int datasetIdx = 0;
@@ -157,11 +155,10 @@ public class ResultsGenerator {
         ExcelRW.write(excelFilePath, datasetNames, datasetMeanStdDevsAverage);
     }
 
-
     public static void main(String[] args) throws Exception {
         Dataset[] datasets = {Dataset.GLASS, Dataset.WDBC, Dataset.FLAME, Dataset.COMPOUND,
                 Dataset.PATHBASED, Dataset.JAIN, Dataset.S1, Dataset.S3, Dataset.DIM064, Dataset.DIM256};
-        ResultsGenerator resultsGenerator = new ResultsGenerator(datasets, "mga");
-        resultsGenerator.generate("results/mGA/", 30, true, false, true);
+        ResultsGenerator resultsGenerator = new ResultsGenerator(datasets);
+        resultsGenerator.generate("results/mGA/", "mga.txt", 30, true, false, true);
     }
 }

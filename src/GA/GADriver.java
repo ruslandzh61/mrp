@@ -50,16 +50,18 @@ public class GADriver extends Analyzer {
         mgaC26(10,20, true,true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.4,0.6}),
         mgaC27(10,20, true,true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.8,0.2}),
         mgaC28(10,20, true,true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.1,0.9}),
+        mgaC29(10,20, true,true, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.05,0.95}),
 
-        mgaC29(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.9,0.1}),
-        mgaC30(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.6,0.4}),
-        mgaC31(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.2,0.8}),
-        mgaC32(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.4,0.6}),
-        mgaC33(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.8,0.2}),
-        mgaC34(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.1,0.9}),
-        mgaC35(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.7,0.3}),
-        mgaC36(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.3,0.7}),
-        mgaC37(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.05,0.95});
+        mgaC30(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.9,0.1}),
+        mgaC31(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.6,0.4}),
+        mgaC32(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.2,0.8}),
+        mgaC33(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.4,0.6}),
+        mgaC34(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.8,0.2}),
+        mgaC35(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.1,0.9}),
+        mgaC36(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.7,0.3}),
+        mgaC37(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.3,0.7}),
+        mgaC38(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM, new double[]{0.05,0.95}),
+        mgaC39(10,20, true,false, MyGenClustPlusPlus.FITNESS.MULTIOBJECTIVE_SUM);
 
         private int chrSelectionGen;
         private int generations;
@@ -85,27 +87,12 @@ public class GADriver extends Analyzer {
         GaConfiguration() {
         }
     }
-
-    public static String[] confValuesStr() {
-        GaConfiguration[] configurations = GaConfiguration.values();
-        String[] res = new String[configurations.length];
-        for (int i = 0; i < configurations.length; ++i) {
-            res[i] = configurations[i].name();
-        }
-        return res;
-    }
+    private GaConfiguration gaConfiguration;
 
     public void setGaConfiguration(GaConfiguration gaConfiguration) {
         this.gaConfiguration = gaConfiguration;
     }
 
-    private GaConfiguration gaConfiguration;
-
-    public void setSeedStartFrom(int seedStartFrom) {
-        this.seedStartFrom = seedStartFrom;
-    }
-
-    private int seedStartFrom;
 
     public void run() throws Exception {
         assert (reporter != null);
@@ -217,7 +204,7 @@ public class GADriver extends Analyzer {
         int seedStartFrom = Integer.parseInt(args[2]);
         int runs = Integer.parseInt(args[3]);
         if (conf != GaConfiguration.GA) {
-            String solutionsFilePath = "results/mGA/" + conf.name() + "_" + dataset.name() + "-" + seedStartFrom + "-" + runs + ".txt";
+            String solutionsFilePath = "results/mGA2/" + conf.name() + "_" + dataset.name() + "-" + seedStartFrom + "-" + runs + ".txt";
             GADriver driver = new GADriver();
             driver.setDataset(dataset);
             driver.setGaConfiguration(conf);

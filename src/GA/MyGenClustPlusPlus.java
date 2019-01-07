@@ -23,6 +23,7 @@ import weka.core.TechnicalInformation.Type;
 
 public class MyGenClustPlusPlus extends RandomizableClusterer implements TechnicalInformationHandler {
     private double[] evaluationWeights;
+    private double sumDist = 2.0;
 
     public void setEvaluationWeights(double[] evaluationWeights) {
         this.evaluationWeights = evaluationWeights;
@@ -283,11 +284,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
                     for (int i = 0; i < nextPop.size(); ++i) {
                         nextPopObjectives[i] = evaluate(nextPop.get(i).clustering.getLabels());
                     }
-                    // update utopia point
-                    //updateUtopiaDystopia(nextPopObjectives);
-                    /*if (normalizeObjectives) {
-                        utils.Utils.normalize(nextPopObjectives);
-                    }*/
+
                     // MaxiMin strategy
                     double[] fitness = utils.Utils.determineParetoSet(utils.Utils.deepCopy(nextPopObjectives));
                     int mainPopCurIdx = 0;
@@ -305,13 +302,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
                     int roomToFill = mainPopulation.length - mainPopCurIdx;
                     // now randomly pick nextPopList
                     int i = 0;
-                    /*while (i < roomToFill) {
-                        int idxPick = m_rand.nextInt(nextPop.size());
-                        assert (nextPop.get(idxPick) != null);
-                        mainPopulation[mainPopCurIdx++] = new KMeans(nextPop.get(idxPick).clustering);
-                        i++;
-                        nextPop.remove(idxPick);
-                    }*/
+
                     Collections.sort(nextPop, Collections.reverseOrder());
                     while (i < roomToFill) {
                         mainPopulation[mainPopCurIdx++] = new KMeans(nextPop.get(i).clustering);
@@ -373,59 +364,56 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         measureFinalPop(mainPopulation, myData, trueLabels);
         System.out.println("-- FINAL POP END");*/
         if (maximin) {
-            boolean chooseFromNonDom = true;
             double[][] cloned;
-            if (chooseFromNonDom) {
-                // MaxiMin strategy
-                double[] fitness = utils.Utils.determineParetoSet(utils.Utils.deepCopy(mainPopObjectives));
-                // indices of non-dominated solutions
-                assert (fitness.length == mainPopObjectives.length);
-                List<Integer> nonDomSetIndices = new ArrayList<>();
-                for (int i = 0; i < mainPopObjectives.length; ++i) {
-                    if (fitness[i] < MAXIMIN_THRESHOLD) {
-                        nonDomSetIndices.add(i);
-                    }
+            // MaxiMin strategy
+            double[] fitness = utils.Utils.determineParetoSet(utils.Utils.deepCopy(mainPopObjectives));
+            // indices of non-dominated solutions
+            assert (fitness.length == mainPopObjectives.length);
+            List<Integer> nonDomSetIndices = new ArrayList<>();
+            for (int i = 0; i < mainPopObjectives.length; ++i) {
+                if (fitness[i] < MAXIMIN_THRESHOLD) {
+                    nonDomSetIndices.add(i);
                 }
-                //System.out.println(Arrays.toString(fitness));
+            }
+            //System.out.println(Arrays.toString(fitness));
 
-                // for printing non-dominated solutions
-                KMeans[] nonDomMKMeans = new KMeans[nonDomSetIndices.size()];
-                for (int i = 0; i < nonDomSetIndices.size(); ++i) {
-                    int index = nonDomSetIndices.get(i);
-                    nonDomMKMeans[i] = new KMeans(population[index]);
-                }
+            // for printing non-dominated solutions
+            KMeans[] nonDomMKMeans = new KMeans[nonDomSetIndices.size()];
+            for (int i = 0; i < nonDomSetIndices.size(); ++i) {
+                int index = nonDomSetIndices.get(i);
+                nonDomMKMeans[i] = new KMeans(population[index]);
+            }
 
-                //System.out.println("size of pops: " + population.length + " : " + nonDomMKMeans.length);
-                // if there is no non-dominated clustering solution
-                if (nonDomSetIndices.size() == 0) {
-                    /*for (int i = 0; i < fitness.length; ++i) {
-                        if (fitness[i] >= MAXIMIN_THRESHOLD) {
-                            nonDomSetIndices.add(i);
-                            break;
-                        }
-                    }*/
-                    cloned = utils.Utils.deepCopy(mainPopObjectives);
-                } else {
-                    //measureFinalPop(nonDomMKMeans, myData, trueLabels);
-                    //System.out.println("--- FINAL NON-DOM END");
-
-                    double[][] nonDomSetObjs = new double[nonDomSetIndices.size()][];
-                    for (int i = 0; i < nonDomSetObjs.length; ++i) {
-                        int index = nonDomSetIndices.get(i);
-                        nonDomSetObjs[i] = mainPopObjectives[index];
-                    }
-                    // choose final cluster solution
-                    cloned = utils.Utils.deepCopy(nonDomSetObjs);
-                }
-            } else {
+            // if there is no non-dominated clustering solution
+            if (nonDomSetIndices.size() == 0) {
                 cloned = utils.Utils.deepCopy(mainPopObjectives);
+            } else {
+                double[][] nonDomSetObjs = new double[nonDomSetIndices.size()][];
+                for (int i = 0; i < nonDomSetObjs.length; ++i) {
+                    int index = nonDomSetIndices.get(i);
+                    nonDomSetObjs[i] = mainPopObjectives[index];
+                }
+                cloned = utils.Utils.deepCopy(nonDomSetObjs);
             }
 
             if (this.normalizeObjectives) {
                 utils.Utils.normalize(cloned, objBestCoordinates, objWorstCoordinates);
-                newBestIndex = utils.Utils.pickClosestToUtopia(cloned, new double[]{0.0, 0.0});
+                int idx = utils.Utils.pickClosestToUtopia(cloned, new double[]{0.0, 0.0}, this.evaluationWeights, this.sumDist);
+
+                if (nonDomSetIndices.size() != 0) {
+                    // idx is idx of nonDomSetIndices where index of mainPop is stored
+                    newBestIndex = nonDomSetIndices.get(idx);
+                } else {
+                    newBestIndex = idx;
+                }
             } else {
-                newBestIndex = utils.Utils.pickClosestToUtopia(cloned, objBestCoordinates);
+                int idx = utils.Utils.pickClosestToUtopia(cloned, objBestCoordinates, this.evaluationWeights, this.sumDist);
+                if (nonDomSetIndices.size() != 0) {
+                    // idx is idx of nonDomSetIndices where index of mainPop is stored
+                    newBestIndex = nonDomSetIndices.get(idx);
+                } else {
+                    newBestIndex = idx;
+                }
             }
         } else {
             for (int var20 = 0; var20 < population.length; ++var20) {
@@ -681,24 +669,6 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
         }
     }
 
-    private double myDBIndex(KMeans chromosome) {
-        int[] labelsPred = null;
-        try {
-            labelsPred = chromosome.getLabels();
-        } catch (Exception var19) {
-            var19.printStackTrace();
-        }
-
-        HashMap<Integer, double[]> centroids = utils.Utils.centroids(myData, labelsPred);
-        if (centroids.size() < 2) {
-            return 0.0;
-        }
-
-        double dbScore = utils.Utils.dbIndexScore(centroids, labelsPred, myData);
-
-        return dbScore;
-    }
-
     private double fitness(KMeans chromosome) {
         if (fitnessType == FITNESS.MULTIOBJECTIVE_SUM) {
             double[] objs = evaluate(chromosome.getLabels());
@@ -707,7 +677,7 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
             if (normalizeObjectives) {
                 utils.Utils.normalize(objs, objBestCoordinates, objWorstCoordinates);
             }
-            return 1.0D / utils.Utils.sum(objs, evaluationWeights, 2.0);
+            return 1.0D / utils.Utils.sum(objs, this.evaluationWeights, this.sumDist);
         } else if (this.fitnessType == FITNESS.SILHOUETTE) {
             return this.silhouette.compute(chromosome.getLabels(), this.myData);
         } else if (fitnessType == FITNESS.DBINDEX) {
