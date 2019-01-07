@@ -284,7 +284,11 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
                     for (int i = 0; i < nextPop.size(); ++i) {
                         nextPopObjectives[i] = evaluate(nextPop.get(i).clustering.getLabels());
                     }
-
+                    // update utopia point
+                    //updateUtopiaDystopia(nextPopObjectives);
+                    /*if (normalizeObjectives) {
+                        utils.Utils.normalize(nextPopObjectives);
+                    }*/
                     // MaxiMin strategy
                     double[] fitness = utils.Utils.determineParetoSet(utils.Utils.deepCopy(nextPopObjectives));
                     int mainPopCurIdx = 0;
@@ -667,6 +671,24 @@ public class MyGenClustPlusPlus extends RandomizableClusterer implements Technic
             var20 /= (double)numClust;
             return var20;
         }
+    }
+
+    private double myDBIndex(KMeans chromosome) {
+        int[] labelsPred = null;
+        try {
+            labelsPred = chromosome.getLabels();
+        } catch (Exception var19) {
+            var19.printStackTrace();
+        }
+
+        HashMap<Integer, double[]> centroids = utils.Utils.centroids(myData, labelsPred);
+        if (centroids.size() < 2) {
+            return 0.0;
+        }
+
+        double dbScore = utils.Utils.dbIndexScore(centroids, labelsPred, myData);
+
+        return dbScore;
     }
 
     private double fitness(KMeans chromosome) {

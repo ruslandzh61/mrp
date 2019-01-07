@@ -106,7 +106,6 @@ public class GADriver extends Analyzer {
 
         for (int i = 0; i < this.seedStartFrom; ++i) {
             rnd.nextInt();
-            System.out.println(i);
         }
 
         // step 2 - pick objectives

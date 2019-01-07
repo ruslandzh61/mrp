@@ -23,18 +23,16 @@ public class PSO {
     private int curIterationNum, numOfIterWithoutImprov;
 
     private List<Particle> psoList;
-    /* record of objectives of personal best solution are stored
-        for the purpose of not calculating them every time pBest is updated */
-    //private HashMap<Particle, double[]> pBestObjective;
-    //private double[] pBestFitness;
+    //record of objectives of personal best solution are stored
+    //    for the purpose of not calculating them every time pBest is updated
     private Problem problem;
-    /* solutions will be evaluated on objectives stored in evaluation array */
+    // solutions will be evaluated on objectives stored in evaluation array
     private Evaluator.Evaluation[] evaluation;
     //private Solution gBestSolution;
-    /* NCConstruct is used for evaluating connectivy objective function */
+    // NCConstruct is used for evaluating connectivy objective function
     private NCConstruct ncc;
     //private Pareto pareto = new Pareto();
-    /* objBestCoordinates represent utopia point */
+    // objBestCoordinates represent utopia point
     private double[] objBestCoordinates, objWorstCoordinates;
     private Random generator;
     private VelocityCalculator velocityCalculator;
@@ -44,7 +42,6 @@ public class PSO {
     private static int minSizeOfCluster = 2;
 
     private AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
-    private List<Experiment> iterationsBest;
 
     public PSO(Problem aProblem, NCConstruct aNCconstruct, Evaluator.Evaluation[] aEvaluation,
                PSOConfiguration configuration, int[] aLabelsTrue) {
@@ -71,8 +68,6 @@ public class PSO {
         for (int iO = 0; iO < numOfObj; ++iO) {
             objWorstCoordinates[iO] = Double.NEGATIVE_INFINITY;
         }
-
-        iterationsBest = new ArrayList<>(this.conf.maxIteration);
     }
 
     public int[] execute() throws Exception {
@@ -92,44 +87,23 @@ public class PSO {
         numOfIterWithoutImprov = 0;
 
         while(curIterationNum < conf.maxIteration && numOfIterWithoutImprov < conf.maxIterWithoutImprovement) {
-            //if (this.curIterationNum % 20 == 0) {
-            //System.out.println("ITERATION " + curIterationNum + ": ");
-            //}
             update();
-            /*if (this.curIterationNum % 20 == 0) {
-                System.out.println("without improv: " + numOfIterWithoutImprov);
-            }*/
             curIterationNum++;
         }
         // update nonDomPSOList to pick a clusterInstance to utopia point solution out of non-dominated set
         Particle leader;
         if (this.conf.maximin) {
-            List<Particle> nonDomPSOList = determineParetoSet(psoList);
-            if (nonDomPSOList.size() != 0) {
-                double[][] objs = objectivesFromParticles(nonDomPSOList);
-                for (int i = 0; i < nonDomPSOList.size(); ++i) {
-                    nonDomPSOList.get(i).getSolution().setFitness(fitness(objs[i]));
-                }
-
-                for (int i = 0; i < nonDomPSOList.size(); ++i) {
-                    assert (nonDomPSOList.get(i).getSolution().getFitness() >= 0);
-                }
-                Collections.sort(nonDomPSOList);
-                leader = pickALeader(nonDomPSOList, false);
-            } else {
-                List<Particle> psoListCloned = new ArrayList<Particle>();
+            List<Particle> nonDomPSOList = determineParetoSet(this.psoList);
+            if (nonDomPSOList.size() == 0) {
+                nonDomPSOList = new ArrayList<Particle>();
                 for (Particle p: psoList) {
-                    psoListCloned.add(new Particle(p));
+                    nonDomPSOList.add(new Particle(p));
                 }
-                double[][] objs = objectivesFromParticles(psoListCloned);
-
-                for (int i = 0; i < psoListCloned.size(); ++i) {
-                    psoListCloned.get(i).getSolution().setFitness(fitness(objs[i]));
-                }
-                Collections.sort(psoListCloned);
-
-                leader = pickALeader(psoListCloned, false);
             }
+            setFitness(nonDomPSOList);
+
+            Collections.sort(nonDomPSOList);
+            leader = pickALeader(nonDomPSOList, false);
         } else {
             Collections.sort(this.psoList);
             leader = this.psoList.get(0);
@@ -154,6 +128,15 @@ public class PSO {
         System.out.println("dystopia point: " + Arrays.toString(objWorstCoordinates));*/
 
         return leader.getSolution().getSolution();
+    }
+
+    private void setFitness(List<Particle> particleList) {
+        double[][] objs = objectivesFromParticles(particleList);
+        for (int i = 0; i < particleList.size(); ++i) {
+            double f = fitness(objs[i]);
+            assert (f >= 0);
+            particleList.get(i).getSolution().setFitness(f);
+        }
     }
 
     private Analyzer printParticlesPerformace(List<Particle> particles) {
@@ -263,21 +246,6 @@ public class PSO {
         return labelsPred;
     }
 
-    /*private int[] kMeansAssignments(Instances instances, int k) throws Exception {
-        SimpleKMeans kMeans = new SimpleKMeans();
-        kMeans.setSeed(generator.nextInt());
-        SelectedTag selectedTag = new SelectedTag(SimpleKMeans.KMEANS_PLUS_PLUS, SimpleKMeans.TAGS_SELECTION);
-        kMeans.setInitializationMethod(selectedTag);
-        kMeans.setPreserveInstancesOrder(true);
-        kMeans.setMaxIterations(50);
-        kMeans.setNumClusters(k);
-        kMeans.buildClusterer(instances);
-        int[] labelsPred = kMeans.getAssignments();
-        Utils.removeNoise(labelsPred, problem.getData(), minSizeOfCluster, 2.0);
-        Utils.adjustAssignments(labelsPred);
-        return labelsPred;
-    }*/
-
     private void update() {
         // step 1 - Evaluate objective functions for each particle
         for(int iP = 0; iP < swarmSize; iP++) {
@@ -288,38 +256,41 @@ public class PSO {
         updateUtopiaPoint(psoList);
 
         if (this.conf.maximin) {
+            setFitness(psoList);
+
             // step 2 - determine pareto-optimal set
             List<Particle> nonDomPSOList = determineParetoSet(psoList);
             List<Particle> psoListCloned = null;
             if (nonDomPSOList.size() != 0) {
+                // compute fitness
+                setFitness(nonDomPSOList);
                 Collections.sort(nonDomPSOList);
             } else {
                 psoListCloned = new ArrayList<Particle>();
                 for (Particle p: psoList) {
                     psoListCloned.add(new Particle(p));
                 }
-                double[][] objs = objectivesFromParticles(psoListCloned);
-                for (int i = 0; i < psoListCloned.size(); ++i) {
-                    psoListCloned.get(i).getSolution().setFitness(fitness(objs[i]));
-                }
+                setFitness(psoListCloned);
                 Collections.sort(psoListCloned);
             }
-        /* in case there are no strongly non-dominated particles */
 
             // step 3 - Update Personal Best of each particle
             for (int i = 0; i < swarmSize; i++) {
-                double[] curIterObjs = psoList.get(i).getSolution().getObjectives().clone();
+                double[] curIterObjs = problem.evaluate(psoList.get(i).getSolution().getSolution(), evaluation, ncc);//psoList.get(i).getSolution().getObjectives().clone();
+                utils.Utils.normalize(curIterObjs, objBestCoordinates, objWorstCoordinates);
                 Solution prev = psoList.get(i).getPrev();
                 double[] prevObjs = null;
                 if (prev != null) {
                     prevObjs = problem.evaluate(prev.getSolution(), evaluation, ncc);
                     utils.Utils.normalize(prevObjs, objBestCoordinates, objWorstCoordinates);
                 }
-                // reverse order, since objectives should be minimized in this case
+
                 if (prev == null) {
                     // before first update; prev not set yet
                     psoList.get(i).setpBest(psoList.get(i).getSolution());
                 } else if (Pareto.testDominance(prevObjs, curIterObjs, false)) {
+                    // reverse order, since objectives should be minimized in this case
+
                     // set to prev if dom
                     psoList.get(i).setpBest(psoList.get(i).getSolution());
                 }
@@ -369,6 +340,7 @@ public class PSO {
 
             updateUtopiaPoint(nextPopList);
             List<Particle> nonDomFromNextPSOList = determineParetoSet(nextPopList);
+            setFitness(nonDomFromNextPSOList);
 
             // copy non-dominated solutions to next generation
             psoList = new ArrayList<Particle>();
@@ -376,7 +348,7 @@ public class PSO {
                 if (i >= this.swarmSize) {
                     break;
                 }
-                psoList.add(new Particle(nonDomFromNextPSOList.get(i)));
+                psoList.add(nonDomFromNextPSOList.get(i));
             }
 
             int roomToFill = swarmSize - psoList.size();
@@ -387,10 +359,7 @@ public class PSO {
             for (Particle p: nextPopList) {
                 psoListCloned.add(new Particle(p));
             }
-            double[][] objs = objectivesFromParticles(psoListCloned);
-            for (int i = 0; i < psoListCloned.size(); ++i) {
-                psoListCloned.get(i).getSolution().setFitness(fitness(objs[i]));
-            }
+            setFitness(psoListCloned);
             Collections.sort(psoListCloned);
             int idx = 0;
             while (idx < roomToFill) {
@@ -401,24 +370,14 @@ public class PSO {
         /* recompute non-dom set to compare with previous one */
             nonDomPSOList = determineParetoSet(psoList);
             if (nonDomPSOList.size() != 0) {
-                objs = objectivesFromParticles(nonDomPSOList);
-                for (int i = 0; i < nonDomPSOList.size(); ++i) {
-                    nonDomPSOList.get(i).getSolution().setFitness(fitness(objs[i]));
-                }
-
-                for (int i = 0; i < nonDomPSOList.size(); ++i) {
-                    assert (nonDomPSOList.get(i).getSolution().getFitness() >= 0);
-                }
+                setFitness(nonDomPSOList);
                 Collections.sort(nonDomPSOList);
             } else {
                 psoListCloned = new ArrayList<Particle>();
                 for (Particle p: psoList) {
                     psoListCloned.add(new Particle(p));
                 }
-                objs = objectivesFromParticles(psoListCloned);
-                for (int i = 0; i < psoListCloned.size(); ++i) {
-                    psoListCloned.get(i).getSolution().setFitness(fitness(objs[i]));
-                }
+                setFitness(psoListCloned);
                 Collections.sort(psoListCloned);
             }
 
@@ -438,10 +397,7 @@ public class PSO {
             prevBest = new Solution(curBest);
         } else {
             // adjust fitness after objective normalization
-            double[][] objs = objectivesFromParticles(psoList);
-            for (int i = 0; i < psoList.size(); ++i) {
-                psoList.get(i).getSolution().setFitness(fitness(objs[i]));
-            }
+            setFitness(psoList);
 
             // update pBest
             for (int i = 0; i < swarmSize; i++) {
@@ -449,7 +405,9 @@ public class PSO {
                 Solution prev = psoList.get(i).getSolution();
                 double pBestFitness;
                 if (prev != null) {
-                    pBestFitness = fitness(problem.evaluate(prev.getSolution(), evaluation, ncc));
+                    double[] prevObjs = problem.evaluate(prev.getSolution(), evaluation, ncc);
+                    Utils.normalize(prevObjs, objBestCoordinates, objWorstCoordinates);
+                    pBestFitness = fitness(prevObjs);
                 } else {
                     pBestFitness = Double.POSITIVE_INFINITY;
                 }
@@ -469,11 +427,11 @@ public class PSO {
             double w = (conf.maxW - conf.minW) * (conf.maxIteration - curIterationNum) / conf.maxIteration + conf.minW;
             velocityCalculator.setW(w);
 
-            List<Particle> popToPickLeader = new ArrayList<Particle>(swarmSize * 2);
+            List<Particle> popToPickLeader = new ArrayList<Particle>(swarmSize);
             for (int i = 0; i < psoList.size(); ++i) {
                 popToPickLeader.add(new Particle(psoList.get(i)));
             }
-
+            setFitness(popToPickLeader);
             Collections.sort(popToPickLeader);
 
             for (Particle aNextPopParticle : nextPopList) {
@@ -499,10 +457,7 @@ public class PSO {
             //update objective boundaries
             updateUtopiaPoint(nextPopList);
             //adjust fitness
-            objs = objectivesFromParticles(nextPopList);
-            for (int i = 0; i < nextPopList.size(); ++i) {
-                nextPopList.get(i).getSolution().setFitness(fitness(objs[i]));
-            }
+            setFitness(nextPopList);
 
             // copy main psoList particles to nextPopList
             for (Particle aParticle : psoList) {
@@ -514,7 +469,6 @@ public class PSO {
             for (int i = 0; i < this.swarmSize; ++i) {
                 psoList.add(nextPopList.get(i));
             }
-
 
             Solution curBest = psoList.get(0).getSolution();
             if (prevBest != null && curBest.equals(prevBest)) {
@@ -540,6 +494,9 @@ public class PSO {
 
     // fitness is minimized in this case
     private double fitness(double[] objs) {
+        for (double obj: objs) {
+            assert (obj >= 0);
+        }
         return utils.Utils.sum(objs, this.conf.weights, 2.0);
     }
 
@@ -549,7 +506,9 @@ public class PSO {
         double[] fitness = Utils.determineParetoSet(objList);
         List<Particle> result = new ArrayList<>();
         for (int i = 0; i < particleList.size(); ++i) {
-            particleList.get(i).getSolution().setFitness(fitness[i]);
+            if (result.size() >= this.conf.pMax) {
+                break;
+            }
             // max > 0 then solution i is strongly dominated
             if (fitness[i] < THRESHOLD) {
                 result.add(particleList.get(i));
@@ -561,7 +520,7 @@ public class PSO {
     private double[][] objectivesFromParticles(List<Particle> particles) {
         double[][] objsResult = new double[particles.size()][];
         for (int i = 0; i < particles.size(); ++i) {
-            objsResult[i] = particles.get(i).getSolution().getObjectives().clone();
+            objsResult[i] = problem.evaluate(particles.get(i).getSolution().getSolution(), evaluation, ncc); //particles.get(i).getSolution().getObjectives().clone();
         }
         utils.Utils.normalize(objsResult, objBestCoordinates, objWorstCoordinates);
 
@@ -571,6 +530,7 @@ public class PSO {
     /** Select global best solution according to certain criteria - proximity to utopia point */
     private Particle pickALeader(List<Particle> particleList, boolean pickLeaderRandomly) {
         // update best found solution so far
+        assert (particleList != null && particleList.size() != 0);
         Particle leader = null;
         if (pickLeaderRandomly) {
             int iLeader;
@@ -601,8 +561,9 @@ public class PSO {
     private void updateUtopiaPoint(List<Particle> swarm) {
         // update utopia point
         for (int i = 0; i < swarm.size(); ++i) {
+            double[] objs = problem.evaluate(swarm.get(i).getSolution().getSolution(), evaluation, ncc);
             for (int iO = 0; iO < evaluation.length; ++iO) {
-                double obj = swarm.get(i).getSolution().getObjective(iO);
+                double obj = objs[iO]; //swarm.get(i).getSolution().getObjective(iO);
                 if (obj < objBestCoordinates[iO]) {
                     objBestCoordinates[iO] = obj;
                 }

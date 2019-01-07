@@ -118,7 +118,7 @@ public abstract class Analyzer {
 
         solutionsLog.append(dataset.name() + " " + reporter.size() + System.lineSeparator());
         for (int j = 0; j < reporter.size(); ++j) {
-            //solutionsLog.append(reporter.get(j).getTime() + System.lineSeparator());
+            solutionsLog.append(reporter.get(j).getTime() + System.lineSeparator());
             solutionsLog.append(Arrays.toString(reporter.get(j).getSolution()) + System.lineSeparator());
         }
 

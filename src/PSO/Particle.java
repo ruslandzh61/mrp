@@ -42,6 +42,9 @@ public class Particle implements Comparable<Particle> {
         if (particle.getpBest() != null) {
             this.setpBest(particle.getpBest());
         }
+        if (particle.prev != null) {
+            this.setpBest(particle.prev);
+        }
         this.velocity = particle.getVelocity().clone();
         this.dummySol = particle.getDummySol().clone();
         setSeed(particle.getSeed());
@@ -156,6 +159,7 @@ public class Particle implements Comparable<Particle> {
 
     public void setpBest(Solution aPBest) {
         this.pBest = new Solution(aPBest.getSolution().clone(),aPBest.getK(false));
+        this.pBest.setFitness(aPBest.getFitness());
     }
 
     private void calcIntermediateSol(Solution gBest) {

@@ -5,15 +5,10 @@ package PSO;
  */
 public enum PSOConfiguration {
     CONF2(200, true, true),
-    CONF3(200, true, false, new double[]{0.07, 0.93}),
-    CONF4(200, true, false, new double[]{0.15, 0.85}),
     CONF5(200, true, false, new double[]{0.05, 0.95}),
-    CONF6(200, true, false, new double[]{0.1, 0.9}),
     CONF7(200, true, false),
     CONF8(200, true, true, new double[]{0.05, 0.95}),
-    CONF9(200, true, true, new double[]{0.1, 0.9}),
-    CONF10(200, true, true, new double[]{0.03, 0.97}),
-    CONF11(200, true, true, new double[]{0.15, 0.85});
+    CONF10(200, true, true, new double[]{0.03, 0.97});
 
     PSOConfiguration(int aMaxIteration, boolean aEqualClusterNumDistribution, boolean aMaximin) {
         this.maxIteration = aMaxIteration;

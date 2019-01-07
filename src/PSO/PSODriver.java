@@ -83,7 +83,7 @@ public class PSODriver extends Analyzer {
         int runs = Integer.parseInt(args[3]);
 
         System.out.println("Dataset: " + dataset.name());
-        String solutionsFilePath = "results/PSO/pso" + conf.name() + "_" + dataset.name() + "-" + seedStartFrom + "-" + runs + ".txt";
+        String solutionsFilePath = "results/PSO2/pso" + conf.name() + "_" + dataset.name() + "-" + seedStartFrom + "-" + runs + ".txt";
 
         PSODriver psoDriver = new PSODriver();
         psoDriver.setConfiguration(conf);
