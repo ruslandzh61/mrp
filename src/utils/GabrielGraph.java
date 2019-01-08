@@ -4,12 +4,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Created by rusland on 09.10.18.
  * GabrielGraph represents a construction of gabriel graph
  */
 public class GabrielGraph {
-    // private static final String NEWLINE = System.getProperty("line.separator");
-
     // Gabriel Graph is represented as an array of edge lists
     private List<Integer>[] adj;
     private int[][] density; // matrix

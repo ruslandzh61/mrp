@@ -1,19 +1,15 @@
 package clustering;
 
 import smile.validation.AdjustedRandIndex;
-import utils.ExcelRW;
 import utils.Silh;
 import utils.Utils;
 import weka.core.Instances;
-
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 /**
- * Created by rusland on 20.12.18.
+ * Abstart class Analyzer used for conducting experiments on clustering algoritms
  */
 
 public abstract class Analyzer {
@@ -21,19 +17,36 @@ public abstract class Analyzer {
     protected double[][] dataAttrs;
     protected Instances wekaData;
     protected int[] labelsTrue;
-    protected AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
-    protected Silh silhoutte = new Silh();
     protected Reporter reporter;
-    protected Experiment mean, stdDev;
     protected int seedStartFrom;
+    private Experiment mean, stdDev;
+    private AdjustedRandIndex adjustedRandIndex = new AdjustedRandIndex();
+    private Silh silhoutte = new Silh();
 
-    enum Algorithm {
-        KMEANS, GENCLUST, MGENCLUST, MCPSO;
+    public abstract void run() throws Exception;
+
+    public void analyze(boolean print) {
+        this.reporter.compute();
+        mean = this.reporter.getMean();
+        stdDev = this.reporter.getStdDev();
+
+        if (print) {
+            System.out.println("------- ANALYSIS --------");
+
+            if (this.reporter.size() == 1) {
+                System.out.println("C: " + Arrays.toString(this.reporter.get(0).getSolution()));
+            }
+            System.out.println("A: " + Utils.doublePrecision(mean.getAri(), 4) +
+                    " +- " + Utils.doublePrecision(stdDev.getAri(), 4));
+            System.out.println("D: " + Utils.doublePrecision(mean.getDb(), 4) +
+                    " +- " + Utils.doublePrecision(stdDev.getDb(), 4));
+            System.out.println("S: " + Utils.doublePrecision(mean.getSilh(), 4) +
+                    " +- " + Utils.doublePrecision(stdDev.getSilh(), 4));
+            System.out.println("K: " + Utils.doublePrecision(mean.getK(), 4) +
+                    " +- " + Utils.doublePrecision(stdDev.getK(), 4));
+        }
     }
 
-    public Experiment getExperiment(int idx) {
-        return reporter.get(idx);
-    }
     protected void setRuns(int runs) {
         reporter = new Reporter(runs);
     }
@@ -88,30 +101,7 @@ public abstract class Analyzer {
         this.wekaData = Utils.getData(dataset);
     }
 
-    public abstract void run() throws Exception;
 
-    public void analyze(boolean print) {
-
-        this.reporter.compute();
-        mean = this.reporter.getMean();
-        stdDev = this.reporter.getStdDev();
-
-        if (print) {
-            System.out.println("------- ANALYSIS --------");
-
-            if (this.reporter.size() == 1) {
-                System.out.println("C: " + Arrays.toString(this.reporter.get(0).getSolution()));
-            }
-            System.out.println("A: " + Utils.doublePrecision(mean.getAri(), 4) +
-                    " +- " + Utils.doublePrecision(stdDev.getAri(), 4));
-            System.out.println("D: " + Utils.doublePrecision(mean.getDb(), 4) +
-                    " +- " + Utils.doublePrecision(stdDev.getDb(), 4));
-            System.out.println("S: " + Utils.doublePrecision(mean.getSilh(), 4) +
-                    " +- " + Utils.doublePrecision(stdDev.getSilh(), 4));
-            System.out.println("K: " + Utils.doublePrecision(mean.getK(), 4) +
-                    " +- " + Utils.doublePrecision(stdDev.getK(), 4));
-        }
-    }
 
     protected void saveResults(String solutionsFilePath) throws Exception {
         StringBuilder solutionsLog = new StringBuilder();
@@ -126,15 +116,15 @@ public abstract class Analyzer {
         //ExcelRW.write(resultFilePath, reporter.getExperiments(), this.dataset);
     }
 
-    public Experiment getMean() {
+    protected Experiment getMean() {
         return mean;
     }
 
-    public Experiment getStdDev() {
+    protected Experiment getStdDev() {
         return stdDev;
     }
 
-    public void setSeedStartFrom(int seedStartFrom) {
+    protected void setSeedStartFrom(int seedStartFrom) {
         this.seedStartFrom = seedStartFrom;
     }
 

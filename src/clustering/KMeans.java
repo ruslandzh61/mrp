@@ -6,87 +6,68 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * Created by rusland on 10.11.18.
- * code is taken from http://cecs.wright.edu/~keke.chen/cloud/labs/mapreduce/KMeans.java
- * https://github.com/JasonAltschuler/KMeansPlusPlus/blob/master/src/KMeans.java
- * http://commons.apache.org/proper/commons-math/apidocs/org/apache/commons/math4/ml/clustering/KMeansPlusPlusClusterer.html#KMeansPlusPlusClusterer-int-
- */
+ * Implementation of K-Means clustering algorithm with different centroid initialization methods: Random, K-Means++, Hill-climb
+ *  */
 public class KMeans {
-    private boolean supplied;
-
-    private int niter = 50;
-    private int maxIters = 500;
-    private double threshold = 0.005;
-
-    public KMeans() {
-        this.pow = default_distMeasure;
-        this.seed = default_seed;
-        this.rnd = new Random(seed);
-        this.initialization = default_init;
-    }
-
     public enum Initialization {
         RANDOM, KMEANS_PLUS_PLUS, HILL_CLIMBER
     }
 
+    private static int maxIters = 500;
+    private static double threshold = 0.005;
     private static int default_seed = 10;
     private static double default_distMeasure = 2.0;
     private static Initialization default_init = Initialization.KMEANS_PLUS_PLUS;
 
+    // in case of hill-climbing - whether centroids are supplied or not
+    private boolean supplied;
+    // number of iterations
+    private int numIters = 50;
     private int[] labels;
     private double[][] centroids;
     private int k;
     private int seed;
 
-    public void setPow(double pow) {
-        this.pow = pow;
-    }
-
-    private double pow;
+    // distance measure, e.g. Manhattan, Euclidean
+    private double distMeasure;
     private Random rnd;
     private Initialization initialization;
     private double[][] initialStartPoint;
+
+    public KMeans() {
+        this.distMeasure = default_distMeasure;
+        this.seed = default_seed;
+        this.rnd = new Random(seed);
+        this.initialization = default_init;
+    }
+
 
     public KMeans(KMeans kMeans) {
         this.centroids = Utils.deepCopy(kMeans.getCentroids());
         this.labels = kMeans.getLabels().clone();
         this.k = kMeans.numberOfClusters();
-        this.pow = kMeans.pow;
+        this.distMeasure = kMeans.distMeasure;
         this.initialization = kMeans.initialization;
     }
 
     public KMeans(int aK, double aPow) {
         this.k = aK;
-        this.pow = aPow;
+        this.distMeasure = aPow;
         this.seed = default_seed;
         this.initialization = default_init;
-    }
-
-    public void setInitializationMethod(Initialization aInitialization) {
-        this.initialization = aInitialization;
-    }
-
-    public void setMaxIterations(int aIter) {
-        this.niter = aIter;
-    }
-
-    public void setInitial(double[][] initial) {
-        this.supplied = true;
-        this.k = initial.length;
-        this.initialStartPoint = Utils.deepCopy(initial);
     }
 
     public void buildClusterer(double[][] data) throws Exception {
         double[][] copiedData = Utils.deepCopy(data);
         initialize(copiedData);
         int N = copiedData.length;
-        assert (niter >= 1 && niter <= maxIters);
+        assert (numIters >= 1 && numIters <= maxIters);
 
         double [][] prevCentroids = Utils.deepCopy(centroids);
         int[] prevLabels = this.labels.clone();
         int round = 0;
 
-        while (round < niter) {
+        while (round < numIters) {
             // recompute centroids based on the assignments
             centroids = updateCentroids(copiedData);
             //assign record to the clusterInstance centroid
@@ -109,6 +90,25 @@ public class KMeans {
         getRidOfEmptyCentroids();
     }
 
+    /**
+     *  find the clusterInstance centroid for the record v
+     *  */
+    public int clusterInstance(double[] v){
+        double mindist = Utils.dist(v, centroids[0], this.distMeasure);
+        int label = 0;
+        for (int i = 1; i < k; i++) {
+            double t = Utils.dist(v, centroids[i], this.distMeasure);
+            if (mindist > t) {
+                mindist = t;
+                label = i;
+            }
+        }
+        return label;
+    }
+
+    /**
+     * Remove empty centroids in clustering solution
+     */
     private void getRidOfEmptyCentroids() {
         double[][] copy = Utils.deepCopy(this.centroids);
         Set<Integer> distLabels = Utils.distinctItems(this.labels);
@@ -124,33 +124,6 @@ public class KMeans {
         for (i = 0; i < labels.length; ++i) {
             labels[i] = oldToNewIndex.get(labels[i]);
         }
-    }
-
-    public int numberOfClusters() {
-        return centroids.length;
-    }
-
-    public int[] getLabels() {
-        return labels;
-    }
-
-    public double[][] getCentroids() {
-        return Utils.deepCopy(centroids);
-    }
-
-    /**
-     * performs one iteration of k-means buildClusterer
-     * */
-    /*void oneIter() {
-        centroids = updateCentroids();
-        //assign record to the clusterInstance centroid
-        for (int i=0; i < N; i++){
-            labels[i] = clusterInstance(data[i]);
-        }
-    }*/
-
-    public String toString() {
-        return "number of clusters: " + this.k;
     }
 
     private void initialize(double[][] data) {
@@ -175,7 +148,7 @@ public class KMeans {
             // this is very easy.
             for (int i = 0; i < N; i++) {
                 if (i != firstIdx) { // That point isn't considered
-                    double d = Utils.dist(data[firstIdx], data[i], pow);
+                    double d = Utils.dist(data[firstIdx], data[i], distMeasure);
                     minDistSquared[i] = d*d;
                 }
             }
@@ -298,20 +271,43 @@ public class KMeans {
         return newc;
     }
 
-    /**
-     *  find the clusterInstance centroid for the record v
-     *  */
-    public int clusterInstance(double[] v){
-        double mindist = Utils.dist(v, centroids[0], this.pow);
-        int label = 0;
-        for (int i = 1; i < k; i++) {
-            double t = Utils.dist(v, centroids[i], this.pow);
-            if (mindist > t) {
-                mindist = t;
-                label = i;
-            }
-        }
-        return label;
+    public void setDistMeasure(double distMeasure) {
+        this.distMeasure = distMeasure;
+    }
+
+    public void setInitializationMethod(Initialization aInitialization) {
+        this.initialization = aInitialization;
+    }
+
+    public void setMaxIterations(int aIter) {
+        this.numIters = aIter;
+    }
+
+    public void setInitial(double[][] initial) {
+        this.supplied = true;
+        this.k = initial.length;
+        this.initialStartPoint = Utils.deepCopy(initial);
+    }
+
+    public int numberOfClusters() {
+        return centroids.length;
+    }
+
+    public int[] getLabels() {
+        return labels;
+    }
+
+    public double[][] getCentroids() {
+        return Utils.deepCopy(centroids);
+    }
+
+    public String toString() {
+        return "number of clusters: " + this.k;
+    }
+
+    public void setSeed(int aSeed) {
+        rnd = new Random(aSeed);
+        this.seed = aSeed;
     }
 
     /**
@@ -326,7 +322,7 @@ public class KMeans {
         // c1 and c2 are two sets of centroids
         double maxv = 0;
         for (int i = 0; i < k; i++){
-            double d = Utils.dist(c1[i], c2[i], this.pow);
+            double d = Utils.dist(c1[i], c2[i], this.distMeasure);
             if (maxv < d)
                 maxv = d;
         }
@@ -337,44 +333,4 @@ public class KMeans {
             return false;
     }*/
 
-    public static void main(String[] args) throws IOException {
-        /*double[][] data;
-        int k;
-        int[] labels;
-        int skipLines = 0;
-        //data = new double[][]{{2,2}, {3,3}, {3,1}, {4,2},
-        //        {1.6,-0.5}, {3.01, -1.5}, {-4, 2}, {-2, 2}, {-3, 3},{7,7}};
-        //k = 4;
-        //labels = {0,0,0,0,0,0,1,1,1,2};
-
-
-        List<String[]> dataStr = Utils.readFile("data/glass.csv", ',');
-        assert (dataStr.size()>0);
-
-        labels = Utils.extractLabels(dataStr, dataStr.get(0).length-1);
-
-        // exclude columns from csv file
-        int[] excludedColumns = {0,dataStr.get(0).length-1};
-        data = Utils.extractAttributes(dataStr, excludedColumns);
-        k = data.length/20;
-        clustering.KMeans kMeans;
-        kMeans = new clustering.KMeans(data, data.length, data[0].length, k);
-        kMeans.oneIter();
-        //kMeans.buildClusterer(100);
-        int[] labelsPred = kMeans.getLabels();
-
-        //smile.buildClusterer.clustering.KMeans kMeans = new smile.buildClusterer.clustering.KMeans(data,k,100);
-        //int[] labelsPred = kMeans.getClusterLabel();
-        System.out.println(Arrays.toString(labelsPred));
-        System.out.println(new AdjustedRandIndex().measure(labels, labelsPred));*/
-    }
-
-    public int getSeed() {
-        return seed;
-    }
-
-    public void setSeed(int aSeed) {
-        rnd = new Random(aSeed);
-        this.seed = aSeed;
-    }
 }

@@ -6,7 +6,6 @@ import java.util.Random;
 import java.util.Set;
 
 /**
- * Created by rusland on 09.09.18.
  * represents extended version of particle, defined in (Jarboui, 2007):
  *      'Combinatorial particle swarm optimization (CPSO) for partitional buildClusterer problem'
  * Extended particle stores real solution 'solution' and intermediate dummy solution vector
@@ -181,23 +180,6 @@ public class Particle implements Comparable<Particle> {
     @Override
     public int compareTo(Particle other) {
         return this.solution.compareTo(other.getSolution());
-    }
-
-    public static void main(String[] args) {
-        /*int[] s = {0,0,0,1,2,1};
-        int k = 3;
-        int[] pbest = {1,0,2,1,2,0};
-        int[] gbest = {2,1,2,0,1,1};
-        double[] vel = {-1.2,-0.9,0.5,0.7,0.9,0.3};
-        Solution sol = new Solution(s,3);
-        Solution pbestSol = new Solution(pbest,3);
-        Solution gbestSol = new Solution(gbest,3);
-        Particle p = new Particle(sol,vel);
-
-        // pretend velocity is updated
-        p.setVelocity(vel);
-        p.setpBest(pbestSol);
-        p.update(gbestSol, k);*/
     }
 
     public int getSeed() {

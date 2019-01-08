@@ -1,10 +1,7 @@
 package utils;
 
-import GA.GADriver;
-import PSO.Solution;
 import clustering.Cluster;
 import clustering.Dataset;
-import clustering.Experiment;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
@@ -17,7 +14,6 @@ import weka.filters.unsupervised.attribute.Remove;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.xml.crypto.Data;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -26,12 +22,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * Created by rusland on 28.10.18.
+ * Utility functions
  */
 public class Utils {
 
@@ -48,9 +42,6 @@ public class Utils {
         return chooser.getSelectedFile().getAbsolutePath();
     }
 
-    /**
-    * taken from https://www.geeksforgeeks.org/reading-csv-file-java-using-opencv/
-    * */
     public static List<String[]> readFile(String file, char sep) throws IOException
     {
         // Create object of filereader
@@ -245,12 +236,7 @@ public class Utils {
             assert (sol[i] < k);
         }
     }
-    /**
-     * @k - number of clusters
-     * @clusters - dim: N x D
-     * @label - label of len N
-     * return centroids: dimensionality: k x D
-     */
+
     public static HashMap<Integer, double[]> centroids(double[][] dataset, int[] labels) {
         int N = dataset.length;
         int D = dataset[0].length;
@@ -348,6 +334,13 @@ public class Utils {
         normalize(data, dataLow, dataHigh);
     }
 
+    /**
+     * Calculates Davies-Bauldin (DB) Index
+     * @param clusters - clusters represented as HashpMap
+     * @param labels - data points assignments produced by clustering algorithm
+     * @param data - dataset without labels
+     * @return DB Index score in range [0..1]
+     */
     public static double dbIndexScore(HashMap<Integer, double[]> clusters, int[] labels, double[][] data) {
         int numberOfClusters = clusters.size();
         double david = 0.0;
@@ -423,14 +416,6 @@ public class Utils {
         }
     }*/
 
-    public static HashMap<Integer, double[]> centroidsFromWekaInstance(Instances instances) {
-        HashMap<Integer, double[]> result = new HashMap<>();
-        for (int i = 0; i < instances.numInstances(); ++i) {
-            result.put(i,instances.get(i).toDoubleArray());
-        }
-        return result;
-    }
-
     public static double[][] wekaInstancesToArray(Instances instances) {
         double[][] result = new double[instances.size()][];
         for (int i = 0; i < result.length; ++i) {
@@ -483,6 +468,11 @@ public class Utils {
         return data;
     }
 
+    /**
+     * computes standard deviation of class
+     * @param arr - array of values
+     * @return value of standard deviation
+     */
     public static double standardDeviation(double arr[]) {
         double sum = 0.0;
         double standardDeviation = 0.0;
@@ -500,6 +490,10 @@ public class Utils {
         return Math.sqrt(standardDeviation / arr.length);
     }
 
+    /**
+     * set ids of labels in range [1..K], K number of labels
+     * @param labels - array of data point assignments produced by clustering algorithm
+     */
     public static void adjustAssignments(int[] labels) {
         HashMap<Integer, Integer> map = new HashMap();
         for (int i = 0; i < labels.length; ++i) {
@@ -522,6 +516,11 @@ public class Utils {
         }
     }
 
+    /**
+     * determine pareto set using MaxiMin Strategy
+     * @param objsList - vector of objectives for each solution
+     * @return - MaxiMin function value for each solution
+     */
     public static double[] determineParetoSet(double[][] objsList) {
         double[] maxiMins = new double[objsList.length];
         for (int i = 0; i < objsList.length; ++i) {
@@ -549,12 +548,20 @@ public class Utils {
         return maxiMins;
     }
 
-    public static int pickClosestToUtopia(double[][] objs, double[] utopiaCoords, double[] weights, double pow) {
+    /**
+     * pick solution closest to utopia point
+     * @param objs - values of objectives for each solution
+     * @param utopiaCoords - values of ideal objectives
+     * @param weights - weights for each dimension distance
+     * @param distMeasure - distance measure, e.g. Manhattan, Euclidean
+     * @return index of closest solution
+     */
+    public static int pickClosestToUtopia(double[][] objs, double[] utopiaCoords, double[] weights, double distMeasure) {
         double minDist = Double.POSITIVE_INFINITY;
         int leader = -1;
         int i = 0;
         for (double[] cur: objs) {
-            double distToUtopia = Utils.dist(cur, utopiaCoords, weights, pow);
+            double distToUtopia = Utils.dist(cur, utopiaCoords, weights, distMeasure);
             if (distToUtopia < minDist) {
                 leader = i;
                 minDist = distToUtopia;
@@ -565,6 +572,12 @@ public class Utils {
         return leader;
     }
 
+    /**
+     * normalize vector
+     * @param cur - vector to normalize
+     * @param low - low bound
+     * @param high - high bound
+     */
     public static void normalize(double[] cur, double[] low, double[] high) {
         assert (low.length == cur.length);
         for (int i = 0; i < cur.length; ++i) {
@@ -581,7 +594,14 @@ public class Utils {
         }
     }
 
-    public static void removeNoise(int[] labels, double[][] data, int minSizeOfCluster, double pow) {
+    /**
+     * removes small clusters
+     * @param labels - data point assignments
+     * @param data - dataset without labels
+     * @param minSizeOfCluster - minimum of size cluster
+     * @param distMeasure
+     */
+    public static void removeNoise(int[] labels, double[][] data, int minSizeOfCluster, double distMeasure) {
         Set<Integer> goodClusters = new HashSet<>();
 
         // count size of clusters
@@ -602,7 +622,6 @@ public class Utils {
             }
         }
 
-        //System.out.println(goodClusters.size());
         // remove bad clusters
         HashMap<Integer, double[]> centroids = Utils.centroids(data, labels);
         for (int i = 0; i < labels.length; ++i) {
@@ -613,7 +632,7 @@ public class Utils {
                     if (!goodClusters.contains(c)) {
                         continue;
                     }
-                    double tmpDist = dist(centroids.get(c), data[i], pow);
+                    double tmpDist = dist(centroids.get(c), data[i], distMeasure);
                     if (minDist > tmpDist) {
                         minDist = tmpDist;
                         targetC = c;
@@ -630,6 +649,14 @@ public class Utils {
                 .doubleValue();
     }
 
+    /**
+     * reduce size of dataset
+     * @param dataset - dataset
+     * @param inOrder - whether dataset is ordered by label value
+     * @param portion - portion of dataset to use to generate new reduced in size dataset
+     * @param randomly - pick data points randomly
+     * @throws IOException
+     */
     public static void reduceDataset(Dataset dataset, boolean inOrder, int portion, boolean randomly) throws IOException {
         // given that clusters are in order and cluster ids are in order
         List<String[]> fileArr = readFile(dataset.getPath(), ',');
@@ -682,6 +709,17 @@ public class Utils {
         whenWriteStringUsingBufferedWritter_thenCorrect(res, dataset.getPath().replace(".", "r" + portion + "."), false);
     }
 
+    /**
+     * read cluster solutions from file
+     * @param filePath - folder path relative to the project root
+     * @param r - number of runs
+     * @param includesRuns - indicates whether txt file stores number of runs next name of corresponding dataset
+     * @param includesTrueLabels - indicates whether true labels are stored in the file on the line after dataset name
+     * @param includesTime - indicates whether file stores algorithm running time for each run
+     * @param datasets - datasets
+     * @return solutions in hashmap presentation, in which key is dataset name and value is array of solutions corresponding to dataset
+     * @throws IOException
+     */
     public static HashMap<String, int[][]> readSolutionFromFile(String filePath, int r, boolean includesRuns,
                                             boolean includesTrueLabels, boolean includesTime, Dataset[] datasets) throws IOException {
         HashMap<String, int[][]>  res = new HashMap<>();
@@ -735,6 +773,13 @@ public class Utils {
         System.out.println(Arrays.toString(labelsTrue));
     }
 
+    /**
+     * Calculates sum of squared errors (SSE)
+     * @param centroidList - centroids in double-array representation
+     * @param labelList - data points assignments
+     * @param data - dataset without labels
+     * @return - SSE
+     */
     public static double sse(double[][] centroidList, int[] labelList, double[][] data) {
         HashMap<Integer, double[]> mapC = new HashMap<>();
         for (int i = 0; i < centroidList.length; ++i) {
@@ -769,116 +814,5 @@ public class Utils {
         clusters.removeIf(cluster -> cluster.size() < 1);
 
         return clusters;
-    }
-
-    public static void main(String[] args) throws Exception {
-        //Utils.reduceDataset(Dataset.IS, false, 2, true);
-        //Utils.replaceInFile(Dataset.IS.getPath(), " ", "");
-        //Utils.nominalForm(Dataset.IS.getPath(), "data/ois.csv");
-        /*HashMap<String, int[][]> datasetTosolutions = readSolutionFromFile("results/mGA/tuning/mgaC1.txt", 10);
-        for (String dataset: datasetTosolutions.keySet()) {
-            System.out.println(dataset);
-            int[][] expSols = datasetTosolutions.get(dataset);
-            for (int[] expSol: expSols) {
-                System.out.println(Arrays.toString(expSol));
-            }
-        }*/
-        //Dataset d = Dataset.S2;
-        //reduceDataset(d, true, 5, true);
-        /*Dataset[] datasets = {Dataset.AGGREGATION, Dataset.R15, Dataset.JAIN};
-        for (Dataset d: datasets) {
-            String newPath = d.getPath().replace(".csv", "o.csv");
-            nominalForm(d.getPath(), newPath);
-            replaceInFile(newPath, " ", "");
-        }*/
-
-        //Utils.nominalFormToNumber("data/compound.csv", ',', -1);
-        //Utils.nominalForm("data/aggregation.csv", "data/oaggregation.csv");
-
-        //test centroids
-        /*double[][] data = {{1,1},{5,5},{10,10},{11,11}};
-        int[] labels = {0,0,2,2};
-        HashMap<Integer, double[]> centroids = Utils.centroids(data,labels);
-        for (int c: centroids.keySet()) {
-            System.out.println(Arrays.toString(centroids.get(c)));
-        }*/
-        /*int[] l = new int[] {0, 3, 2, 1};
-        System.out.println(Arrays.toString(adjustLabels(l)));*/
-
-        /*double[][] data = {{-1, 0.1}, {0.5, 0}, {1, 1}};
-        normalize(data);
-        for (int i = 0; i < data.length; ++i) {
-            System.out.println(Arrays.toString(data[i]));
-        }*/
-
-        /*int[] labels = {1, 0, 5, 2, 2};
-        //adjustAssignments(labels);
-        System.out.println(Arrays.toString(labels));
-
-        int distNumK = Utils.distinctNumberOfItems(labels);
-        Integer[] distClusters = Utils.distinctItems(labels).toArray(new Integer[distNumK]);
-        int idx = new Random().nextInt(distClusters.length);
-        System.out.println(distClusters[idx]);*/
-        /*double[][] data = {{1,1}, {1,2},{5,5},{5,5.5},{4,5},{1,0}};
-        int[] label = {5,5,1,1,0,10};
-        removeNoise(label, data, 2);
-        System.out.println(Arrays.toString(label));*/
-
-        //System.out.println(doublePrecision(10.3453453455, 5));
-
-        /*double[] objLow = {-0.5, 20.0};
-        double[] objHigh = {-0.1, 120};
-        double[] utopia = {0.0, 0.0};
-        double[][] objs = {{-0.2, 60}, {-0.3, 50}, {-0.3, 40}};
-        Utils.normalize(objs, objLow, objHigh);
-        for (double[] obj: objs) {
-            System.out.println(Arrays.toString(obj));
-        }
-        System.out.println(pickClosestToUtopia(objs, utopia));
-        System.out.println(Arrays.toString(determineParetoSet(objs)));*/
-
-        /*Instances instances = getData("data/p-glass.csv", false, false);
-        for (double[] record: Utils.wekaInstancesToArray(instances)) {
-            System.out.println(Arrays.toString(record));
-        }
-        double[][] vl = {{5.0, 1.51742, 13.27, 3.62, 1.24, 73.08, 0.55, 8.07, 0.0, 0.0},
-        {6.0, 1.51596, 12.79, 3.61, 1.62, 72.97, 0.64, 8.07, 0.0, 0.26},
-            {7.0, 1.51743, 13.3, 3.6, 1.14, 73.09, 0.58, 8.17, 0.0, 0.0}};
-        new DenseInstance(1.0, vl[0]);
-        Instances centroidIns = new Instances(instances, vl.length);
-        for (double[] v: vl) {
-            centroidIns.add(new DenseInstance(1.0, v));
-        }
-        for (Instance i: centroidIns) {
-            System.out.println(Arrays.toString(i.toDoubleArray()));
-        }*/
-
-        /*double[][] data = {{1.0, 0, -0.5},
-                {-1.0, 20, -0.5},
-                {0.0, 100, -0.5}};
-        double[] low = {-2.0, 0, -0.4};
-        double[] high = {2.0, 100, -0.5};
-        Utils.normalize(data, low, high);
-        for (int i = 0; i < data.length; ++i) {
-            System.out.println(Arrays.toString(data[i]));
-        }*/
-
-        /*double[] data = {0.0, -40, -0.5};
-        double[] low = {-2.0, 0, -0.6};
-        double[] high = {2.0, 50, -0.4};
-        Utils.normalize(data, low, high);
-        System.out.println(Arrays.toString(data));*/
-        /*Dataset dataset = Dataset.COMPOUND;
-        System.out.println(dataset.getD());
-        dataset.setD(5);
-        System.out.println(dataset.getD());
-        Dataset newD = Dataset.COMPOUND;
-        System.out.println("new: " + newD.getD());*/
-
-        /*String[] arr = new String[64];
-        for (int i = 1; i <= 64; ++i) {
-            arr[i-1] = "a".concat(Integer.toString(i));
-        }
-        System.out.println(Arrays.toString(arr));*/
     }
 }

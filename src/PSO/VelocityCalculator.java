@@ -3,7 +3,6 @@ package PSO;
 import java.util.Random;
 
 /**
- * Created by rusland on 15.11.18.
  * calculates velocity of particle
  */
 public class VelocityCalculator {

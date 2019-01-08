@@ -3,7 +3,6 @@ package utils;
 import java.util.*;
 
 /**
- * Created by rusland on 10.10.18.
  * NCConstruct implements neighborhood construction procedure
  */
 public class NCConstruct {

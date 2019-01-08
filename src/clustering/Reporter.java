@@ -6,7 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Created by rusland on 20.12.18.
+ * Represents Experimental results
+ * Computes performance measures, mean and standard deviation
  */
 public class Reporter {
     private Experiment[] experiments;
@@ -16,23 +17,35 @@ public class Reporter {
     private boolean computed;
 
     /**
-    * @r - number of experiments
+    * @param numExperiments  - number of experiments
     * */
     public Reporter(int numExperiments) {
         this.experiments = new Experiment[numExperiments];
         this.computed = false;
     }
 
+    /**
+     * set experimental results for a specified run
+     * @param experimentID index of experiment
+     * @param experiment experimental result
+     */
     public void set(int experimentID, Experiment experiment) {
         experiments[experimentID] = experiment.clone();
         experiments[experimentID].setTime(experiment.getTime());
         this.computed = false;
     }
 
+    /**
+     * @param idx index of run
+     * @return experimental results for a specified run
+     */
     public Experiment get(int idx) {
         return experiments[idx];
     }
 
+    /**
+     * compute performace measures
+     */
     public void compute() {
         double[] aris = new double[experiments.length];
         double[] dbs = new double[experiments.length];
@@ -65,17 +78,19 @@ public class Reporter {
         return this.experiments.length;
     }
 
+    /**
+     * @return mean results of experiments
+     */
     public Experiment getMean() {
         assert (this.computed == true);
         return mean;
     }
 
+    /**
+     * @return standard deviation results of experiments
+     */
     public Experiment getStdDev() {
         assert (this.computed == true);
         return stdDev;
-    }
-
-    public Experiment[] getExperiments() {
-        return experiments;
     }
 }

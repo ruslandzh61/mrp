@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Created by rusland on 20.12.18.
+ * Tests methods in Utils class
  */
 public class UtilsTesting {
 

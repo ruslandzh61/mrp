@@ -9,7 +9,7 @@ import java.util.List;
 
 
 /**
- * Created by rusland on 23.12.18.
+ * Calculates Silhouette Coefficient
  */
 public class Silh {
     List<Cluster> clusters;

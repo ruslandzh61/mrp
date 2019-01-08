@@ -1,17 +1,10 @@
 package utils;
 
-import PSO.Solution;
-
 import java.util.*;
 
 /**
- * Created by rusland on 10.11.18.
  * Pareto implements simple procedure for finding set of pareto-optimal front;
- * should be substituted with MaxiMin algorithm (Li, 2007):
- *      'Better Spread and Convergence: Particle Swarm Multiobjective Optimization Using the Maximin Fitness Function'
- *
- * some code is taken from
- * https://github.com/jcaucb/ParetoNondominated/blob/master/src/org/ucb/c5/pareto/Pareto.java
+ * should be substituted with
  */
 public class Pareto {
     public static int PRECISION = 8;
@@ -95,7 +88,7 @@ public class Pareto {
     }
 
     public static void main(String[] args) {
-        /*double[][] values = new double[6][];
+        double[][] values = new double[6][];
         values[0] = new double[]{0.2, 0.17590848575069545};
         values[1] = new double[]{0.2, 0.22910852642658405};
         values[2] = new double[]{0.2, 0.19483310610576984};
@@ -107,6 +100,6 @@ public class Pareto {
             map.put(i, values[i]);
         }
         Set<Integer> set = new Pareto().extractParetoNondominated(map);
-        System.out.println(set);*/
+        System.out.println(set);
     }
 }

@@ -10,26 +10,18 @@ import java.util.Arrays;
 import java.util.Random;
 
 /**
- * Created by rusland on 20.12.18.
+ * Extends Analyzer to run experiments on K-Means algorithm
  */
 public class KMeansDriver extends Analyzer {
     private boolean isUsekMeansPlusPlus;
     private boolean isUseWekaVersion;
+    private double distMeasure;
 
-
-
-    public void setDistMeasure(double distMeasure) {
+    void setDistMeasure(double distMeasure) {
         this.distMeasure = distMeasure;
     }
 
-    private double distMeasure;
-
-    public KMeansDriver(boolean plus, boolean weka) {
-        this.isUsekMeansPlusPlus = plus;
-        this.isUseWekaVersion = weka;
-    }
-
-    public KMeansDriver() {}
+    KMeansDriver() {}
 
     public void run(int k) throws Exception {
         processData();
@@ -62,46 +54,8 @@ public class KMeansDriver extends Analyzer {
         }
     }
 
-    public void runK(String path, int runs) throws Exception {
-        StringBuilder solutionsLog = new StringBuilder();
-        Random rnd = new Random(1);
-        int[] labelsPred;
-        processData();
-
-        int minK = 2;
-        int maxK = (int) Math.sqrt(this.dataAttrs.length);
-        double[][] results = new double[maxK-minK+1][2];
-        int[] fakeLabels = new int[dataAttrs.length];
-        double[][] fakeCentroids = new double[1][];
-        fakeCentroids[0] = utils.Utils.centroids(dataAttrs, fakeLabels).get(0);
-        solutionsLog.append(1 + " " + utils.Utils.sse(fakeCentroids, fakeLabels, dataAttrs) + System.lineSeparator());
-        for (int k = minK; k <= maxK; ++k) {
-            double totalSSE = 0.0;
-            for (int skipRnd = 0; skipRnd < seedStartFrom; ++skipRnd) {
-                rnd.nextInt();
-            }
-            for (int run = 1; run <= runs; ++run) {
-                KMeans kMeans = new KMeans(k, distMeasure);
-                kMeans.setSeed(rnd.nextInt());
-                if (isUsekMeansPlusPlus) {
-                    kMeans.setInitializationMethod(KMeans.Initialization.KMEANS_PLUS_PLUS);
-                } else {
-                    kMeans.setInitializationMethod(KMeans.Initialization.RANDOM);
-                }
-                kMeans.buildClusterer(this.dataAttrs);
-                labelsPred = kMeans.getLabels();
-                Utils.removeNoise(labelsPred, this.dataAttrs, 2, 2.0);
-                Utils.adjustAssignments(labelsPred);
-                double sse = utils.Utils.sse(kMeans.getCentroids(), labelsPred, dataAttrs);
-                totalSSE += sse;
-            }
-
-            double avgSSE = totalSSE/runs;
-            System.out.println(k + " " + avgSSE);
-            solutionsLog.append(k + " " + avgSSE + System.lineSeparator());
-        }
-        Utils.whenWriteStringUsingBufferedWritter_thenCorrect(solutionsLog.toString(), path, true);
-    }
+    /** Multi-run K-Means
+     */
     public void run() throws Exception {
         assert (dataset != null);
         assert (reporter != null);
@@ -114,8 +68,8 @@ public class KMeansDriver extends Analyzer {
             int[] labelsPred;
             Experiment bestE = new Experiment();
             bestE.setAri(Double.NEGATIVE_INFINITY);
-            int minK = 2; //(int)(0.02 * dataAttrs.length);
-            int maxK = (int) Math.sqrt(this.dataAttrs.length); //(int)(0.1 * dataAttrs.length);
+            int minK = 2;
+            int maxK = (int) Math.sqrt(this.dataAttrs.length);
             for (int k = minK; k <= maxK; ++k) {
                 if (this.isUseWekaVersion) {
                     SimpleKMeans kMeans = new SimpleKMeans();
@@ -171,61 +125,61 @@ public class KMeansDriver extends Analyzer {
         }
     }
 
-    public boolean isUsekMeansPlusPlus() {
-        return isUsekMeansPlusPlus;
+    /** run experiments for a dataset using different number of clusters
+     * @param path - file path to save results,
+     * @param runs - number of runs
+     * */
+    void runK(String path, int runs) throws Exception {
+        StringBuilder solutionsLog = new StringBuilder();
+        Random rnd = new Random(1);
+        int[] labelsPred;
+        processData();
+
+        int minK = 2;
+        int maxK = (int) Math.sqrt(this.dataAttrs.length);
+        int[] fakeLabels = new int[dataAttrs.length];
+        double[][] fakeCentroids = new double[1][];
+        fakeCentroids[0] = utils.Utils.centroids(dataAttrs, fakeLabels).get(0);
+        solutionsLog.append(1 + " " + utils.Utils.sse(fakeCentroids, fakeLabels, dataAttrs) + System.lineSeparator());
+        for (int k = minK; k <= maxK; ++k) {
+            double totalSSE = 0.0;
+            for (int skipRnd = 0; skipRnd < seedStartFrom; ++skipRnd) {
+                rnd.nextInt();
+            }
+            for (int run = 1; run <= runs; ++run) {
+                KMeans kMeans = new KMeans(k, distMeasure);
+                kMeans.setSeed(rnd.nextInt());
+                if (isUsekMeansPlusPlus) {
+                    kMeans.setInitializationMethod(KMeans.Initialization.KMEANS_PLUS_PLUS);
+                } else {
+                    kMeans.setInitializationMethod(KMeans.Initialization.RANDOM);
+                }
+                kMeans.buildClusterer(this.dataAttrs);
+                labelsPred = kMeans.getLabels();
+                Utils.removeNoise(labelsPred, this.dataAttrs, 2, 2.0);
+                Utils.adjustAssignments(labelsPred);
+                double sse = utils.Utils.sse(kMeans.getCentroids(), labelsPred, dataAttrs);
+                totalSSE += sse;
+            }
+
+            double avgSSE = totalSSE/runs;
+            System.out.println(k + " " + avgSSE);
+            solutionsLog.append(k + " " + avgSSE + System.lineSeparator());
+        }
+        Utils.whenWriteStringUsingBufferedWritter_thenCorrect(solutionsLog.toString(), path, true);
     }
 
-    public void setUsekMeansPlusPlus(boolean usekMeansPlusPlus) {
+    void setUsekMeansPlusPlus(boolean usekMeansPlusPlus) {
         isUsekMeansPlusPlus = usekMeansPlusPlus;
     }
 
-    static void testMultiKmeans() throws Exception {
-        int counter = 1; // write counter before writing results to .txt;
-        String solutionsFilePath = "results/newDatasets.txt";
-
-        Dataset[] datasets = {Dataset.IS}; //Dataset.AGGREGATION, Dataset.R15, Dataset.JAIN};//Dataset.values();
-        int runs = 10;
-        boolean usePlusPlus = false;
-        boolean useWeka = false;
-        double distMeasure = 1.0;
-
-        if (useWeka) {
-            if (usePlusPlus) {
-                System.out.println("WEKA K-Means");
-            } else {
-                System.out.println("WEKA K-Means++");
-            }
-        } else {
-            if (usePlusPlus) {
-                System.out.println("My K-Means");
-            } else {
-                System.out.println("My K-Means++");
-            }
-        }
-
-        for (Dataset dataset: datasets) {
-            System.out.println("remove first attribute: " + dataset.isRemoveFirst());
-            System.out.println("normalize: " + dataset.isNormalize());
-            System.out.println("N=" + dataset.getN() + "; D=" + dataset.getD() + "; K=" + dataset.getK());
-            KMeansDriver kMeansDriver = new KMeansDriver(usePlusPlus, useWeka);
-            kMeansDriver.setDistMeasure(distMeasure);
-            kMeansDriver.setDataset(dataset);
-            kMeansDriver.setRuns(runs);
-            kMeansDriver.run();
-            kMeansDriver.analyze(true);
-            //kMeansDriver.saveResults(solutionsFilePath);
-            System.out.println("real number of clusters: " + dataset.getK());
-        /*System.out.println("my k-means: ");
-        PSODriver.runMyKmeans(clustering.KMeans.Initialization.RANDOM, 10, filePath, removeFirst, normalize);
-        System.out.println("-------");
-        System.out.println("WEKA random k-means");
-        PSODriver.runKmeans(SimpleKMeans.RANDOM, 10, filePath, filePathForWeka, removeFirst, normalize);
-        System.out.println("-------");
-        System.out.println("WEKA kmeans++ k-means");
-        PSODriver.runKmeans(SimpleKMeans.KMEANS_PLUS_PLUS, 10, filePath, filePathForWeka, removeFirst, normalize);*/
-        }
-    }
-
+    /**
+     * experiments are run to determine optimal number of clusters in the
+     * dataset using Elbow Method for K-Means Clustering
+     * @param args - args[1] is a name of dataset;
+     *  args[2] is a seed to start experiments from; args[3] is a number of runs
+     * @throws Exception
+     */
     static void testForElbow(String[] args) throws Exception {
         String path;
         boolean usePlusPlus = false;
@@ -242,11 +196,14 @@ public class KMeansDriver extends Analyzer {
         driver.runK(path, runs);
     }
 
-    public static void main(String[] args) throws Exception {
-        System.out.println("K-means");
+    /** experiments are run on K-Means using a pre-defined number of clusters, obtained from experimental results
+     * utilizing Elbow Method for K-Means clustering.
+     */
+    static void testKMeans() throws Exception {
         Dataset[] datasets = {Dataset.GLASS, Dataset.JAIN, Dataset.WDBC, Dataset.FLAME, Dataset.COMPOUND,
-        Dataset.PATHBASED, Dataset.S1, Dataset.S3, Dataset.DIM064, Dataset.DIM256};
-        int[] ks = {3,3,2,4,3,3,12,13,21,12};
+                Dataset.PATHBASED, Dataset.S1, Dataset.S3, Dataset.DIM064, Dataset.DIM256};
+        // ks are determined based on previous experiments using Elbow Method: testForElbow()
+        int[] ks = {3, 3, 2, 4, 3, 3, 12, 13, 21, 12};
         int runs = 1;
         int datasetIdx = 8; //Integer.parseInt(args[0]);
         String solutionsFilePath = "results/k-means/" + datasets[datasetIdx].name() + ks[datasetIdx] + ".txt";
@@ -260,5 +217,23 @@ public class KMeansDriver extends Analyzer {
         driver.run(ks[datasetIdx]);
         driver.analyze(true);
         driver.saveResults(solutionsFilePath);
+    }
+
+    /**
+     * Method to run experiments on K-Means.
+     * If arguments are passed, experiments are run to determine optimal number of clusters in the
+     * dataset using Elbow Method for K-Means Clustering. Otherwise, that is if no arguments passed,
+     * experiments are run on K-Means using a pre-defined number of clusters, obtained from experimental results
+     * utilizing Elbow Method for K-Means clustering.
+     * Clustering solutions are saved into txt file. Passed arguments are included in file's name.
+     * @param args - array of arguments: args[0] is a name of dataset;
+     *  args[1] is a seed to start experiments from; args[2] is a number of runs
+     **/
+    public static void main(String[] args) throws Exception {
+        if (args == null || args.length == 0) {
+            testKMeans();
+        } else {
+            testForElbow(args);
+        }
     }
 }

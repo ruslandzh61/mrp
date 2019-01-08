@@ -3,8 +3,7 @@ package clustering;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by rusland on 23.12.18.
+/** Represents a cluster
  */
 public class Cluster {
     private int id;

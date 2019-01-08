@@ -5,20 +5,13 @@ import utils.*;
 import java.util.Arrays;
 
 /**
- * Created by rusland on 06.10.18.
- * locus-based solution representation
- * e.g. [1,1,1,1,1,2,2,2,3] - transform nine data points to a particle vector
- *      which represents a buildClusterer solution consisting of three clusters
- *      first 5 points belong to cluster with 1, next 3 points - to cluster 2, last point - to cluster 3
+ * Represents clustering solution
  */
 public class Solution implements Comparable<Solution> {
     private int[] solution;
     private double fitness;
     private int k;
-    private double[] objectives; // objective function values: connectivity on first and cohesion on second
-
-    /** number of clusters stays the same if empty clusters are counted as well
-    * */
+    private double[] objectives;
 
     public Solution(Solution s) {
         this.solution = s.getSolution().clone();

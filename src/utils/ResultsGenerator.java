@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Created by rusland on 2018-12-29.
+ * Generate Excel file with experimental results
  */
 public class ResultsGenerator {
     Dataset[] datasets;
@@ -60,8 +60,8 @@ public class ResultsGenerator {
         }
     }
 
-    /** @i - dataset index
-     *
+    /** @param i - dataset index
+     * @param labelsPred - data points assignment produced by clustering algorithm
       */
     protected Experiment measure(int i, int[] labelsPred) {
         HashMap<Integer, double[]> centroids = Utils.centroids(this.dataAttrsList.get(i), labelsPred);
@@ -82,7 +82,18 @@ public class ResultsGenerator {
         return new Experiment(labelsPred, aRIScore, dbScore, silhScore, numClusters);
     }
 
-    // String[] confs = {GADriver.GaConfiguration.mgaC1.name()};//GADriver.GaConfiguration.values();
+    /**
+     * Generates results in Excel from clustering solutions stored in txt file;
+     * DATASETS SHOULD BE IN THE SAME ORDER AS IN THE TXT FILE AND VALUE OF RUNS SHOULD MATCH NUMBER OF RUNS IN TXT FILE;
+     * last two rows in fileName.xls correspond to mean and standard deviation
+     * @param folderPath - folder path relative to the project root
+     * @param fileName - file name where clustering solutions are stored
+     * @param runs - number of runs
+     * @param includesRuns - indicates whether txt file stores number of runs next name of corresponding dataset
+     * @param includesTrueLabels - indicates whether true labels are stored in the file on the line after dataset name
+     * @param includesTime - indicates whether file stores algorithm running time for each run
+     * @throws Exception
+     */
     public void generate(String folderPath, String fileName, int runs, boolean includesRuns, boolean includesTrueLabels, boolean includesTime) throws Exception { // folder "results/mGA/tuning"
         Experiment[] experiments;
         Experiment[] confMeans = new Experiment[datasets.length];
@@ -110,7 +121,8 @@ public class ResultsGenerator {
 
             confMeans[datasetIdx] = reporter.getMean();
             confStdDevs[datasetIdx] = reporter.getStdDev();
-
+            String excelFilePath = folderPath + fileName + ".xls";
+            ExcelRW.write(excelFilePath, experiments, datasets[datasetIdx].name());
             ++datasetIdx;
         }
 
@@ -155,10 +167,18 @@ public class ResultsGenerator {
         ExcelRW.write(excelFilePath, datasetNames, datasetMeanStdDevsAverage);
     }
 
+    /**
+     * DATASETS SHOULD BE IN THE SAME ORDER AS IN THE TXT FILE AND VALUE OF RUNS SHOULD MATCH NUMBER OF RUNS IN TXT FILE
+     * @param args - no arguments
+     * @throws Exception
+     */
     public static void main(String[] args) throws Exception {
+        String folderPath = "results/PSO/";
+        String fileName = "pso";
+        int runs = 30;
         Dataset[] datasets = {Dataset.GLASS, Dataset.WDBC, Dataset.FLAME, Dataset.COMPOUND,
                 Dataset.PATHBASED, Dataset.JAIN, Dataset.S1, Dataset.S3, Dataset.DIM064, Dataset.DIM256};
         ResultsGenerator resultsGenerator = new ResultsGenerator(datasets);
-        resultsGenerator.generate("results/mGA/", "mga.txt", 30, true, false, true);
+        resultsGenerator.generate(folderPath, fileName, runs, true, false, false);
     }
 }

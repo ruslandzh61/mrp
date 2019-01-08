@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Created by rusland on 28.10.18.
+ * Represents a bi-directional graph
  */
 public class Graph {
     private int V;

@@ -1,7 +1,7 @@
 package clustering;
 
 /**
- * Created by rusland on 20.12.18.
+ * Represents experimental results: clustering solution and performance measures
  */
 public class Experiment {
     private int[] solution;

@@ -7,13 +7,12 @@ import utils.Utils;
 import java.util.*;
 
 /**
- * Created by rusland on 06.10.18.
+ * Evaluator computes objective functions for a clustering solution
  */
 public class Evaluator {
     public enum Evaluation {
         CONNECTIVITY, COHESION
     }
-
 
     /**
      * 'data' and 'ncc' parameters are needed for the evaluation of connectivity function
@@ -125,20 +124,4 @@ public class Evaluator {
         }
         return clustersHp;
     }*/
-
-    public static void main(String[] args) {
-
-        int[] realS = {1,2,3,0,5,4,7,8,6,9}; // 4 clusters
-        //int[] realS = {1,2,3,0,0,4,7,8,6,9}; // 3 clusters
-        //int[] realS = {1,2,3,5,0,4,7,8,0,9}; // 2 cluster
-        //int[] realS = {1,2,3,5,0,4,7,8,0,0}; // 1 cluster
-        double[][] data = {{2,2}, {3,3}, {3,1}, {4,2}, {1.6,-0.5}, {3.01, -1.5}, {-4, 2}, {-2, 2}, {-3, 3},{7,7}};
-
-        Solution s = new Solution(realS, Utils.distinctNumberOfItems(realS));
-        Evaluator e = new Evaluator();
-        NCConstruct ncc = new NCConstruct(data);
-        double cost = e.evaluate(realS,Evaluation.CONNECTIVITY,data, ncc);
-        System.out.println(cost);
-
-    }
 }

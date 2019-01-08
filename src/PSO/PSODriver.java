@@ -3,32 +3,24 @@ package PSO;
 import clustering.*;
 import utils.NCConstruct;
 import utils.Utils;
-
-import javax.security.auth.login.Configuration;
 import java.util.*;
 
 /**
- * Created by rusland on 27.10.18.
- * PSODriver is the main class for running PSO-based buildClusterer algorithm (Armani,2016):
- *      'Multiobjective buildClusterer analysis using particle swarm optimization'
+ * Extends Analyzer class to PSODriver runs experiments on clustering algorithm based on
+ * PSO-based algorithm (Armani,2016): 'Multiobjective buildClusterer analysis using particle swarm optimization'
  *
- * NOT COMPLETE: Pareto-optimal front is retrieved using simple algorithm,
- *      which should be substituted later with MaxiMinPSO algorithm to to determine Pareto-domination (Li, 2007):
- *          'Better Spread and Convergence: Particle Swarm Multiobjective Optimization Using the Maximin Fitness Function'
- *
- * PROBLEM: Solutions don't improve after initialization step in the next iterations of PSO
+ * MaxiMin algorithm (Li, 2007):
+ *      'Better Spread and Convergence: Particle Swarm Multiobjective Optimization Using the Maximin Fitness Function'
  */
 public class PSODriver extends Analyzer {
-
     private PSOConfiguration configuration;
 
     /**
-     * main method to run PSO-based buildClusterer
+     * main method to run PSO-based clusterer
      * */
     public void run() throws Exception {
         assert (reporter != null);
         assert (dataset != null);
-        /* process data */
         processData();
 
         // step 2 - pick objectives
@@ -71,7 +63,7 @@ public class PSODriver extends Analyzer {
         }
     }
 
-    public void setConfiguration(PSOConfiguration configuration) {
+    void setConfiguration(PSOConfiguration configuration) {
         this.configuration = configuration;
     }
 
@@ -83,7 +75,7 @@ public class PSODriver extends Analyzer {
         int runs = Integer.parseInt(args[3]);
 
         System.out.println("Dataset: " + dataset.name());
-        String solutionsFilePath = "results/PSO2/pso" + conf.name() + "_" + dataset.name() + "-" + seedStartFrom + "-" + runs + ".txt";
+        String solutionsFilePath = "results/PSO/pso" + conf.name() + "_" + dataset.name() + "-" + seedStartFrom + "-" + runs + ".txt";
 
         PSODriver psoDriver = new PSODriver();
         psoDriver.setConfiguration(conf);

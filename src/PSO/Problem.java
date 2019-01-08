@@ -5,12 +5,10 @@ import utils.NCConstruct;
 import utils.Utils;
 
 /**
- * Created by rusland on 09.09.18.
+ * Represents clustering problem
  */
 public class Problem {
     private int N, D;
-    // space constraints
-    //private double[] dimLow, dimHigh;
 
     public double[][] getData() {
         return data;
@@ -24,7 +22,6 @@ public class Problem {
         this.N = data.length;
         this.D = data[0].length;
         evaluator = aEvaluator;
-        //retrieveDimBound();
     }
 
     public int getN() {
@@ -32,10 +29,6 @@ public class Problem {
     }
 
     public int getD() { return D;}
-
-    /*public double getDimLow(int dimIdx) { return dimLow[dimIdx];}
-
-    public double getDimHigh(int dimIdx) { return dimHigh[dimIdx];}*/
 
     public double[] evaluate(int[] solution, Evaluator.Evaluation[] evaluation, NCConstruct ncc) {
         assert (evaluation.length>0);
@@ -45,23 +38,4 @@ public class Problem {
         }
         return result;
     }
-
-    /*private void retrieveDimBound() {
-        dimLow = new double[D];
-        dimHigh = new double[D];
-        for (int iD = 0; iD < D; ++iD) {
-            dimLow[iD] = Integer.MAX_VALUE;
-            dimHigh[iD] = Integer.MIN_VALUE;
-        }
-        for (int iN = 0; iN < N; ++iN) {
-            for (int iD = 0; iD < D; ++iD) {
-                if (data[iN][iD] > dimHigh[iD]) {
-                    dimHigh[iD] = data[iN][iD];
-                }
-                if (data[iN][iD] < dimLow[iD]) {
-                    dimLow[iD] = data[iN][iD];
-                }
-            }
-        }
-    }*/
 }

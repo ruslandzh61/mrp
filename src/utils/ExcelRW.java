@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Created by rusland on 25.12.18.
+ * Creates Excel files
  */
 public class ExcelRW {
     private Workbook workbook;
@@ -125,6 +125,7 @@ public class ExcelRW {
     }
 
     public static void main(String[] args) throws Exception {
+        // tests
         String[] datasets = {Dataset.GLASS.name(), Dataset.WDBC.name(), Dataset.FLAME.name(), Dataset.COMPOUND.name(),
                 Dataset.PATHBASED.name(), Dataset.S1.name(), Dataset.S3.name(), Dataset.DIM064.name(), Dataset.DIM256.name()};
         String[][] arrStr = {{"45+-4", "40+-6", "45+-4", "7"},{"55+-6", "40+-3", "35+-4","5"},{"30+-4", "45+-9", "35+-7", "5"}};

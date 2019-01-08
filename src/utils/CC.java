@@ -1,7 +1,7 @@
 package utils;
 
 /**
- * Created by rusland on 28.10.18.
+ * Represents Connected Components
  */
 public class CC {
     private boolean[] marked;   // marked[v] = has vertex v been marked?
