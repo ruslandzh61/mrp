@@ -6,60 +6,7 @@
     </artifacts-to-build>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="31ac2908-1b01-48a7-8033-ec2e78d94e2f" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/ga-comparison.docx" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/ga-comparison.pdf" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/GA/ga_IS-0-30.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/GA/means.xls" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/GA/stdDevs.xls" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/PSO2/psoCONF5_COMPOUND-0-30.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/PSO2/psoCONF5_GLASS-0-30.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/PSO2/psoCONF7_FLAME-0-30.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/PSO2/psoCONF7_JAIN-0-30.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/PSO2/psoCONF7_PATHBASED-0-30.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/PSO2/psoCONF7_WDBC-0-30.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/mGA/means.xls" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/mGA/stdDevs.xls" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/mGA2/mgaC13_COMPOUND-0-30.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/mGA2/mgaC13_FLAME-0-30.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/mGA2/mgaC13_GLASS-0-30.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/mGA2/mgaC13_JAIN-0-30.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/mGA2/mgaC25_GLASS-0-30.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/mGA2/mgaC26_COMPOUND-0-10.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/mGA2/mgaC26_COMPOUND-10-20.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/mGA2/mgaC27_WDBC-0-10.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/mGA2/mgaC27_WDBC-10-10.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/mGA2/mgaC27_WDBC-20-10.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/mGA2/mgaC28_S1-0-10.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/mGA2/mgaC29_S1-0-10.txt" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/results/mGA2/mgaC29_S3-0-10.txt" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/PSO/PSOConfiguration.class" afterPath="$PROJECT_DIR$/out/production/Project/PSO/PSOConfiguration.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/PSO/PSODriver.class" afterPath="$PROJECT_DIR$/out/production/Project/PSO/PSODriver.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/PSO/Particle.class" afterPath="$PROJECT_DIR$/out/production/Project/PSO/Particle.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/PSO/Solution.class" afterPath="$PROJECT_DIR$/out/production/Project/PSO/Solution.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/clustering/Analyzer.class" afterPath="$PROJECT_DIR$/out/production/Project/clustering/Analyzer.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/clustering/Experiment.class" afterPath="$PROJECT_DIR$/out/production/Project/clustering/Experiment.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/clustering/Reporter.class" afterPath="$PROJECT_DIR$/out/production/Project/clustering/Reporter.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/utils/ExcelRW.class" afterPath="$PROJECT_DIR$/out/production/Project/utils/ExcelRW.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/utils/ResultsGenerator.class" afterPath="$PROJECT_DIR$/out/production/Project/utils/ResultsGenerator.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/out/production/Project/utils/Utils.class" afterPath="$PROJECT_DIR$/out/production/Project/utils/Utils.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/results/GA/datasetMeanStdDevs.xls" afterPath="$PROJECT_DIR$/results/GA/datasetMeanStdDevs.xls" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/results/GA/ga11.xls" afterPath="$PROJECT_DIR$/results/GA/ga11.xls" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/results/ga-overall-comparison.xlsx" afterPath="$PROJECT_DIR$/results/ga-overall-comparison.xlsx" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/results/k-means/kmeans.xls" afterPath="$PROJECT_DIR$/results/k-means/kmeans.xls" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/results/mGA/mga.xls" afterPath="$PROJECT_DIR$/results/mGA/mga.xls" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/PSO/PSOConfiguration.java" afterPath="$PROJECT_DIR$/src/PSO/PSOConfiguration.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/PSO/PSODriver.java" afterPath="$PROJECT_DIR$/src/PSO/PSODriver.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/PSO/Particle.java" afterPath="$PROJECT_DIR$/src/PSO/Particle.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/PSO/Solution.java" afterPath="$PROJECT_DIR$/src/PSO/Solution.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/clustering/Analyzer.java" afterPath="$PROJECT_DIR$/src/clustering/Analyzer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/clustering/Experiment.java" afterPath="$PROJECT_DIR$/src/clustering/Experiment.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/clustering/Reporter.java" afterPath="$PROJECT_DIR$/src/clustering/Reporter.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/utils/ExcelRW.java" afterPath="$PROJECT_DIR$/src/utils/ExcelRW.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/utils/ResultsGenerator.java" afterPath="$PROJECT_DIR$/src/utils/ResultsGenerator.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/utils/Utils.java" afterPath="$PROJECT_DIR$/src/utils/Utils.java" />
-    </list>
+    <list default="true" id="31ac2908-1b01-48a7-8033-ec2e78d94e2f" name="Default" comment="" />
     <ignored path="GA-PSO-Clustering.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path="$PROJECT_DIR$/out/" />
