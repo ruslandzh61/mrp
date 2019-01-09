@@ -70,7 +70,6 @@ public class Solution implements Comparable<Solution> {
         }
     }
 
-
     public double getObjective(int i) {
         return objectives[i];
     }

@@ -6,12 +6,14 @@ package PSO;
 public enum PSOConfiguration {
     // MaxiMin is used, weights of objectives are the same (0.5, 0.5)
     CONF2(200, true, true),
-    // MaxiMin is not used, weights of objectives are different (0.05, 0.95)
+    // MaxiMin is not used, weights of objectives are different
+    CONF4(200, true, false, new double[]{0.15, 0.85}),
     CONF5(200, true, false, new double[]{0.05, 0.95}),
     // MaxiMin is not used, weights of objectives are same (0.5, 0.5)
     CONF7(200, true, false),
-    // MaxiMin is used, weights of objectives are different (0.05, 0.95)
+    // MaxiMin is used, weights of objectives are different
     CONF8(200, true, true, new double[]{0.05, 0.95});
+
 
     PSOConfiguration(int aMaxIteration, boolean aEqualClusterNumDistribution, boolean aMaximin) {
         this.maxIteration = aMaxIteration;
@@ -31,7 +33,7 @@ public enum PSOConfiguration {
     double maxW = 0.9;
     double minW = 0.4;
     int maxIteration = 200;
-    int maxIterWithoutImprovement = 50;
+    int maxIterWithoutImprovement = 25;
     // maxK depends on size of dataset: Math.sqrt(N), N is a number of data points
     int maxK = 150;
     int pMax = 150;

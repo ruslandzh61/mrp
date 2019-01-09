@@ -101,8 +101,6 @@ public abstract class Analyzer {
         this.wekaData = Utils.getData(dataset);
     }
 
-
-
     protected void saveResults(String solutionsFilePath) throws Exception {
         StringBuilder solutionsLog = new StringBuilder();
 
@@ -134,6 +132,7 @@ public abstract class Analyzer {
         double dbScore = Utils.dbIndexScore(centroids, labelsPred, this.dataAttrs);
         double silhScore = silhoutte.compute(centroids, labelsPred, this.dataAttrs);
         int numClusters = Utils.distinctNumberOfItems(labelsPred);
+        int kDiff = Math.abs(dataset.getK()-numClusters);
 
         /*for (int i: centroids.keySet()) {
             System.out.println(Arrays.toString(centroids.get(i)));
@@ -144,6 +143,6 @@ public abstract class Analyzer {
         System.out.println("Silhoutte score of PSO run: " + Utils.doublePrecision(silhScore, 4));
         System.out.println("number of clusters for run: " + numClusters);*/
 
-        return new Experiment(labelsPred, aRIScore, dbScore, silhScore, numClusters);
+        return new Experiment(labelsPred, aRIScore, dbScore, silhScore, numClusters, kDiff);
     }
 }

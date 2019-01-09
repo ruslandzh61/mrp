@@ -67,6 +67,13 @@ public class PSODriver extends Analyzer {
         this.configuration = configuration;
     }
 
+    /**
+     *
+     * Method to run experiments on PSO-based algorithm.
+     * Clustering solutions are saved into txt file. Passed arguments are included in file's name.
+     * @param args - array of arguments: args[0] is a name of configuration; args[1] is a name of dataset;
+     *  args[2] is a seed to start experiments from; args[3] is a number of runs
+     */
     public static void main(String[] args) throws Exception {
         System.out.println("PSO");
         PSOConfiguration conf = PSOConfiguration.valueOf(args[0]);

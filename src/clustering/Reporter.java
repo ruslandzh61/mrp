@@ -51,12 +51,14 @@ public class Reporter {
         double[] dbs = new double[experiments.length];
         double[] silhs = new double[experiments.length];
         double[] ks = new double[experiments.length];
+        double[] kdiffs = new double[experiments.length];
 
         for (int i = 0; i < experiments.length; ++i) {
             aris[i] = experiments[i].getAri();
             dbs[i] = experiments[i].getDb();
             silhs[i] = experiments[i].getSilh();
             ks[i] = experiments[i].getK();
+            kdiffs[i] = experiments[i].getKDiff();
         }
 
         this.stdDev = new Experiment();
@@ -64,12 +66,14 @@ public class Reporter {
         this.stdDev.setDb(Utils.standardDeviation(dbs));
         this.stdDev.setSilh(Utils.standardDeviation(silhs));
         this.stdDev.setK(Utils.standardDeviation(ks));
+        this.stdDev.setKDiff(Utils.standardDeviation(kdiffs));
 
         this.mean = new Experiment();
         this.mean.setAri(Utils.sum(aris, 1.0)/experiments.length);
         this.mean.setDb(Utils.sum(dbs, 1.0)/experiments.length);
         this.mean.setSilh(Utils.sum(silhs, 1.0)/experiments.length);
         this.mean.setK(Utils.sum(ks, 1.0)/experiments.length);
+        this.mean.setKDiff(Utils.sum(kdiffs, 1.0)/experiments.length);
 
         this.computed = true;
     }

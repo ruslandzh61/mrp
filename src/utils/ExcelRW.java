@@ -40,7 +40,7 @@ public class ExcelRW {
         }
 
         Sheet sheet = workbook.createSheet();
-        columns = new String[]{"Dataset","ARI", "DB", "Silhouette", "k"};
+        columns = new String[]{"Dataset","ARI", "DB", "Silhouette", "k", "kDiff"};
         Row headerRow = sheet.createRow(0);
         for (int i = 0; i < columns.length; ++i) {
             Cell cell = headerRow.createCell(i);
@@ -90,7 +90,7 @@ public class ExcelRW {
         }
         Sheet sheet = workbook.createSheet(datasetName);
         if (experiments[0].getConfiguration() != null) {
-            columns = new String[]{"config", "ari", "db", "silh", "k"};
+            columns = new String[]{"config", "ari", "db", "silh", "k", "kDiff"};
         }
         Row headerRow = sheet.createRow(0);
         for (int i = 0; i < columns.length; ++i) {
@@ -105,12 +105,14 @@ public class ExcelRW {
                 row.createCell(1).setCellValue(e.getDb());
                 row.createCell(2).setCellValue(e.getSilh());
                 row.createCell(3).setCellValue(e.getK());
+                row.createCell(4).setCellValue(e.getKDiff());
             } else {
                 row.createCell(0).setCellValue(e.getConfiguration());
                 row.createCell(1).setCellValue(e.getAri());
                 row.createCell(2).setCellValue(e.getDb());
                 row.createCell(3).setCellValue(e.getSilh());
                 row.createCell(4).setCellValue(e.getK());
+                row.createCell(5).setCellValue(e.getKDiff());
             }
         }
 

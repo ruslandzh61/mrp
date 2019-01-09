@@ -6,6 +6,7 @@ package clustering;
 public class Experiment {
     private int[] solution;
     private double ari, db, silh, k;
+    private double kDiff;
 
     public double getTime() {
         return time;
@@ -29,7 +30,7 @@ public class Experiment {
 
     public Experiment() {}
 
-    public Experiment(int[] aSolution, double aAri, double aDb, double aSilh, double aK) {
+    public Experiment(int[] aSolution, double aAri, double aDb, double aSilh, double aK, double aKDiff) {
         if (aSolution != null) {
             this.solution = aSolution.clone();
         } else {
@@ -39,10 +40,11 @@ public class Experiment {
         this.db = aDb;
         this.silh = aSilh;
         this.k = aK;
+        this.kDiff = aKDiff;
     }
 
     public Experiment(Experiment e) {
-        this(e.getSolution(), e.getAri(), e.getDb(), e.getSilh(), e.getK());
+        this(e.getSolution(), e.getAri(), e.getDb(), e.getSilh(), e.getK(), e.getKDiff());
     }
 
     public Experiment clone() {
@@ -87,5 +89,13 @@ public class Experiment {
 
     public void setK(double k) {
         this.k = k;
+    }
+
+    public void setKDiff(double diff) {
+        this.kDiff = diff;
+    }
+
+    public double getKDiff() {
+        return kDiff;
     }
 }

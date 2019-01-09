@@ -63,12 +63,13 @@ public class ResultsGenerator {
     /** @param i - dataset index
      * @param labelsPred - data points assignment produced by clustering algorithm
       */
-    protected Experiment measure(int i, int[] labelsPred) {
+    protected Experiment measure(int i, int[] labelsPred, Dataset dataset) {
         HashMap<Integer, double[]> centroids = Utils.centroids(this.dataAttrsList.get(i), labelsPred);
         double aRIScore = this.adjustedRandIndex.measure(this.datasets[i].getLabels(), labelsPred);
         double dbScore = Utils.dbIndexScore(centroids, labelsPred, this.dataAttrsList.get(i));
         double silhScore = silhoutte.compute(centroids, labelsPred, this.dataAttrsList.get(i));
         int numClusters = Utils.distinctNumberOfItems(labelsPred);
+        int kDiff = Math.abs(dataset.getK()-numClusters);
 
         /*for (int i: centroids.keySet()) {
             System.out.println(Arrays.toString(centroids.get(i)));
@@ -79,7 +80,7 @@ public class ResultsGenerator {
         System.out.println("Silhoutte score of PSO run: " + Utils.doublePrecision(silhScore, 4));
         System.out.println("number of clusters for run: " + numClusters);*/
 
-        return new Experiment(labelsPred, aRIScore, dbScore, silhScore, numClusters);
+        return new Experiment(labelsPred, aRIScore, dbScore, silhScore, numClusters, kDiff);
     }
 
     /**
@@ -99,7 +100,7 @@ public class ResultsGenerator {
         Experiment[] confMeans = new Experiment[datasets.length];
         Experiment[] confStdDevs = new Experiment[datasets.length];
         System.out.println(folderPath + fileName);
-        experiments = new Experiment[runs+2];
+        experiments = new Experiment[runs];
         String filePath = folderPath + fileName + ".txt";
         HashMap<String, int[][]> datasetTosolutions = Utils.readSolutionFromFile(filePath, runs, includesRuns, includesTrueLabels, includesTime, datasets);
 
@@ -111,22 +112,21 @@ public class ResultsGenerator {
             int expSolIdx = 0;
             for (int[] expSol: expSols) {
                 //System.out.println(Arrays.toString(expSol));
-                experiments[expSolIdx] = measure(datasetIdx, expSol);
+                experiments[expSolIdx] = measure(datasetIdx, expSol, dataset);
                 reporter.set(expSolIdx, experiments[expSolIdx]);
                 ++expSolIdx;
             }
             reporter.compute();
-            experiments[expSolIdx++] = reporter.getMean();
-            experiments[expSolIdx] = reporter.getStdDev();
 
             confMeans[datasetIdx] = reporter.getMean();
             confStdDevs[datasetIdx] = reporter.getStdDev();
             String excelFilePath = folderPath + fileName + ".xls";
             ExcelRW.write(excelFilePath, experiments, datasets[datasetIdx].name());
+            utils.Utils.experimentsToCsv(folderPath+dataset.name()+".csv", experiments);
             ++datasetIdx;
         }
 
-        String[][] datasetMeanStdDevsAverage = new String[datasets.length+1][4];
+        String[][] datasetMeanStdDevsAverage = new String[datasets.length+1][5];
         String[] d;
         for (int i = 0; i < datasets.length; ++i) {
             d = datasetMeanStdDevsAverage[i];
@@ -134,6 +134,7 @@ public class ResultsGenerator {
             d[1] = utils.Utils.doublePrecision(confMeans[i].getDb(), 4) + " +- " + utils.Utils.doublePrecision(confStdDevs[i].getDb(), 4);
             d[2] = utils.Utils.doublePrecision(confMeans[i].getSilh(), 4) + " +- " + utils.Utils.doublePrecision(confStdDevs[i].getSilh(), 4);
             d[3] = utils.Utils.doublePrecision(confMeans[i].getK(), 4) + " +- " + utils.Utils.doublePrecision(confStdDevs[i].getK(), 4);
+            d[4] = utils.Utils.doublePrecision(confMeans[i].getKDiff(), 4) + " +- " + utils.Utils.doublePrecision(confStdDevs[i].getKDiff(), 4);
         }
         String excelFilePath = folderPath + "datasetMeanStdDevs.xls";
 
@@ -158,6 +159,7 @@ public class ResultsGenerator {
         d[1] = utils.Utils.doublePrecision(confMeanOverDatasets.getDb(), 4) + " +- " + utils.Utils.doublePrecision(confStdDevOverDatasets.getDb(), 4);
         d[2] = utils.Utils.doublePrecision(confMeanOverDatasets.getSilh(), 4) + " +- " + utils.Utils.doublePrecision(confStdDevOverDatasets.getSilh(), 4);
         d[3] = utils.Utils.doublePrecision(confMeanOverDatasets.getK(), 4) + " +- " + utils.Utils.doublePrecision(confStdDevOverDatasets.getK(), 4);
+        d[4] = utils.Utils.doublePrecision(confMeanOverDatasets.getKDiff(), 4) + " +- " + utils.Utils.doublePrecision(confStdDevOverDatasets.getKDiff(), 4);
 
         String[] datasetNames = new String[datasets.length+1];
         for (int i = 0; i < datasets.length; ++i) {
@@ -173,12 +175,12 @@ public class ResultsGenerator {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
-        String folderPath = "results/PSO/";
-        String fileName = "pso";
+        String folderPath = "results/mGA2/";
+        String fileName = "mga";
         int runs = 30;
         Dataset[] datasets = {Dataset.GLASS, Dataset.WDBC, Dataset.FLAME, Dataset.COMPOUND,
                 Dataset.PATHBASED, Dataset.JAIN, Dataset.S1, Dataset.S3, Dataset.DIM064, Dataset.DIM256};
         ResultsGenerator resultsGenerator = new ResultsGenerator(datasets);
-        resultsGenerator.generate(folderPath, fileName, runs, true, false, false);
+        resultsGenerator.generate(folderPath, fileName, runs, true, false, true);
     }
 }

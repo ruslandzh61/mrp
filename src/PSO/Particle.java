@@ -22,6 +22,11 @@ public class Particle implements Comparable<Particle> {
     private Random rnd;
     private int seed;
     private static int default_seed = 10;
+
+    public void setPrev(Solution prev) {
+        this.prev = prev;
+    }
+
     private Solution prev = null;
 
     public Particle(Solution aSolution, double[] aVelocity) {
@@ -42,7 +47,7 @@ public class Particle implements Comparable<Particle> {
             this.setpBest(particle.getpBest());
         }
         if (particle.prev != null) {
-            this.setpBest(particle.prev);
+            this.setPrev(new Solution(particle.solution));
         }
         this.velocity = particle.getVelocity().clone();
         this.dummySol = particle.getDummySol().clone();

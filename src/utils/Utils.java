@@ -2,6 +2,7 @@ package utils;
 
 import clustering.Cluster;
 import clustering.Dataset;
+import clustering.Experiment;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
@@ -814,5 +815,27 @@ public class Utils {
         clusters.removeIf(cluster -> cluster.size() < 1);
 
         return clusters;
+    }
+
+    public static void experimentsToCsv(String path, Experiment[] es) throws IOException {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("ari,db,silh,k,kdiff\n");
+        for (Experiment e : es) {
+            stringBuilder.append(e.getAri() + ",");
+            stringBuilder.append(e.getDb() + ",");
+            stringBuilder.append(e.getSilh() + ",");
+            stringBuilder.append(e.getK() + ",");
+            stringBuilder.append(e.getKDiff() + "\n");
+        }
+        System.out.println(stringBuilder.toString());
+        whenWriteStringUsingBufferedWritter_thenCorrect(stringBuilder.toString(), path, false);
+    }
+
+    public static void main(String[] args) throws IOException {
+        Experiment e1 = new Experiment(null,1.0, 2.0,3.0,4,0.5);
+        Experiment e2 = new Experiment(null,2.0, 1.0,3.0,4,0.2);
+        Experiment[] es = {e1, e2};
+        String path = "test.csv";
+        experimentsToCsv(path, es);
     }
 }
