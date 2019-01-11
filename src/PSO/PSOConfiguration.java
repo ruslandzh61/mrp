@@ -4,25 +4,24 @@ package PSO;
  * Configuratios for PSO-based algorithm
  */
 public enum PSOConfiguration {
+    CONF1(200, false, true, true),
     // MaxiMin is used, weights of objectives are the same (0.5, 0.5)
-    CONF2(200, true, true),
+    CONF2(200, true, true, true),
     // MaxiMin is not used, weights of objectives are different
-    CONF4(200, true, false, new double[]{0.15, 0.85}),
-    CONF5(200, true, false, new double[]{0.05, 0.95}),
+    CONF4(200, true, true, false, new double[]{0.15, 0.85}),
+    CONF5(200, true, true, false, new double[]{0.05, 0.95}),
     // MaxiMin is not used, weights of objectives are same (0.5, 0.5)
-    CONF7(200, true, false),
+    CONF7(200, true, true, false),
     // MaxiMin is used, weights of objectives are different
-    CONF8(200, true, true, new double[]{0.05, 0.95});
+    CONF8(200, true, true, true, new double[]{0.05, 0.95});
 
-
-    PSOConfiguration(int aMaxIteration, boolean aEqualClusterNumDistribution, boolean aMaximin) {
-        this.maxIteration = aMaxIteration;
-        this.equalClusterNumDistribution = aEqualClusterNumDistribution;
-        this.maximin = aMaximin;
+    PSOConfiguration(int aMaxIteration, boolean aNormObjs, boolean aEqualClusterNumDistribution, boolean aMaximin) {
+        this(aMaxIteration, aNormObjs, aEqualClusterNumDistribution, aMaximin, new double[]{0.5, 0.5});
     }
 
-    PSOConfiguration(int aMaxIteration, boolean aEqualClusterNumDistribution, boolean aMaximin, double[] aWeights) {
+    PSOConfiguration(int aMaxIteration, boolean aNormObjs, boolean aEqualClusterNumDistribution, boolean aMaximin, double[] aWeights) {
         this.maxIteration = aMaxIteration;
+        this.normObjs = aNormObjs;
         this.equalClusterNumDistribution = aEqualClusterNumDistribution;
         this.maximin = aMaximin;
         this.weights = aWeights.clone();
@@ -41,5 +40,6 @@ public enum PSOConfiguration {
     double numTopParticlesToPickForLeader = 0.2;
     boolean equalClusterNumDistribution = true;
     boolean maximin = true;
+    boolean normObjs;
     double[] weights = {0.5, 0.5};
 }

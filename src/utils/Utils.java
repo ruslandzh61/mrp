@@ -573,6 +573,28 @@ public class Utils {
         return leader;
     }
 
+    public static int[] pickClosestToUtopia(double[][] objs, int n, double[] utopiaCoords, double[] weights, double distMeasure) {
+        assert (n > 0);
+        int[] result = new int[n];
+
+        if (n == 1) {
+            result[0] = pickClosestToUtopia(objs, utopiaCoords, weights, distMeasure);
+            return result;
+        }
+
+        List<Integer> indices = new ArrayList<>(objs.length);
+        for (int i = 0; i < objs.length; ++i) {
+            indices.add(i);
+        }
+        Collections.sort(indices, (o1, o2) -> Double.compare(Utils.dist(objs[o1], utopiaCoords, weights, distMeasure),
+                Utils.dist(objs[o2], utopiaCoords, weights, distMeasure)));
+        for (int i = 0; i < result.length; ++i) {
+            result[i] = indices.get(i);
+        }
+
+        return result;
+    }
+
     /**
      * normalize vector
      * @param cur - vector to normalize
@@ -832,10 +854,18 @@ public class Utils {
     }
 
     public static void main(String[] args) throws IOException {
-        Experiment e1 = new Experiment(null,1.0, 2.0,3.0,4,0.5);
+        double[][] objs = {{0.5, 0.7}, {-0.2, 0.8}, {0.3, 0.3}};
+        int n = 2;
+        double[] utopiaPoint = {0.3, 0.4};
+        double[] weights = {1.0, 1.0};
+        int[] resultIndices = pickClosestToUtopia(objs, n, utopiaPoint, weights, 2.0);
+        for (int ind: resultIndices) {
+            System.out.println(Arrays.toString(objs[ind]));
+        }
+        /*Experiment e1 = new Experiment(null,1.0, 2.0,3.0,4,0.5);
         Experiment e2 = new Experiment(null,2.0, 1.0,3.0,4,0.2);
         Experiment[] es = {e1, e2};
         String path = "test.csv";
-        experimentsToCsv(path, es);
+        experimentsToCsv(path, es);*/
     }
 }

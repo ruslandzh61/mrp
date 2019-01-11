@@ -68,6 +68,12 @@ public class PSO {
         for (int iO = 0; iO < numOfObj; ++iO) {
             objWorstCoordinates[iO] = Double.NEGATIVE_INFINITY;
         }
+
+        if (this.conf.weights[0] == 0.5) {
+            for (int i = 0; i < numOfObj; ++i) {
+                this.conf.weights[i] = 1.0;
+            }
+        }
     }
 
     public int[] execute() throws Exception {
@@ -93,16 +99,16 @@ public class PSO {
         // update nonDomPSOList to pick a clusterInstance to utopia point solution out of non-dominated set
         Particle leader;
         if (this.conf.maximin) {
-            List<Particle> nonDomPSOList = determineParetoSet(this.psoList);
+            List<Particle> nonDomPSOList = determineParetoSet(psoList);
+            // in case there is no non-dom solution */
             if (nonDomPSOList.size() == 0) {
-                nonDomPSOList = new ArrayList<Particle>();
-                for (Particle p: psoList) {
-                    nonDomPSOList.add(new Particle(p));
+                for (int i = 0; i < psoList.size(); ++i) {
+                    //if (psoList.get(i).getSolution().getFitness() >= THRESHOLD) {
+                    nonDomPSOList.add(new Particle(psoList.get(i)));
+                        //break;
+                    //}
                 }
             }
-            setFitness(nonDomPSOList);
-
-            Collections.sort(nonDomPSOList);
             leader = pickALeader(nonDomPSOList, false);
         } else {
             Collections.sort(this.psoList);
@@ -110,22 +116,6 @@ public class PSO {
         }
         Utils.removeNoise(leader.getSolution().getSolution(), problem.getData(), minSizeOfCluster, 2.0);
         Utils.adjustAssignments(leader.getSolution().getSolution());
-
-        /*System.out.println("--- PSO list start ---");
-        printParticlesPerformace(psoList, true);
-        System.out.println("--- PSO list end -----");
-        System.out.println("NON-DOMINATED SET");
-        printParticlesPerformace(nonDomPSOList, true);*/
-        //System.out.println("------------------");
-
-        /*System.out.println("Solution found at iteration " + curIterationNum);
-        double[] objs = problem.evaluate(leader.getSolution().getSolution(), evaluation, ncc);
-        System.out.println("value of objectives: " + Arrays.toString(objs));
-        double[] objCloned = objs.clone();
-        Utils.normalize(objCloned, this.objBestCoordinates, this.objWorstCoordinates);
-        System.out.println("norm value of objectives: " + Arrays.toString(objCloned));
-        System.out.println("utopia point: " + Arrays.toString(objBestCoordinates));
-        System.out.println("dystopia point: " + Arrays.toString(objWorstCoordinates));*/
 
         return leader.getSolution().getSolution();
     }
@@ -256,33 +246,47 @@ public class PSO {
         updateUtopiaPoint(psoList);
 
         if (this.conf.maximin) {
-            setFitness(psoList);
+            // step 1 - Evaluate objective functions for each particle
+            for(int iP = 0; iP < swarmSize; iP++) {
+                Particle p = psoList.get(iP);
+                p.getSolution().setObjectives(problem.evaluate(psoList.get(iP).getSolution().getSolution(), evaluation, ncc));
+            }
+        /* update before  */
+            updateUtopiaPoint(psoList);
 
             // step 2 - determine pareto-optimal set
             List<Particle> nonDomPSOList = determineParetoSet(psoList);
-            List<Particle> psoListCloned = null;
-            if (nonDomPSOList.size() != 0) {
-                // compute fitness
-                setFitness(nonDomPSOList);
-                Collections.sort(nonDomPSOList);
-            } else {
-                psoListCloned = new ArrayList<Particle>();
-                for (Particle p: psoList) {
-                    psoListCloned.add(new Particle(p));
+        /* in case there are no strongly non-dominated particles */
+            if (nonDomPSOList.size() == 0) {
+                for (int i = 0; i < psoList.size(); ++i) {
+                    if (psoList.get(i).getSolution().getFitness() >= THRESHOLD) {
+                        nonDomPSOList.add(new Particle(psoList.get(i)));
+                        break;
+                    }
                 }
-                setFitness(psoListCloned);
-                Collections.sort(psoListCloned);
             }
+            if (nonDomPSOList.size() == 0) {
+                nonDomPSOList.add(psoList.get(generator.nextInt(swarmSize)));
+            }
+
+            assert (nonDomPSOList != null);
+            assert (nonDomPSOList.size() != 0);
+            Collections.sort(nonDomPSOList);
+
 
             // step 3 - Update Personal Best of each particle
             for (int i = 0; i < swarmSize; i++) {
-                double[] curIterObjs = problem.evaluate(psoList.get(i).getSolution().getSolution(), evaluation, ncc);//psoList.get(i).getSolution().getObjectives().clone();
-                utils.Utils.normalize(curIterObjs, objBestCoordinates, objWorstCoordinates);
+                double[] curIterObjs = problem.evaluate(psoList.get(i).getSolution().getSolution(), evaluation, ncc);
+                if (this.conf.normObjs) {
+                    utils.Utils.normalize(curIterObjs, objBestCoordinates, objWorstCoordinates);
+                }
                 Solution prev = psoList.get(i).getPrev();
                 double[] prevObjs = null;
                 if (prev != null) {
                     prevObjs = problem.evaluate(prev.getSolution(), evaluation, ncc);
-                    utils.Utils.normalize(prevObjs, objBestCoordinates, objWorstCoordinates);
+                    if (this.conf.normObjs) {
+                        utils.Utils.normalize(prevObjs, objBestCoordinates, objWorstCoordinates);
+                    }
                 }
 
                 if (prev == null) {
@@ -314,12 +318,7 @@ public class PSO {
             velocityCalculator.setW(w);
 
             for (Particle aNextPopList: nextPopList) {
-                Particle paretoLeaderSolution;
-                if (nonDomPSOList.size() != 0) {
-                    paretoLeaderSolution = pickALeader(nonDomPSOList, true);
-                } else {
-                    paretoLeaderSolution = pickALeader(psoListCloned, true);
-                }
+                Particle paretoLeaderSolution = pickALeader(nonDomPSOList, true);
                 double[] newVel = velocityCalculator.calculate(aNextPopList);
                 aNextPopList.setVelocity(newVel);
                 Utils.checkClusterLabels(paretoLeaderSolution.getSolution().getSolution(),
@@ -339,56 +338,64 @@ public class PSO {
             }
 
             updateUtopiaPoint(nextPopList);
-            List<Particle> nonDomFromNextPSOList = determineParetoSet(nextPopList);
-            setFitness(nonDomFromNextPSOList);
+
+            double[][] nextPopObjs = objectivesFromParticles(nextPopList);
+            // determine pareto set and
+            double[] fitness = Utils.determineParetoSet(nextPopObjs);
+            // set fitness to MaxiMin fitness
+            for (int i = 0; i < nextPopList.size(); ++i) {
+                nextPopList.get(i).getSolution().setFitness(fitness[i]);
+            }
+            List<Particle> nonDomFromNextPSOList = new ArrayList<>();
+            for (int i = 0; i < nextPopList.size(); ++i) {
+                // max > 0 then solution i is strongly dominated
+                if (fitness[i] < THRESHOLD) {
+                    nonDomFromNextPSOList.add(nextPopList.get(i));
+                }
+            }
 
             // copy non-dominated solutions to next generation
             psoList = new ArrayList<Particle>();
             for (int i = 0; i < nonDomFromNextPSOList.size(); ++i) {
-                if (i >= this.swarmSize) {
+                if (i >= swarmSize) {
                     break;
                 }
-                psoList.add(nonDomFromNextPSOList.get(i));
+                psoList.add(new Particle(nonDomFromNextPSOList.get(i)));
             }
 
             int roomToFill = swarmSize - psoList.size();
-            // first - remove non-dominated
-            nextPopList.removeIf(particle -> (particle.getSolution().getFitness() < THRESHOLD));
+            // if there is still room, add dominated solutions
+            if (roomToFill > 0) {
+                // first - remove non-dominated
+                nextPopList.removeIf(particle -> (particle.getSolution().getFitness() < THRESHOLD));
+                // recompute since some individuals have been removed
+                nextPopObjs = objectivesFromParticles(nextPopList);
 
-            psoListCloned = new ArrayList<Particle>();
-            for (Particle p: nextPopList) {
-                psoListCloned.add(new Particle(p));
-            }
-            setFitness(psoListCloned);
-            Collections.sort(psoListCloned);
-            int idx = 0;
-            while (idx < roomToFill) {
-                psoList.add(psoListCloned.get(idx));
-                idx++;
-            }
-
-        /* recompute non-dom set to compare with previous one */
-            nonDomPSOList = determineParetoSet(psoList);
-            if (nonDomPSOList.size() != 0) {
-                setFitness(nonDomPSOList);
-                Collections.sort(nonDomPSOList);
-            } else {
-                psoListCloned = new ArrayList<Particle>();
-                for (Particle p: psoList) {
-                    psoListCloned.add(new Particle(p));
+                // pick n best dominated solutions (closest to utopia point)
+                int[] resultIndices;
+                if (this.conf.normObjs) {
+                    resultIndices = Utils.pickClosestToUtopia(nextPopObjs, roomToFill, new double[]{0.0, 0.0}, this.conf.weights, 2.0);
+                } else {
+                    // if do not normalize, weights are all same
+                    resultIndices = Utils.pickClosestToUtopia(nextPopObjs, roomToFill, this.objBestCoordinates, this.conf.weights, 2.0);
                 }
-                setFitness(psoListCloned);
-                Collections.sort(psoListCloned);
+                // add to next generation
+                for (int i = 0; i < roomToFill; ++i) {
+                    this.psoList.add(nextPopList.get(resultIndices[i]));
+                }
             }
 
-            // naive method to identify whether pareto set changed
-            //if (this.nonDomPSOList.size() == prevParetoSize) {
+            assert (psoList.size() == this.swarmSize);
+
+            // recompute non-dom set to compare with previous one
+            nonDomPSOList = determineParetoSet(psoList);
             Solution curBest;
             if (nonDomPSOList.size() != 0) {
                 curBest = pickALeader(nonDomPSOList, false).getSolution();
             } else {
-                curBest = pickALeader(psoListCloned, false).getSolution();
+                curBest = pickALeader(psoList, false).getSolution();
             }
+
             if (prevBest != null && curBest.equals(prevBest)) {
                 numOfIterWithoutImprov++;
             } else {
@@ -406,7 +413,9 @@ public class PSO {
                 double pBestFitness;
                 if (prev != null) {
                     double[] prevObjs = problem.evaluate(prev.getSolution(), evaluation, ncc);
-                    Utils.normalize(prevObjs, objBestCoordinates, objWorstCoordinates);
+                    if (this.conf.normObjs) {
+                        Utils.normalize(prevObjs, objBestCoordinates, objWorstCoordinates);
+                    }
                     pBestFitness = fitness(prevObjs);
                 } else {
                     pBestFitness = Double.POSITIVE_INFINITY;
@@ -477,27 +486,20 @@ public class PSO {
                 numOfIterWithoutImprov = 0;
             }
             prevBest = new Solution(curBest);
-
-            /*int[] labelsPred = psoList.get(0).getSolution().getSolution();
-            HashMap<Integer, double[]> centroids = Utils.centroids(this.problem.getData(), labelsPred);
-            double aRIScore = this.adjustedRandIndex.measure(this.labelsTrue, labelsPred);
-            double dbScore = Utils.dbIndexScore(centroids, labelsPred, this.problem.getData());
-            double silhScore = new Silh().compute(centroids, labelsPred, this.problem.getData());
-            int numClusters = Utils.distinctNumberOfItems(labelsPred);
-            System.out.println("A: " + aRIScore);
-            System.out.println("D: " + dbScore);
-            System.out.println("S: " + silhScore);
-            System.out.println("K: " + numClusters);*/
-
         }
     }
 
-    // fitness is minimized in this case
+    // fitness is a distance to utopia point; fitness is minimized in this case
     private double fitness(double[] objs) {
-        for (double obj: objs) {
+        /*for (double obj: objs) {
             assert (obj >= 0);
         }
-        return utils.Utils.sum(objs, this.conf.weights, 2.0);
+        return utils.Utils.sum(objs, this.conf.weights, 2.0);*/
+        if (this.conf.normObjs) {
+            return Math.sqrt(Utils.dist(objs, new double[]{0.0, 0.0}, this.conf.weights, 2.0));
+        } else {
+            return Math.sqrt(Utils.dist(objs, objBestCoordinates, this.conf.weights, 2.0));
+        }
     }
 
     private List<Particle> determineParetoSet(List<Particle> particleList) {
@@ -522,8 +524,9 @@ public class PSO {
         for (int i = 0; i < particles.size(); ++i) {
             objsResult[i] = problem.evaluate(particles.get(i).getSolution().getSolution(), evaluation, ncc); //particles.get(i).getSolution().getObjectives().clone();
         }
-        utils.Utils.normalize(objsResult, objBestCoordinates, objWorstCoordinates);
-
+        if (this.conf.normObjs) {
+            utils.Utils.normalize(objsResult, objBestCoordinates, objWorstCoordinates);
+        }
         return objsResult;
     }
 
@@ -548,7 +551,12 @@ public class PSO {
             double[][] objs = objectivesFromParticles(particleList);
             assert (objs.length > 0);
             int leaderIdx = -1;
-            leaderIdx = Utils.pickClosestToUtopia(objs, new double[]{0.0, 0.0}, this.conf.weights, 2.0);
+            if (this.conf.normObjs) {
+                leaderIdx = Utils.pickClosestToUtopia(objs, new double[]{0.0, 0.0}, this.conf.weights, 2.0);
+            } else {
+                // if do not normalize, weights are all same
+                leaderIdx = Utils.pickClosestToUtopia(objs, this.objBestCoordinates, this.conf.weights, 2.0);
+            }
             assert (leaderIdx != -1);
             leader = particleList.get(leaderIdx);
         }
